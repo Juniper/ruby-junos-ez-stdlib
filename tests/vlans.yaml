@@ -1,0 +1,15 @@
+---
+Red:
+  vlan_id: 100
+  
+Blue:
+  vlan_id: 101
+
+Green:
+  vlan_id: 102
+  
+Yellow:
+  vlan_id: 103
+  
+Black:
+  vlan_id: 104
