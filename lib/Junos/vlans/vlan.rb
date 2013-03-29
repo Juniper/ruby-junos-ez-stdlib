@@ -1,4 +1,8 @@
-class Junos::Vlans::VLAN < Junos::Provides::Parent
+class Junos::Vlans::Provider::VLAN < Junos::Vlans::Provider
+  
+  ### ---------------------------------------------------------------
+  ### XML top placement
+  ### ---------------------------------------------------------------
   
   def xml_at_top
     Nokogiri::XML::Builder.new{|x| x.configuration{ 
@@ -12,17 +16,18 @@ class Junos::Vlans::VLAN < Junos::Provides::Parent
   ### XML readers
   ### ---------------------------------------------------------------
 
-  def read!
+  def xml_read!    
     cfg_xml = @ndev.rpc.get_configuration( xml_at_top )
     return nil unless (@has_xml = cfg_xml.xpath('//vlan')[0])  
-    status_from_junos( @has_xml )    
-    xml_read_parse
+    xml_read_parser( @has_xml, @has )  
   end
   
-  def xml_read_parse
-    @has[:vlan_id] = @has_xml.xpath('vlan-id').text.to_i
-    @has[:description] = @has_xml.xpath('description').text
-    @has[:no_mac_learning] = @has_xml.xpath('no-mac-learning').empty? ? false : true
+  def xml_read_parser( as_xml, as_hash )
+    status_from_junos( as_xml, as_hash )    
+    as_hash[:vlan_id] = as_xml.xpath('vlan-id').text.to_i
+    as_hash[:description] = as_xml.xpath('description').text
+    as_hash[:no_mac_learning] = as_xml.xpath('no-mac-learning').empty? ? false : true    
+    return true
   end
   
   ### ---------------------------------------------------------------
@@ -44,4 +49,31 @@ class Junos::Vlans::VLAN < Junos::Provides::Parent
     xml.description value ? value : Netconf::JunosConfig::DELETE
   end
 
+end
+
+##### ---------------------------------------------------------------
+##### Provider collection methods
+##### ---------------------------------------------------------------
+
+class Junos::Vlans::Provider::VLAN
+  
+  def list!    
+    xml_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'vlans' }
+    xml_cfgs.xpath('vlans/vlan').collect do |vlan|
+      vlan.xpath('name').text
+    end    
+  end
+  
+  def catalog!
+    catalog = {}    
+    xml_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'vlans' }    
+    xml_cfgs.xpath('vlans/vlan').collect do |vlan|
+      name = vlan.xpath('name').text
+      props = Hash.new
+      xml_read_parser( vlan, props )
+      catalog[name] = props
+    end          
+    return catalog
+  end
+  
 end

@@ -1,11 +1,11 @@
-
-require 'Junos/junosmod'
+module Junos; end
 
 ### -----------------------------------------------------------------
 ### Declare the 'namespace' for the Junos::Facts::Keeper class
 ### -----------------------------------------------------------------
 
-module Junos; module Facts
+module Junos::Facts
+  
   class Keeper
     
     attr_accessor :facts
@@ -45,7 +45,7 @@ module Junos; module Facts
     end
   
   end # class
-end; end
+end
 
 ### -----------------------------------------------------------------
 ### Module methods for Kernel.extend, to be used by caller and

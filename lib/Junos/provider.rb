@@ -1,10 +1,20 @@
-require 'Junos/junosmod'
-
-module Junos::Provides    
-  PROPERTIES = [:exist, :active]      
+module Junos; end
+  
+module Junos::Provider    
+  
+  PROPERTIES = [:exist, :active]    
+      
+  def self.attach_instance_variable( on_obj, varsname, new_obj )
+    ivar = ("@" + varsname.to_s).to_sym
+    on_obj.instance_variable_set( ivar, new_obj )
+    on_obj.define_singleton_method( varsname ) do
+      on_obj.instance_variable_get( ivar )
+    end    
+  end  
+  
 end
   
-class Junos::Provides::Parent
+class Junos::Provider::Parent
   attr_accessor :has, :should, :properties
   attr_reader :name
   
@@ -55,25 +65,38 @@ class Junos::Provides::Parent
   ### 'exists?' - does the item exist in the Juos config
   ### ---------------------------------------------------------------
   
-  def exists?; not @has_xml.nil?; end  
+  def exists?; @has[:exist]; end  
 
   ### ---------------------------------------------------------------
   ### 'active?' - is the config item active in the Junos config
   ### ---------------------------------------------------------------    
     
-  def active?; @has[:active]; end
+  def active?
+    false unless exists?
+    @has[:active]
+  end
 
   ### ---------------------------------------------------------------
   ### []= is used to store values in the write-back hash (@should)
   ### ---------------------------------------------------------------    
   
   def []=( property, rval )
+    raise ArgumentError, "invalid property['#{property.to_s}']" unless properties.include? property
     @should[property] = rval
   end
   
   def name_decorated( name = @name )
     self.class.to_s + "['" + name + "']"
   end
+
+  ### ---------------------------------------------------------------
+  ### Provider methods to obtain collection information as
+  ### 'list' - array of named items
+  ### 'catalog' - hash of all items with properties
+  ### ---------------------------------------------------------------    
+      
+  def list!; nil; end
+  def catalog!; nil; end
   
   ### ---------------------------------------------------------------
   ### 'create' will build a new object, but does not write the 
@@ -99,6 +122,9 @@ class Junos::Provides::Parent
     
     yield( newbie ) if block_given?
     
+    newbie[:exist] = true
+    newbie[:active] ||= true
+    
     ## return the new object    
     return newbie    
   end
@@ -118,19 +144,38 @@ class Junos::Provides::Parent
     xml = xml_at_top
     par = xml.instance_variable_get(:@parent)    
     par['delete'] = 'delete'
-    junos_load_xml_config!( xml.doc.root )
+    rsp = junos_load_xml_config!( xml.doc.root )
+    @has[:exist] = false
+    rsp
   end
     
   ### ---------------------------------------------------------------
   ### Junos read/write methods
   ### ---------------------------------------------------------------
   
-  def read!; nil; end
+  def read!
+    @has.clear
+    xml_read!
+  end
   
+  def need_write?; not @should.empty? end
+    
   def write!
-    return nil if @should.empty?    
+    return nil if @should.empty?        
+    
+    # create the necessary chagnes and push them to the Junos
+    # device.  If an error occurs, it will be raised
+    
     xml_change = xml_build_change    
-    junos_load_xml_config!( xml_change )
+    rsp = junos_load_xml_config!( xml_change )    
+    
+    # copy the 'should' values into the 'has' values now that 
+    # they've been written back to Junos
+        
+    @has.merge! @should 
+    @should.clear
+    
+    return rsp
   end       
 
   ### ---------------------------------------------------------------
@@ -139,7 +184,14 @@ class Junos::Provides::Parent
   
   def xml_at_edit; nil; end
   def xml_at_top; nil; end
+  def xml_on_create( xml ); nil; end
+  def xml_on_delete( xml ); nil; end
     
+  def xml_change_exist( xml )
+    return xml_on_create( xml ) if @should[:exist]
+    return xml_on_delete( xml )
+  end
+  
   def xml_change_active( xml )
     par = xml.instance_variable_get(:@parent)
     value = @should[:active]  ? 'active' : 'inactive'
@@ -148,8 +200,8 @@ class Junos::Provides::Parent
         
   def xml_build_change    
     edit_at = xml_at_edit || xml_at_top
-    @should.keys.each do |property|
-      self.send( "xml_change_#{property}", edit_at )
+    @should.keys.each do |prop|
+      self.send( "xml_change_#{prop}", edit_at )
     end
     edit_at.doc.root    
   end
@@ -164,7 +216,7 @@ class Junos::Provides::Parent
   end
   
   def to_yaml( which = :read )
-    as_hash.to_yaml which
+    to_hash.to_yaml which
   end  
   
   def loadyaml( filename, opts_hash = {} )
@@ -180,9 +232,9 @@ class Junos::Provides::Parent
   
   private
         
-  def status_from_junos( xml )
-    @has[:active] = xml['inactive'] ? false : true
-    @has[:exist] = true
+  def status_from_junos( xml, has )
+    has[:active] = xml['inactive'] ? false : true
+    has[:exist] = true
   end
   
   ### ---------------------------------------------------------------
@@ -197,7 +249,7 @@ class Junos::Provides::Parent
       result = @ndev.rpc.load_configuration( xml )
     rescue Netconf::RpcError => e      
       errs = e.rsp.xpath('//rpc-error[error-severity = "error"]')
-      throw e unless errs.empty?
+      raise e unless errs.empty?
       e.rsp
     else
       result

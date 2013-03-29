@@ -16,19 +16,18 @@ class JunosDevice < Netconf::SSH
   def open
     super
     facts_create!
-    Junos::Vlans::Provider( self, :Vlans ) 
+    Junos::Vlans::Provider( self, :Vlans )    
   end
   
 end
 
-JunosDevice.new( MyLogins::EX4 ) do |ndev|
-  
-  vlan = ndev.Vlans['Jeremy']
-  vlan[:description] = "New Jeremy Description"
-  vlan.write!
+
+host = MyLogins::HOSTS[ARGV[0]]
+
+JunosDevice.new( host ) do |ndev|
   
   binding.pry
-  
+        
 end
 
 

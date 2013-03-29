@@ -4,10 +4,10 @@ require 'net/netconf'
 
 Gem::Specification.new do |s|
 
-  s.name = 'junos-nclibs'
+  s.name = 'junos-nc-stdlib'
   s.version = '0.0.1'
-  s.summary = "Junos Libraries for NETCONF"
-  s.description = "Junos Libs for application development using NETCONF"
+  s.summary = "Junos Standard Libraries for NETCONF"
+  s.description = "Junos Standard Libs for application development using NETCONF"
   s.homepage = 'https://github.com/jeremyschulman'
   s.authors = ["Jeremy Schulman"]
   s.email = 'jschulman@juniper.net'

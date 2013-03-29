@@ -4,7 +4,7 @@ Junos::Facts::Keeper.define( :chassis ) do
   chassis = inv_info.xpath('chassis')
   
   @facts[:hardwaremodel] = chassis.xpath('description').text
-  @facts[:serial_number] = chassis.xpath('serial-number').text           
+  @facts[:serialnumber] = chassis.xpath('serial-number').text           
 end
 
 Junos::Facts::Keeper.define( :routingengines ) do
