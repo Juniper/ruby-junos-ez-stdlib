@@ -1,24 +1,22 @@
-module Junos; end
+module JunosNC; end
 
-### -----------------------------------------------------------------
-### Declare the 'namespace' for the Junos::Facts::Keeper class
-### -----------------------------------------------------------------
-
-module Junos::Facts
+module JunosNC::Facts
   
   class Keeper
-    
-    attr_accessor :facts
+    attr_accessor :known
     
     def initialize( ndev )
       @ndev = ndev
-      @facts = Hash.new
+      @known = Hash.new
     end
+    
+    def clear; @known.clean end
+    def list; @known.keys end      
     
     def uses( *facts )
       values = facts.collect do |f|
-        self.send("fact_read_#{f}") unless @facts[f]
-        @facts[f]
+        self.send("fact_read_#{f}") unless @known[f]
+        self[f]
       end      
       (values.count == 1) ? values[0] : values      
     end
@@ -28,11 +26,11 @@ module Junos::Facts
     end
   
     def []=(key,value)
-      @facts[key] = value
+      @known[key] = value
     end
     
     def [](key)
-      @facts[key]
+      @known[key]
     end
     
     def read!
@@ -40,7 +38,7 @@ module Junos::Facts
       fact_readers.each do |getter| 
         getter =~ /^fact_read_(\w+)/
         fact = $1.to_sym
-        self.send( getter ) unless @facts[fact]
+        self.send( getter ) unless @known[fact]
       end
     end
   
@@ -52,21 +50,35 @@ end
 ### other libraries.  DO NOT CHANGE THESE METHOD DEFINITIONS
 ### -----------------------------------------------------------------
 
-module Junos::Facts            
-  def facts_create!
-    @__Junos_facts__ ||= Keeper.new( self )
-    @__Junos_facts__.facts.clear
-    @__Junos_facts__.read!
+module JunosNC::Facts  
+  
+  def self.Provider( ndev )       
+    factkpr = JunosNC::Facts::Keeper.new( ndev )     
+    JunosNC::Provider.attach_instance_variable( ndev, :ndev_facts, factkpr )
+    factkpr.read!
+  end  
+  
+  def facts_read!
+    @ndev_facts.clear
+    @ndev_facts.read!
   end
+  
   def facts
-    @__Junos_facts__.facts.keys
+    @ndev_facts.list
   end
+  
+  def fact( this_fact )
+    @ndev_facts[this_fact]        
+  end
+  
   def fact_get( fact )
-    @__Junos_facts__[fact]    
+    @ndev_facts[fact]    
   end
+  
   def fact_set( fact, rvalue )
-    @__Junos_facts__[fact] = rvalue
+    @ndev_facts[fact] = rvalue
   end
+    
 end; 
 
 ### -----------------------------------------------------------------

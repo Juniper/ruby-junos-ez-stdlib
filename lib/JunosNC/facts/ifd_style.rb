@@ -1,8 +1,8 @@
 
-Junos::Facts::Keeper.define( :ifd_style ) do 
+JunosNC::Facts::Keeper.define( :ifd_style ) do 
   persona = uses :personality
   
-  @facts[:ifd_style] = case persona
+  self[:ifd_style] = case persona
   when :SWITCH
     :SWITCH
   else
