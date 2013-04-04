@@ -48,18 +48,7 @@ class JunosNC::Provider::Parent
   ### ---------------------------------------------------------------  
   
   def is_provider?; @name.nil? end
-    
-  ### ---------------------------------------------------------------
-  ### option controls
-  ### ---------------------------------------------------------------  
-  
-  ## controls the behavior of the "oh_no!" closure for
-  ## raising exceptions
-  
-  def ignore_raise=( value )
-    @opts[:ignore_raise] = value
-  end  
-  
+      
   ### ---------------------------------------------------------------
   ### [] property reader or instance selector
   ### ---------------------------------------------------------------
@@ -147,14 +136,18 @@ class JunosNC::Provider::Parent
     ## if this is an existing object, then we shouldn't 
     ## allow the caller to create something.
     
-    oh_no!{ raise ArgumentError, "Not called by provider!" } unless is_provider?
+    raise ArgumentError, "Not called by provider!" unless is_provider?
       
     ## if we're here, then we're creating an entirely new
     ## instance of this object.  We should check to see if
-    ## it first exists, eh? 
+    ## it first exists, eh?  So allow the caller to specify
+    ## if they want an exception if it already exists; overloading
+    ## the use of the prop_hash[:exist], yo!
     
     newbie = self.select( name )    
-    oh_no!{ raise ArgumentError,  name_decorated(name) + " already exists" if newbie.exists? }
+    if prop_hash[:exist]
+      raise ArgumentError,  name_decorated(name) + " already exists" if newbie.exists? 
+    end
         
     prop_hash.each{ |k,v| newbie[k] = v } unless prop_hash.empty?
     
