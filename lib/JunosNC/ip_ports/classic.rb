@@ -95,7 +95,7 @@ class JunosNC::IPports::Provider::CLASSIC
   end
   
   def build_catalog
-    catalog = {}
+    @catalog = {}
 
     ## do the equivalent of "show interfaces ..." to retrieve the list
     ## of known interfaces that have an IFA == 'inet'.  Note that this
@@ -125,12 +125,11 @@ class JunosNC::IPports::Provider::CLASSIC
       unit = ifl.xpath('name').text.strip
       obj_name = ifd + '.' + unit
       
-      props = {}
-      xml_read_parser( ifl, props )
-      catalog[obj_name] = props      
+      @catalog[obj_name] = {}
+      xml_read_parser( ifl, @catalog[obj_name] )
     end
     
-    return catalog
+    return @catalog
   end
   
   private

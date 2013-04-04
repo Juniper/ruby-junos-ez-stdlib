@@ -71,15 +71,14 @@ class JunosNC::Vlans::Provider::BRIDGE_DOMAIN
   end
   
   def build_catalog
-    catalog = {}    
+    @catalog = {}    
     bd_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'bridge-domains' }    
     bd_cfgs.xpath('bridge-domains/domain').collect do |domain|
       name = domain.xpath('name').text
-      props = Hash.new
-      xml_read_parser( domain, props )
-      catalog[name] = props
+      @catalog[name] = {}
+      xml_read_parser( domain, @catalog[name] )
     end          
-    return catalog
+    return @catalog
   end
   
 end

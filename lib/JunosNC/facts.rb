@@ -51,8 +51,10 @@ end
 ### -----------------------------------------------------------------
 
 module JunosNC::Facts  
+  attr_accessor :providers
   
   def self.Provider( ndev )       
+    ndev.providers = []
     factkpr = JunosNC::Facts::Keeper.new( ndev )     
     JunosNC::Provider.attach_instance_variable( ndev, :ndev_facts, factkpr )
     factkpr.read!

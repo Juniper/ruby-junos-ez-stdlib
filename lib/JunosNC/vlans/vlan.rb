@@ -65,15 +65,14 @@ class JunosNC::Vlans::Provider::VLAN
   end
   
   def build_catalog
-    catalog = {}    
+    @catalog = {}    
     xml_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'vlans' }    
     xml_cfgs.xpath('vlans/vlan').collect do |vlan|
       name = vlan.xpath('name').text
-      props = Hash.new
-      xml_read_parser( vlan, props )
-      catalog[name] = props
+      @catalog[name] = {}
+      xml_read_parser( vlan, @catalog[name] )
     end          
-    return catalog
+    return @catalog
   end
   
 end

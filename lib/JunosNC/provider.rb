@@ -19,6 +19,7 @@ module JunosNC::Provider
     on_obj.define_singleton_method( varsname ) do
       on_obj.instance_variable_get( ivar )
     end    
+    on_obj.providers << varsname
   end  
    
 end
@@ -26,11 +27,13 @@ end
 class JunosNC::Provider::Parent
   
   attr_reader :ndev, :parent, :name
+  attr_accessor :providers
   attr_accessor :has, :should, :properties
   attr_accessor :list, :catalog
   
   def initialize( p_obj, name = nil, opts = {} )
-
+    
+    @providers = []
     @parent = opts[:parent] || nil    
     @ndev = p_obj.instance_variable_get(:@ndev) || p_obj
     @name = name
@@ -48,6 +51,8 @@ class JunosNC::Provider::Parent
   ### ---------------------------------------------------------------  
   
   def is_provider?; @name.nil? end
+    
+  def is_new?; @has[:exist] || false end
       
   ### ---------------------------------------------------------------
   ### [] property reader or instance selector
