@@ -25,10 +25,9 @@ end
   
 class JunosNC::Provider::Parent
   
-  attr_accessor :parent
+  attr_reader :ndev, :parent, :name
   attr_accessor :has, :should, :properties
   attr_accessor :list, :catalog
-  attr_reader :name
   
   def initialize( p_obj, name = nil, opts = {} )
 
@@ -187,32 +186,26 @@ class JunosNC::Provider::Parent
   end
 
   ## ----------------------------------------------------------------
-  ## YAML "BIG" in & out methods
-  ## ----------------------------------------------------------------  
-  ## 'create_big_from_yaml!' is used to create large sections of
-  ## provider code, using a YAML file as the definition.  The
-  ## YAML file *MUST* have a ':name:' defined, and then any other
-  ## data needed by the provider's :xml_big_from_hash method. 
-  ## Since not all providers will support this, check first for
-  ## the existance of the :xml_big_from_hash method
+  ## YAML / HASH methods
   ## ----------------------------------------------------------------
+      
+  def create_from_yaml!( opts = {} )
+    raise ArgumentError "No provider support" unless respond_to? :expanded_xml_from_hash            
+    raise ArguementError "Missing :filename param" unless opts[:filename]    
     
-  def create_big_from_hash!( as_hash, opts = {} )
-    write_xml_config! xml_big_from_hash( as_hash, opts )    
-  end
-  
-  def create_big_from_yaml!( filename, opts = {} )
-    return nil unless respond_to? :xml_big_from_hash    
-    as_hash = YAML.load_file( filename )
-    create_big_from_hash!( as_hash, opts )
+    as_hash = YAML.load_file( opts[:filename] )
+    write_xml_config! expanded_xml_from_hash( as_hash, opts )     
   end
 
-  def big_to_yaml( filename = nil, opts = {} )  
-    return nil unless respond_to? :big_to_hash    
+  def expanded_to_hash( opts = {} ) 
+    to_hash( opts ) 
+  end
     
-    out_hash = big_to_hash( opts )
+  def to_yaml( opts = {} ) 
+    raise ArgumentError, "Not an instance" if is_provider?    
+    out_hash = expanded_to_hash( opts )
     out_yaml = out_hash.to_yaml        
-    File.open( filename, "w" ){|f| f.puts out_hash.to_yaml } if filename   
+    File.open( opts[:filename], "w" ){|f| f.puts out_hash.to_yaml } if opts[:filename]   
     out_yaml    
   end  
   
