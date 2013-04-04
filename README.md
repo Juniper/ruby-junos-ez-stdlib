@@ -15,7 +15,7 @@
 
 # INSTALLATION 
 
-  * gem install junos-nclibs 
+  * gem install junos-nc-stdlib
 
 # CONTRIBUTORS
 
