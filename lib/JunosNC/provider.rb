@@ -27,6 +27,7 @@ class JunosNC::Provider::Parent
   
   attr_accessor :parent
   attr_accessor :has, :should, :properties
+  attr_accessor :list, :catalog
   attr_reader :name
   
   def initialize( p_obj, name = nil, opts = {} )
@@ -123,9 +124,14 @@ class JunosNC::Provider::Parent
   ### 'catalog' - hash of all items with properties
   ### ---------------------------------------------------------------    
       
-  def list!; nil; end
-  def catalog!; nil; end
-
+  def list!
+    @list ||= build_list
+  end
+  
+  def catalog!
+    @catalog ||= build_catalog
+  end
+  
   ### ---------------------------------------------------------------
   ### CREATE methods
   ### ---------------------------------------------------------------

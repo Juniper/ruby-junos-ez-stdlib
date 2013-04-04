@@ -63,14 +63,14 @@ end
 
 class JunosNC::Vlans::Provider::BRIDGE_DOMAIN
   
-  def list!    
+  def build_list    
     bd_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'bridge-domains' }
     bd_cfgs.xpath('bridge-domains/domain').collect do |domain|
       domain.xpath('name').text
     end    
   end
   
-  def catalog!
+  def build_catalog
     catalog = {}    
     bd_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'bridge-domains' }    
     bd_cfgs.xpath('bridge-domains/domain').collect do |domain|

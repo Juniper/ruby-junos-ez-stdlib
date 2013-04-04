@@ -57,14 +57,14 @@ end
 
 class JunosNC::Vlans::Provider::VLAN
   
-  def list!    
+  def build_list    
     xml_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'vlans' }
     xml_cfgs.xpath('vlans/vlan').collect do |vlan|
       vlan.xpath('name').text
     end    
   end
   
-  def catalog!
+  def build_catalog
     catalog = {}    
     xml_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'vlans' }    
     xml_cfgs.xpath('vlans/vlan').collect do |vlan|

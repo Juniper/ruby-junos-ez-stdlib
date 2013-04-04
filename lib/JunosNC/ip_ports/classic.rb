@@ -88,13 +88,13 @@ end
 
 class JunosNC::IPports::Provider::CLASSIC
   
-  def list!            
+  def build_list            
     from_junos_get_ifa_xml.collect do |ifa|
       ifa.xpath('name').text.strip
     end                
   end
   
-  def catalog!
+  def build_catalog
     catalog = {}
 
     ## do the equivalent of "show interfaces ..." to retrieve the list
