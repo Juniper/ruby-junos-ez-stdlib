@@ -19,7 +19,11 @@ JunosNC::Facts::Keeper.define( :routingengines ) do |ndev, facts|
     slot_id = re.xpath('slot').text || "0"
     slot = ("RE" + slot_id).to_sym
     facts[slot] = Hash[ re_facts.collect{ |ele| [ ele.tr('-','_').to_sym, re.xpath(ele).text ] } ]
-    facts[:master] = slot_id if facts[slot][:mastership_state] == 'master'
+    if facts[slot][:mastership_state].empty?
+      facts[slot].delete :mastership_state
+    else 
+      facts[:master] = slot_id if facts[slot][:mastership_state] == 'master'
+    end
   end
   
 end
