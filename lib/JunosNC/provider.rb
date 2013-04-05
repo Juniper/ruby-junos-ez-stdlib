@@ -38,6 +38,9 @@ class JunosNC::Provider::Parent
     @ndev = p_obj.instance_variable_get(:@ndev) || p_obj
     @name = name
     @opts = opts
+    
+    @list = []                # array list of item names
+    @catalog = {}             # hash catalog of named items
         
     return unless @name       # providers do not have a name
     
@@ -116,13 +119,23 @@ class JunosNC::Provider::Parent
   ### 'list' - array of named items
   ### 'catalog' - hash of all items with properties
   ### ---------------------------------------------------------------    
+     
+  def list
+    @list.empty? ? list! : @list
+  end    
       
   def list!
-    @list ||= build_list
+    @list.clear
+    @list = build_list
+  end
+  
+  def catalog
+    @catalog.empty? ? catalog! : @catalog
   end
   
   def catalog!
-    @catalog ||= build_catalog
+    @catalog.clear
+    @catalog = build_catalog
   end
   
   ### ---------------------------------------------------------------

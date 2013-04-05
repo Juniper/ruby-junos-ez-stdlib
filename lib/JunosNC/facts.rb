@@ -11,9 +11,13 @@ module JunosNC::Facts
     end
     
     def clear; @known.clear end
-    def list; @known.keys end      
-    def catalog; @known end      
-    
+      
+    def list; @known.keys end   
+    def list!; read!; list; end
+      
+    def catalog; @known end          
+    def catalog!; read!; catalog end
+          
     def uses( *facts )
       values = facts.collect do |f|
         self.send( "fact_read_#{f}", @ndev, @known ) unless @known[f]
@@ -35,6 +39,7 @@ module JunosNC::Facts
     end
     
     def read!
+      @known.clear
       fact_readers = self.methods.grep /^fact_read_/
       fact_readers.each do |getter| 
         getter =~ /^fact_read_(\w+)/
@@ -52,36 +57,17 @@ end
 ### -----------------------------------------------------------------
 
 module JunosNC::Facts  
-  attr_accessor :providers
-  
+  attr_accessor :providers, :facts
+
   def self.Provider( ndev )       
+    ndev.extend JunosNC::Facts    
     ndev.providers = []
-    factkpr = JunosNC::Facts::Keeper.new( ndev )     
-    JunosNC::Provider.attach_instance_variable( ndev, :ndev_facts, factkpr )
-    factkpr.read!
-  end  
+    ndev.facts = JunosNC::Facts::Keeper.new( ndev )     
+    ndev.facts.read!
+  end      
   
-  def facts!
-    @ndev_facts.clear
-    @ndev_facts.read!
-  end
-  
-  def facts
-    @ndev_facts
-  end
-  
-  def fact( this_fact )
-    @ndev_facts[this_fact]        
-  end
-  
-  def fact_get( fact )
-    @ndev_facts[fact]    
-  end
-  
-  def fact_set( fact, rvalue )
-    @ndev_facts[fact] = rvalue
-  end
-    
+  def fact( name ); facts[name] end
+
 end; 
 
 ### -----------------------------------------------------------------
