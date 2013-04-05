@@ -1,9 +1,9 @@
-JunosNC::Facts::Keeper.define( :switch_style ) do
+JunosNC::Facts::Keeper.define( :switch_style ) do |ndev, facts|
   f_persona = uses :personality
     
-  self[:switch_style] = case f_persona
+  facts[:switch_style] = case f_persona
   when :SWITCH, :SRX_BRANCH
-    case self[:hardwaremodel]
+    case facts[:hardwaremodel]
     when /junosv-firefly/i
       :NONE
     when /^(ex9)|(ex43)/i

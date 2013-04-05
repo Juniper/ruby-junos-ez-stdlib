@@ -10,12 +10,13 @@ module JunosNC::Facts
       @known = Hash.new
     end
     
-    def clear; @known.clean end
+    def clear; @known.clear end
     def list; @known.keys end      
+    def catalog; @known end      
     
     def uses( *facts )
       values = facts.collect do |f|
-        self.send("fact_read_#{f}") unless @known[f]
+        self.send( "fact_read_#{f}", @ndev, @known ) unless @known[f]
         self[f]
       end      
       (values.count == 1) ? values[0] : values      
@@ -38,7 +39,7 @@ module JunosNC::Facts
       fact_readers.each do |getter| 
         getter =~ /^fact_read_(\w+)/
         fact = $1.to_sym
-        self.send( getter ) unless @known[fact]
+        self.send( getter, @ndev, @known ) unless @known[fact]
       end
     end
   
@@ -60,13 +61,13 @@ module JunosNC::Facts
     factkpr.read!
   end  
   
-  def facts_read!
+  def facts!
     @ndev_facts.clear
     @ndev_facts.read!
   end
   
   def facts
-    @ndev_facts.list
+    @ndev_facts
   end
   
   def fact( this_fact )

@@ -1,19 +1,19 @@
-JunosNC::Facts::Keeper.define( :personality ) do
+JunosNC::Facts::Keeper.define( :personality ) do |ndev, facts|
   
   model = uses :hardwaremodel  
       
-  self[:personality] = case model   
+  facts[:personality] = case model   
   when /^(EX)|(QFX)/
     :SWITCH
   when /^MX/
     :MX
   when /^vMX/
-    self[:virtual] = true
+    facts[:virtual] = true
     :MX
   when /SRX(\d){3}/
     :SRX_BRANCH
   when /junosv-firefly/i
-    self[:virtual] = true
+    facts[:virtual] = true
     :SRX_BRANCH
   when /SRX(\d){4}/
     :SRX_HIGHEND
