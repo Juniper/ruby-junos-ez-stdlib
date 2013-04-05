@@ -64,6 +64,7 @@ module JunosNC::Facts
     ndev.providers = []
     ndev.facts = JunosNC::Facts::Keeper.new( ndev )     
     ndev.facts.read!
+    true
   end      
   
   def fact( name ); facts[name] end
