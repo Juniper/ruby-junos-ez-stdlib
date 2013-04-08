@@ -1,14 +1,13 @@
 require 'yaml'
 require 'net/netconf/jnpr'
-
-require 'JunosNC/facts'
-require 'JunosNC/vlans'
+require 'junos-ez/facts'
+require 'junos-ez/vlans'
 
 require_relative 'mylogins'
 
 class JunosDevice < Netconf::SSH
   
-  include JunosNC::Facts
+  include Junos::Ez::Facts
   
   # overload the open method to read the 'facts' from the Junos device and then
   # create a Vlan provider object so we can access the vlans

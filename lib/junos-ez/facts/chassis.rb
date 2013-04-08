@@ -1,4 +1,4 @@
-JunosNC::Facts::Keeper.define( :chassis ) do |ndev, facts|
+Junos::Ez::Facts::Keeper.define( :chassis ) do |ndev, facts|
   
   inv_info = ndev.rpc.get_chassis_inventory
   chassis = inv_info.xpath('chassis')
@@ -7,11 +7,11 @@ JunosNC::Facts::Keeper.define( :chassis ) do |ndev, facts|
   facts[:serialnumber] = chassis.xpath('serial-number').text           
 end
 
-JunosNC::Facts::Keeper.define( :master ) do |ndev, facts|
+Junos::Ez::Facts::Keeper.define( :master ) do |ndev, facts|
   uses :routingengines
 end
 
-JunosNC::Facts::Keeper.define( :routingengines ) do |ndev, facts|
+Junos::Ez::Facts::Keeper.define( :routingengines ) do |ndev, facts|
 
   re_facts = ['mastership-state','status','model','up-time','last-reboot-reason']
   re_info = ndev.rpc.get_route_engine_information

@@ -1,6 +1,6 @@
-require "JunosNC/provider"
+require "junos-ez/provider"
 
-module JunosNC::L1ports
+module Junos::Ez::L1ports
 
   PROPERTIES = [ 
     :admin,               # [ :up, :down ]
@@ -14,18 +14,18 @@ module JunosNC::L1ports
   def self.Provider( ndev, varsym )            
     newbie = case ndev.fact( :ifd_style )
     when :VLAN
-      JunosNC::L1ports::Provider::VLAN.new( ndev )            
+      Junos::Ez::L1ports::Provider::VLAN.new( ndev )            
     when :CLASSIC
-      JunosNC::L1ports::Provider::CLASSIC.new( ndev )      
+      Junos::Ez::L1ports::Provider::CLASSIC.new( ndev )      
     end      
     
-    newbie.properties = JunosNC::Provider::PROPERTIES + PROPERTIES
-    JunosNC::Provider.attach_instance_variable( ndev, varsym, newbie )
+    newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
+    Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )
   end
   
 end
 
-class JunosNC::L1ports::Provider < JunosNC::Provider::Parent
+class Junos::Ez::L1ports::Provider < Junos::Ez::Provider::Parent
   
   ### ---------------------------------------------------------------
   ### XML readers
@@ -76,6 +76,6 @@ class JunosNC::L1ports::Provider < JunosNC::Provider::Parent
   
 end  
 
-require 'JunosNC/l1_ports/vlan'
-require 'JunosNC/l1_ports/classic'
+require 'junos-ez/l1_ports/vlan'
+require 'junos-ez/l1_ports/classic'
 

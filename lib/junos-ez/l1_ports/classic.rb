@@ -1,4 +1,4 @@
-class JunosNC::L1ports::Provider::CLASSIC < JunosNC::L1ports::Provider
+class Junos::Ez::L1ports::Provider::CLASSIC < Junos::Ez::L1ports::Provider
 
   ### ---------------------------------------------------------------
   ### XML top placement

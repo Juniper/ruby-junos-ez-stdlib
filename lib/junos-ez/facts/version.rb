@@ -1,4 +1,4 @@
-JunosNC::Facts::Keeper.define( :version ) do |ndev, facts|
+Junos::Ez::Facts::Keeper.define( :version ) do |ndev, facts|
   
   f_master, f_persona = uses :master, :personality
       

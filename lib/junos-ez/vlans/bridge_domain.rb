@@ -1,4 +1,4 @@
-class JunosNC::Vlans::Provider::BRIDGE_DOMAIN < JunosNC::Vlans::Provider
+class Junos::Ez::Vlans::Provider::BRIDGE_DOMAIN < Junos::Ez::Vlans::Provider
 
   ### ---------------------------------------------------------------
   ### XML top placement
@@ -61,7 +61,7 @@ end
 ##### Provider collection methods
 ##### ---------------------------------------------------------------
 
-class JunosNC::Vlans::Provider::BRIDGE_DOMAIN
+class Junos::Ez::Vlans::Provider::BRIDGE_DOMAIN
   
   def build_list    
     bd_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'bridge-domains' }

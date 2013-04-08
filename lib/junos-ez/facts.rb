@@ -1,6 +1,6 @@
-module JunosNC; end
+require 'junos-ez/provider'
 
-module JunosNC::Facts
+module Junos::Ez::Facts
   
   class Keeper
     attr_accessor :known
@@ -56,13 +56,13 @@ end
 ### other libraries.  DO NOT CHANGE THESE METHOD DEFINITIONS
 ### -----------------------------------------------------------------
 
-module JunosNC::Facts  
+module Junos::Ez::Facts  
   attr_accessor :providers, :facts
 
   def self.Provider( ndev )       
-    ndev.extend JunosNC::Facts    
+    ndev.extend Junos::Ez::Facts    
     ndev.providers = []
-    ndev.facts = JunosNC::Facts::Keeper.new( ndev )     
+    ndev.facts = Junos::Ez::Facts::Keeper.new( ndev )     
     ndev.facts.read!
     true
   end      

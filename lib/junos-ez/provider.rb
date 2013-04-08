@@ -1,12 +1,13 @@
-module JunosNC; end
+module Junos; end
+module Junos::Ez; end
   
-module JunosNC::Provider    
+module Junos::Ez::Provider    
   
   ## all managed objects have the following properties:
   
   PROPERTIES = [ 
     :exist,           # exists in configuration (or should)
-    :active           # active in configuration (or should)
+    :j_active         # active in configuration (or should)
   ]    
 
   ## 'attach_instance_variable' is the way to dynamically
@@ -24,7 +25,7 @@ module JunosNC::Provider
    
 end
   
-class JunosNC::Provider::Parent
+class Junos::Ez::Provider::Parent
   
   attr_reader :ndev, :parent, :name
   attr_accessor :providers
@@ -88,7 +89,6 @@ class JunosNC::Provider::Parent
       
   def select( name )
     raise ArgumentError, "This is not a provider instance" unless is_provider?
-    
     this = self.class.new( @ndev, name, @opts )
     this.properties = self.properties
     this.read!    
@@ -107,7 +107,7 @@ class JunosNC::Provider::Parent
     
   def active?
     false unless exists?
-    @has[:active]
+    @has[:j_active]
   end
   
   def name_decorated( name = @name )
@@ -173,7 +173,7 @@ class JunosNC::Provider::Parent
     ## be active (if not already set)
     
     newbie[:exist] = true
-    newbie[:active] ||= true    
+    newbie[:j_active] ||= true    
     
     ## if a block is provided, then pass the block the new object
     ## the caller is then expected to set the properies
@@ -201,20 +201,19 @@ class JunosNC::Provider::Parent
   ## ----------------------------------------------------------------
       
   def create_from_yaml!( opts = {} )
-    raise ArgumentError "No provider support" unless respond_to? :expanded_xml_from_hash            
-    raise ArguementError "Missing :filename param" unless opts[:filename]    
-    
+    raise ArgumentError "No provider support" unless respond_to? :xml_from_h_expanded
+    raise ArgumentError "Missing :filename param" unless opts[:filename]        
     as_hash = YAML.load_file( opts[:filename] )
-    write_xml_config! expanded_xml_from_hash( as_hash, opts )     
+    write_xml_config! xml_from_h_expanded( as_hash, opts )     
   end
 
-  def expanded_to_hash( opts = {} ) 
-    to_hash( opts ) 
+  def to_h_expanded( opts = {} ) 
+    to_h( opts ) 
   end
     
   def to_yaml( opts = {} ) 
     raise ArgumentError, "Not an instance" if is_provider?    
-    out_hash = expanded_to_hash( opts )
+    out_hash = to_h_expanded( opts )
     out_yaml = out_hash.to_yaml        
     File.open( opts[:filename], "w" ){|f| f.puts out_hash.to_yaml } if opts[:filename]   
     out_yaml    
@@ -240,14 +239,14 @@ class JunosNC::Provider::Parent
   ### ---------------------------------------------------------------
   
   def activate!
-    return nil if @should[:active] == true        
-    @should[:active] = true
+    return nil if @should[:j_active] == true        
+    @should[:j_active] = true
     write!
   end
   
   def deactivate!
-    return nil if @should[:active] == false    
-    @should[:active] = false
+    return nil if @should[:j_active] == false    
+    @should[:j_active] = false
     write!
   end
   
@@ -331,7 +330,7 @@ class JunosNC::Provider::Parent
     
     unless @has_xml
       @has[:exist] = false      
-      @has[:active] = true
+      @has[:j_active] = true
       init_has
       return nil
     end
@@ -351,6 +350,15 @@ class JunosNC::Provider::Parent
     
   def write!
     return nil if @should.empty?
+    
+    # if :exist is marked false, then we need to delete the
+    # item from Junos
+    
+    if (not @should[:exist].nil?) and (@should[:exist] == false)
+      return delete!
+    end
+    
+    @should[:exist] = true
     
     # create the necessary chagnes and push them to the Junos
     # device.  If an error occurs, it will be raised
@@ -409,17 +417,17 @@ class JunosNC::Provider::Parent
     xml_set_or_delete( xml, 'description', @should[:description] )
   end    
   
-  def xml_change_active( xml )
+  def xml_change_j_active( xml )
     par = xml.instance_variable_get(:@parent)
-    value = @should[:active]  ? 'active' : 'inactive'
+    value = @should[:j_active]  ? 'active' : 'inactive'
     par[value] = value # attribute name is same as value
   end  
   
   ### ---------------------------------------------------------------
-  ### 'to_hash' lets us look at the read/write hash structures 
+  ### 'to_h' lets us look at the read/write hash structures 
   ### ---------------------------------------------------------------  
   
-  def to_hash( which = :read )
+  def to_h( which = :read )
     { @name => (which == :read) ? @has : @should }    
   end
   
@@ -430,7 +438,7 @@ class JunosNC::Provider::Parent
   private
   
   def set_has_status( xml, has )
-    has[:active] = xml['inactive'] ? false : true
+    has[:j_active] = xml['inactive'] ? false : true
     has[:exist] = true
   end
   
@@ -457,6 +465,38 @@ class JunosNC::Provider::Parent
   def oh_no!
     return if @opts[:ignore_raise]
     yield if block_given?   # should always be a block given ...
+  end
+
+  ### ---------------------------------------------------------------
+  ### XML property reader/writer for elements that can be present,
+  ### or existing with a "no-" prepended.  For example "retain" or
+  ### "no-retain"
+  ### ---------------------------------------------------------------  
+  
+  def xml_read_parse_noele( as_xml, ele_name, as_hash, prop )
+    unless (ele = as_xml.xpath("#{ele_name} | no-#{ele_name}")).empty?
+      as_hash[prop] = (ele[0].name =~ /^no-/) ? false : true
+    end    
+  end
+  
+  def xml_set_or_delete_noele( xml, ele_name, prop = ele_name.to_sym )
+    
+    # delete what was there
+    unless @has[prop].nil?
+      value_prop = @has[prop]
+      wr_ele_name = value_prop ? ele_name : 'no-' + ele_name
+      xml.send(wr_ele_name.to_sym, Netconf::JunosConfig::DELETE)
+    end
+        
+    # if we're not adding anything back, signal that we've done
+    # something, and we're done, yo!
+    return true if @should[prop].nil?
+
+    # add new value
+    value_prop = @should[prop]
+    ele_name = 'no-' + ele_name if value_prop == false
+    xml.send( ele_name.to_sym )
+    
   end
   
   ### ---------------------------------------------------------------

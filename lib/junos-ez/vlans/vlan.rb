@@ -1,4 +1,4 @@
-class JunosNC::Vlans::Provider::VLAN < JunosNC::Vlans::Provider
+class Junos::Ez::Vlans::Provider::VLAN < Junos::Ez::Vlans::Provider
   
   ### ---------------------------------------------------------------
   ### XML top placement
@@ -55,7 +55,7 @@ end
 ##### Provider collection methods
 ##### ---------------------------------------------------------------
 
-class JunosNC::Vlans::Provider::VLAN
+class Junos::Ez::Vlans::Provider::VLAN
   
   def build_list    
     xml_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'vlans' }

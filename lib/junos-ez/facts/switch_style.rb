@@ -1,4 +1,4 @@
-JunosNC::Facts::Keeper.define( :switch_style ) do |ndev, facts|
+Junos::Ez::Facts::Keeper.define( :switch_style ) do |ndev, facts|
   f_persona = uses :personality
     
   facts[:switch_style] = case f_persona

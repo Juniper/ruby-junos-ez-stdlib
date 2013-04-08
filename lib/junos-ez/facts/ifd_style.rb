@@ -1,5 +1,5 @@
 
-JunosNC::Facts::Keeper.define( :ifd_style ) do  |ndev, facts|
+Junos::Ez::Facts::Keeper.define( :ifd_style ) do  |ndev, facts|
   persona = uses :personality
   
   facts[:ifd_style] = case persona

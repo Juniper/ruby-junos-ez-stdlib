@@ -1,4 +1,4 @@
-JunosNC::Facts::Keeper.define( :personality ) do |ndev, facts|
+Junos::Ez::Facts::Keeper.define( :personality ) do |ndev, facts|
   
   model = uses :hardwaremodel  
       

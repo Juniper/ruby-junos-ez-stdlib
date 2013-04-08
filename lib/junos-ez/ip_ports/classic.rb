@@ -1,4 +1,4 @@
-class JunosNC::IPports::Provider::CLASSIC < JunosNC::IPports::Provider
+class Junos::Ez::IPports::Provider::CLASSIC < Junos::Ez::IPports::Provider
   
   ### ---------------------------------------------------------------
   ### XML top placement
@@ -86,7 +86,7 @@ end
 ##### Provider collection methods
 ##### ---------------------------------------------------------------
 
-class JunosNC::IPports::Provider::CLASSIC
+class Junos::Ez::IPports::Provider::CLASSIC
   
   def build_list            
     from_junos_get_ifa_xml.collect do |ifa|

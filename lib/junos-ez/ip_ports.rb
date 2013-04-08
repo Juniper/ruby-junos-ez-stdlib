@@ -1,7 +1,7 @@
 
-require "JunosNC/provider"
+require "junos-ez/provider"
 
-module JunosNC::IPports
+module Junos::Ez::IPports
 
   PROPERTIES = [ 
     :admin,             # [:up, :down]
@@ -13,18 +13,18 @@ module JunosNC::IPports
 
   def self.Provider( ndev, varsym )        
     
-    newbie = JunosNC::IPports::Provider::CLASSIC.new( ndev )      
-    newbie.properties = JunosNC::Provider::PROPERTIES + PROPERTIES
-    JunosNC::Provider.attach_instance_variable( ndev, varsym, newbie )
+    newbie = Junos::Ez::IPports::Provider::CLASSIC.new( ndev )      
+    newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
+    Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )
     
   end
   
-  class Provider < JunosNC::Provider::Parent
+  class Provider < Junos::Ez::Provider::Parent
     # common parenting goes here ...
   end
   
 end
 
-require 'JunosNC/ip_ports/classic'
+require 'junos-ez/ip_ports/classic'
 
 
