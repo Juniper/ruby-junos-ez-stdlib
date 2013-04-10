@@ -5,7 +5,7 @@ require 'net/netconf'
 Gem::Specification.new do |s|
 
   s.name = 'junos-ez-stdlib'
-  s.version = '0.0.2'
+  s.version = '0.0.3'
   s.summary = "Junos Standard Libraries for NETCONF"
   s.description = "Junos Standard Libs for application development using NETCONF"
   s.homepage = 'https://github.com/jeremyschulman'
