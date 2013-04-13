@@ -339,8 +339,8 @@ class Junos::Ez::Provider::Parent
     ## any defaults
     
     unless @has_xml
-      @has[:_exist] = false      
-      @has[:_active] = true
+      @has[:_exist] ||= false      
+      @has[:_active] ||= true
       init_has
       return nil
     end
