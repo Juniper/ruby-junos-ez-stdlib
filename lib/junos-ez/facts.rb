@@ -1,5 +1,25 @@
 require 'junos-ez/provider'
 
+### -----------------------------------------------------------------
+### Junos::Ez module devices the toplevel Provider and associated
+### Facts class & methods
+### -----------------------------------------------------------------
+
+module Junos::Ez
+  
+  attr_accessor :providers, :facts
+
+  def self.Provider( ndev )       
+    ndev.extend Junos::Ez
+    ndev.providers = []
+    ndev.facts = Junos::Ez::Facts::Keeper.new( ndev )     
+    ndev.facts.read!
+    true
+  end      
+  
+  def fact( name ); facts[name] end
+end; 
+
 module Junos::Ez::Facts
   
   class Keeper
@@ -50,26 +70,6 @@ module Junos::Ez::Facts
   
   end # class
 end
-
-### -----------------------------------------------------------------
-### Module methods for Kernel.extend, to be used by caller and
-### other libraries.  DO NOT CHANGE THESE METHOD DEFINITIONS
-### -----------------------------------------------------------------
-
-module Junos::Ez::Facts  
-  attr_accessor :providers, :facts
-
-  def self.Provider( ndev )       
-    ndev.extend Junos::Ez::Facts    
-    ndev.providers = []
-    ndev.facts = Junos::Ez::Facts::Keeper.new( ndev )     
-    ndev.facts.read!
-    true
-  end      
-  
-  def fact( name ); facts[name] end
-
-end; 
 
 ### -----------------------------------------------------------------
 ### Load all of the fact files

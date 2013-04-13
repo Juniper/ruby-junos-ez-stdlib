@@ -66,7 +66,9 @@ class Junos::Ez::IPports::Provider::CLASSIC < Junos::Ez::IPports::Provider
           xml.name @has[:address]
         }
       end
-      xml.address { xml.name @should[:address] }
+      xml.address { 
+        xml.name @should[:address] 
+      }
     }}
   end
   

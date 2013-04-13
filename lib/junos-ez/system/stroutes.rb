@@ -77,8 +77,10 @@ class Junos::Ez::StaticRoutes::Provider
   def xml_change_gateway( xml )
     # delete existing entries
     ele_nh = :'next-hop'    
-    xml.send(ele_nh, Netconf::JunosConfig::DELETE)
-    return true unless @should[:gateway]       ## simply removing all next-hop elements
+    
+    # clear any existing values, and return unless there are any new ones ...
+    xml.send(ele_nh, Netconf::JunosConfig::DELETE) if @has[:gateway]    
+    return true unless @should[:gateway]      
     
     ## adding back the ones we want now ... 
     if @should[:gateway].kind_of? String

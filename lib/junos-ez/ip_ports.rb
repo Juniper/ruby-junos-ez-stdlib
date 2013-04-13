@@ -11,12 +11,10 @@ module Junos::Ez::IPports
     :address            # ip/prefix as text, e.g. "192.168.10.22/24"
   ]  
 
-  def self.Provider( ndev, varsym )        
-    
+  def self.Provider( ndev, varsym )            
     newbie = Junos::Ez::IPports::Provider::CLASSIC.new( ndev )      
     newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
-    Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )
-    
+    Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )    
   end
   
   class Provider < Junos::Ez::Provider::Parent

@@ -6,8 +6,8 @@ module Junos::Ez::Provider
   ## all managed objects have the following properties:
   
   PROPERTIES = [ 
-    :exist,           # exists in configuration (or should)
-    :j_active         # active in configuration (or should)
+    :_exist,          # exists in configuration (or should)
+    :_active          # active in configuration (or should)
   ]    
 
   ## 'attach_instance_variable' is the way to dynamically
@@ -56,7 +56,7 @@ class Junos::Ez::Provider::Parent
   
   def is_provider?; @name.nil? end
     
-  def is_new?; @has[:exist] || false end
+  def is_new?; @has[:_exist] || false end
       
   ### ---------------------------------------------------------------
   ### [] property reader or instance selector
@@ -99,7 +99,7 @@ class Junos::Ez::Provider::Parent
   ### 'exists?' - does the item exist in the Juos config
   ### ---------------------------------------------------------------
   
-  def exists?; @has[:exist]; end  
+  def exists?; @has[:_exist]; end  
 
   ### ---------------------------------------------------------------
   ### 'active?' - is the config item active in the Junos config
@@ -107,7 +107,7 @@ class Junos::Ez::Provider::Parent
     
   def active?
     false unless exists?
-    @has[:j_active]
+    @has[:_active]
   end
   
   def name_decorated( name = @name )
@@ -160,10 +160,10 @@ class Junos::Ez::Provider::Parent
     ## instance of this object.  We should check to see if
     ## it first exists, eh?  So allow the caller to specify
     ## if they want an exception if it already exists; overloading
-    ## the use of the prop_hash[:exist], yo!
+    ## the use of the prop_hash[:_exist], yo!
     
     newbie = self.select( name )    
-    if prop_hash[:exist]
+    if prop_hash[:_exist]
       raise ArgumentError,  name_decorated(name) + " already exists" if newbie.exists? 
     end
         
@@ -172,8 +172,8 @@ class Junos::Ez::Provider::Parent
     ## default mark the newly created object as should exist and should
     ## be active (if not already set)
     
-    newbie[:exist] = true
-    newbie[:j_active] ||= true    
+    newbie[:_exist] = true
+    newbie[:_active] ||= true    
     
     ## if a block is provided, then pass the block the new object
     ## the caller is then expected to set the properies
@@ -201,7 +201,6 @@ class Junos::Ez::Provider::Parent
   ## ----------------------------------------------------------------
       
   def create_from_yaml!( opts = {} )
-    raise ArgumentError "No provider support" unless respond_to? :xml_from_h_expanded
     raise ArgumentError "Missing :filename param" unless opts[:filename]        
     as_hash = YAML.load_file( opts[:filename] )
     write_xml_config! xml_from_h_expanded( as_hash, opts )     
@@ -212,7 +211,6 @@ class Junos::Ez::Provider::Parent
   end
     
   def to_yaml( opts = {} ) 
-    raise ArgumentError, "Not an instance" if is_provider?    
     out_hash = to_h_expanded( opts )
     out_yaml = out_hash.to_yaml        
     File.open( opts[:filename], "w" ){|f| f.puts out_hash.to_yaml } if opts[:filename]   
@@ -230,7 +228,7 @@ class Junos::Ez::Provider::Parent
     par = xml.instance_variable_get(:@parent)    
     par['delete'] = 'delete'
     rsp = write_xml_config!( xml.doc.root )
-    @has[:exist] = false
+    @has[:_exist] = false
     rsp
   end
 
@@ -239,14 +237,14 @@ class Junos::Ez::Provider::Parent
   ### ---------------------------------------------------------------
   
   def activate!
-    return nil if @should[:j_active] == true        
-    @should[:j_active] = true
+    return nil if @should[:_active] == true        
+    @should[:_active] = true
     write!
   end
   
   def deactivate!
-    return nil if @should[:j_active] == false    
-    @should[:j_active] = false
+    return nil if @should[:_active] == false    
+    @should[:_active] = false
     write!
   end
   
@@ -298,6 +296,18 @@ class Junos::Ez::Provider::Parent
   end
   
   ### ---------------------------------------------------------------
+  ### Provider each method - this will go and create a managed 
+  ### object for each item in the list.  This could get CPU
+  ### intensive depending on the number of items under provider
+  ### management, yo!
+  ### ---------------------------------------------------------------    
+  
+  def each( &block )
+    raise ArgumentError, "not a provider" unless is_provider?
+    list.each{ |name| yield select(name ) }
+  end
+  
+  ### ---------------------------------------------------------------
   ### Provider reader methods
   ### ---------------------------------------------------------------    
   
@@ -323,14 +333,14 @@ class Junos::Ez::Provider::Parent
     @has.clear    
     cfg_xml = xml_config_read!
     @has_xml = xml_get_has_xml( cfg_xml )
-    
+  
     ## if the thing doesn't exist in Junos, then mark the @has
     ## structure accordingly and call the object init_has for
     ## any defaults
     
     unless @has_xml
-      @has[:exist] = false      
-      @has[:j_active] = true
+      @has[:_exist] = false      
+      @has[:_active] = true
       init_has
       return nil
     end
@@ -351,21 +361,13 @@ class Junos::Ez::Provider::Parent
   def write!
     return nil if @should.empty?
     
-    # if :exist is marked false, then we need to delete the
-    # item from Junos
-    
-    if (not @should[:exist].nil?) and (@should[:exist] == false)
-      return delete!
-    end
-    
-    @should[:exist] = true
+    @should[:_exist] ||= true
     
     # create the necessary chagnes and push them to the Junos
     # device.  If an error occurs, it will be raised
     
     xml_change = xml_build_change            
     return nil unless xml_change
-    
     rsp = write_xml_config!( xml_change )    
     
     # copy the 'should' values into the 'has' values now that 
@@ -386,8 +388,12 @@ class Junos::Ez::Provider::Parent
   def xml_on_create( xml ); nil; end
   def xml_on_delete( xml ); nil; end
     
-  def xml_change_exist( xml )
-    return xml_on_create( xml ) if @should[:exist]
+  def xml_change__exist( xml )
+    return xml_on_create( xml ) if @should[:_exist]    
+    
+    par = xml.instance_variable_get(:@parent)
+    par['delete'] = 'delete'
+    
     return xml_on_delete( xml )
   end
 
@@ -397,7 +403,13 @@ class Junos::Ez::Provider::Parent
   ## but sometimes we might want to, so don't make it private
   
   def xml_build_change( xml_at_here = nil )
-    edit_at = xml_at_here || xml_at_edit || xml_at_top    
+    edit_at = xml_at_here || xml_at_edit || xml_at_top
+    
+    if @should[:_exist] == false
+      xml_change__exist( edit_at )
+      return edit_at.doc.root
+    end
+    
     changed = false
     @should.keys.each do |prop|
       changed = true if self.send( "xml_change_#{prop}", edit_at )
@@ -417,9 +429,9 @@ class Junos::Ez::Provider::Parent
     xml_set_or_delete( xml, 'description', @should[:description] )
   end    
   
-  def xml_change_j_active( xml )
+  def xml_change__active( xml )
     par = xml.instance_variable_get(:@parent)
-    value = @should[:j_active]  ? 'active' : 'inactive'
+    value = @should[:_active]  ? 'active' : 'inactive'
     par[value] = value # attribute name is same as value
   end  
   
@@ -438,8 +450,8 @@ class Junos::Ez::Provider::Parent
   private
   
   def set_has_status( xml, has )
-    has[:j_active] = xml['inactive'] ? false : true
-    has[:exist] = true
+    has[:_active] = xml['inactive'] ? false : true
+    has[:_exist] = true
   end
   
   ### ---------------------------------------------------------------
@@ -497,6 +509,13 @@ class Junos::Ez::Provider::Parent
     ele_name = 'no-' + ele_name if value_prop == false
     xml.send( ele_name.to_sym )
     
+  end
+  
+  def xml_when_item( xml_item, &block )
+    raise ArgumentError, "no block given" unless block_given?
+    return unless xml_item[0]
+    return yield(xml_item[0]) if block.arity == 1
+    yield
   end
   
   ### ---------------------------------------------------------------
