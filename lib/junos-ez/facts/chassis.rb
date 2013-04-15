@@ -5,6 +5,19 @@ Junos::Ez::Facts::Keeper.define( :chassis ) do |ndev, facts|
   
   facts[:hardwaremodel] = chassis.xpath('description').text
   facts[:serialnumber] = chassis.xpath('serial-number').text           
+  
+  cfg = ndev.rpc.get_configuration{|xml|
+    xml.system {
+      xml.send(:'host-name')
+      xml.send(:'domain-name')
+    }
+  }
+  
+  facts[:hostname] = cfg.xpath('//host-name').text
+  facts[:domain] = cfg.xpath('//domain-name').text
+  facts[:fqdn] = facts[:hostname]
+  facts[:fqdn] += ".#{facts[:domain]}" unless facts[:domain].empty?
+  
 end
 
 Junos::Ez::Facts::Keeper.define( :master ) do |ndev, facts|
