@@ -10,7 +10,7 @@
 
 # EXAMPLE USAGE
   
-~~~~
+````ruby
 require 'pry'
 require 'yaml'
 require 'net/netconf/jnpr'
@@ -54,7 +54,7 @@ Junos::Ez::IPports::Provider( ndev, :ip_ports )
 binding.pry
 
 ndev.close
-~~~~
+````
   
 # DEPENDENCIES
 
