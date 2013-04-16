@@ -3,14 +3,18 @@
 A collection of Ruby classes to make Junos automation Easy.  These are the 'standard' classes that 
 support the following items:
   
-  * Facts - for example, the version, serialnumber, etc.
+  * Facts - Device "facts", for example the version, serial number, hardware model, etc.
   * L1 Ports - physical ports, like admin, speed, duplex
-  * IP Ports - IPv4 ports
-  * ... more TBD ...
+  * VLANs - VLAN briding instances
+  * L2 Ports - ethernet swithching ports, mapping VLANs to ports
+  * IP Ports - IP v4 ports
+  * Static Routes - static routing entries
+  * Hosts - static host entries 
+  * ... others ... TBD (like NTP, DNS, etc.)
   
 For more information about each topic, please refer to the **README_xyz.md** files.  Suggested order:
 
-  * README_FRAMEWORK
+  * README_ABOUT_EZ      <-- general overview of the "EZ" library framework, *MUST READ FIRST*
   * README_FACTS
   * README_L1_PORTS
   * README_IP_PORTS
