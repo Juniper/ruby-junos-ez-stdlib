@@ -13,8 +13,8 @@ module Junos::Ez::L1ports
 
   def self.Provider( ndev, varsym )            
     newbie = case ndev.fact( :ifd_style )
-    when :VLAN
-      Junos::Ez::L1ports::Provider::VLAN.new( ndev )            
+    when :SWITCH
+      Junos::Ez::L1ports::Provider::SWITCH.new( ndev )            
     when :CLASSIC
       Junos::Ez::L1ports::Provider::CLASSIC.new( ndev )      
     end      
@@ -76,6 +76,6 @@ class Junos::Ez::L1ports::Provider < Junos::Ez::Provider::Parent
   
 end  
 
-require 'junos-ez/l1_ports/vlan'
+require 'junos-ez/l1_ports/switch'
 require 'junos-ez/l1_ports/classic'
 

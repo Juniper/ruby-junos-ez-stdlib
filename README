@@ -4,8 +4,8 @@
   support the following items:
   
   * Facts - for example, the version, serialnumber, etc.
-  * L1ports - physical ports, like admin, speed, duplex
-  * IPports - IPv4 ports
+  * L1 Ports - physical ports, like admin, speed, duplex
+  * IP Ports - IPv4 ports
   * ... more TBD ...
 
 # EXAMPLE USAGE
