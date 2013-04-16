@@ -1,12 +1,19 @@
 # OVERVIEW
 
-  A collection of Ruby classes to make Junos automation Easy.  These are the 'standard' classes that 
-  support the following items:
+A collection of Ruby classes to make Junos automation Easy.  These are the 'standard' classes that 
+support the following items:
   
   * Facts - for example, the version, serialnumber, etc.
   * L1 Ports - physical ports, like admin, speed, duplex
   * IP Ports - IPv4 ports
   * ... more TBD ...
+  
+For more information about each topic, please refer to the **README_xyz.md** files.  Suggested order:
+
+  * README_FRAMEWORK
+  * README_FACTS
+  * README_L1_PORTS
+  * README_IP_PORTS
 
 # EXAMPLE USAGE
   
