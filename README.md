@@ -26,7 +26,6 @@ require 'pry'
 require 'yaml'
 require 'net/netconf/jnpr'
 require 'junos-ez/stdlib'
-require 'junos-ez/srx'
 
 # login information for NETCONF session 
 
