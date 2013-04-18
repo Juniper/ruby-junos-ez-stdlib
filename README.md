@@ -1,5 +1,7 @@
 # OVERVIEW
 
+** NOTE: Work in progress - Not in RubyGems.org**
+
 A collection of Ruby classes to make Junos automation Easy.  These are the 'standard' classes that 
 support the following items:
   
@@ -72,7 +74,7 @@ ndev.close
 
 # INSTALLATION 
 
-  * gem install junos-ez-stdlib
+  * gem install junos-ez-stdlib (* JUST NOT YET *)
 
 # CONTRIBUTORS
 
