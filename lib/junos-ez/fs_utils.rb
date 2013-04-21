@@ -32,6 +32,13 @@ module Junos::Ez::Fs
   end          
 end
 
+### -----------------------------------------------------------------
+###                        PUBLIC METHODS
+### -----------------------------------------------------------------
+### class containing filesystem public utility functions
+### these are not in alphabetical order, but I should do that, yo!
+### -----------------------------------------------------------------
+
 class Junos::Ez::Fs::Provider < Junos::Ez::Provider::Parent
   
   ### -------------------------------------------------------------
@@ -260,8 +267,36 @@ class Junos::Ez::Fs::Provider < Junos::Ez::Provider::Parent
     end
     dryrun_h    
   end
+
+  ### -------------------------------------------------------------
+  ### cp! - copies a file.  The from_file and to_file can be
+  ### URL parameters, yo!
+  ###
+  ### opts[:source_address] will set the source address of the
+  ### copy command, useful when URL contain SCP, HTTP
+  ### -------------------------------------------------------------
+  
+  def cp!( from_file, to_file, opts = {} )
+    args = { :source => from_file, :destination => to_file }
+    args[:source_address] = opts[:source_address] if opts[:source_address]
+    
+    begin
+      got = @ndev.rpc.file_copy( args )
+    rescue => e
+      raise IOError, e.rsp.xpath('rpc-error/error-message').text.strip
+    else
+      return true
+    end
+  end
   
 end # class Provider    
+
+### -----------------------------------------------------------------
+###                        PRIVATE METHODS
+### -----------------------------------------------------------------
+### These are helper/private methods, or methods that are current
+### work-in-progress/under-investigation
+### -----------------------------------------------------------------
 
 class Junos::Ez::Fs::Provider
   private
