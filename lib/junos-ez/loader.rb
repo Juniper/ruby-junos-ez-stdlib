@@ -21,11 +21,18 @@ class Junos::Ez::Loader::Provider < Junos::Ez::Provider::Parent
   
   ### ---------------------------------------------------------------
   ### image! - used to load a software image onto device
+  ###    suggested usage (for now) is that you use the 'scp'
+  ###    method of the Netconf::SSH object to copy the image to the
+  ###    device and then use this method to load the image.  
+  ###    @@@ TBD, provide copy functionality within this method
+  ###    @@@ as convience ...
   ###
-  ### options (opts)  
-  ### :source => URL -- path to image
-  ### :destination => path -- performs copy of image here from :source
+  ### --- options --- 
+  ###
+  ### :filename => path to device local file 
   ### :no_validate => true -- do not validate 
+  ### :no_copy => true -- do not save copy of package files
+  ### :unlink => true -- remove package after successful install
   ### :reboot => true -- reboot once the loading completes  
   ### ---------------------------------------------------------------
   
@@ -37,7 +44,8 @@ class Junos::Ez::Loader::Provider < Junos::Ez::Provider::Parent
   ###    does not perform a 'commit', just the equivalent of the
   ###    load-configuration RPC
   ###
-  ### options:
+  ### --- options ---
+  ###
   ### :filename => path - indcates the filename of content
   ###    note: filename extension will also define format
   ###    .conf <==> :text
