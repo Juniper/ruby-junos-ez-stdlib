@@ -55,8 +55,10 @@ class Junos::Ez::Loader::Provider < Junos::Ez::Provider::Parent
   ###    this will override any auto-format from the :filename
   ### :content => String - string content of data (vs. :filename)
   ### :template  - indicates file/content is an ERB
-  ###    => true - used current binding context
+  ###    => true - used current binding context; i.e. variables
+  ###              active in current context/block
   ###    => <object> - will grab the binding from this object
+  ###                  using a bit of meta-programming magic
   ###    => <binding> - will use this binding
   ### ---------------------------------------------------------------
   
