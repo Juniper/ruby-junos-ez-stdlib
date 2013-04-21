@@ -1,3 +1,10 @@
+##### ---------------------------------------------------------------
+##### The Junos::Ez::Provider and associated Parent class make up
+##### the main 'framework' of the "EZ" library system.  Please 
+##### consider your changes carefully as it will have a large
+##### scope of impact.  Thank you.
+##### ---------------------------------------------------------------
+
 module Junos; end
 module Junos::Ez; end
   
@@ -32,6 +39,10 @@ class Junos::Ez::Provider::Parent
   attr_accessor :has, :should, :properties
   attr_accessor :list, :catalog
   
+  # p_obj - the parent object
+  # name - the name of the resource, or nil if this is a provider
+  # opts - options to the provider/resource.  :parent is reserved  
+  
   def initialize( p_obj, name = nil, opts = {} )
     
     @providers = []
@@ -43,8 +54,8 @@ class Junos::Ez::Provider::Parent
     @list = []                # array list of item names
     @catalog = {}             # hash catalog of named items
         
-    return unless @name       # providers do not have a name
-    
+    return unless @name           
+    # resources only from here ...
     @has = {}         # properties read-from Junos
     @should = {}      # properties to write-back to Junos
   end 
@@ -59,7 +70,8 @@ class Junos::Ez::Provider::Parent
   def is_new?; @has[:_exist] || false end
       
   ### ---------------------------------------------------------------
-  ### [] property reader or instance selector
+  ### [property] resource property reader or 
+  ### ["name"] resource selector from provider
   ### ---------------------------------------------------------------
    
   def []( property )
@@ -84,7 +96,7 @@ class Junos::Ez::Provider::Parent
   end  
 
   ### ---------------------------------------------------------------
-  ### 'select' is used to get an item from a Provider
+  ### 'select' a resource from a provider
   ### ---------------------------------------------------------------
       
   def select( name )
@@ -96,19 +108,22 @@ class Junos::Ez::Provider::Parent
   end    
 
   ### ---------------------------------------------------------------
-  ### 'exists?' - does the item exist in the Juos config
+  ### 'exists?' - does the resource exist in the Juos config
   ### ---------------------------------------------------------------
   
   def exists?; @has[:_exist]; end  
 
   ### ---------------------------------------------------------------
-  ### 'active?' - is the config item active in the Junos config
+  ### 'active?' - is the resource config active in Junos
   ### ---------------------------------------------------------------    
     
   def active?
     false unless exists?
     @has[:_active]
   end
+  
+  ### @@@ helper method, probably needs to go into 'private section
+  ### @@@ TBD
   
   def name_decorated( name = @name )
     self.class.to_s + "['" + name + "']"

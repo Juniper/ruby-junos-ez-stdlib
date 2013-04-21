@@ -1,4 +1,4 @@
-class Junos::Ez::Hosts::Provider
+class Junos::Ez::StaticHosts::Provider
   
   ### ---------------------------------------------------------------
   ### XML top placement
@@ -49,7 +49,7 @@ end
 ##### Provider collection methods
 ##### ---------------------------------------------------------------
 
-class Junos::Ez::Hosts::Provider
+class Junos::Ez::StaticHosts::Provider
   
   def build_list
     @ndev.rpc.get_configuration{|xml| xml.system {

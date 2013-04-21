@@ -1,7 +1,11 @@
 
 require "junos-ez/provider"
 
-module Junos::Ez::Hosts
+### -----------------------------------------------------------------
+### manage static host entries, kinda like "/etc/hosts"
+### -----------------------------------------------------------------
+
+module Junos::Ez::StaticHosts
   
   PROPERTIES = [
     :ip,                    # ipv4 address :String
@@ -9,7 +13,7 @@ module Junos::Ez::Hosts
   ]
   
   def self.Provider( ndev, varsym )            
-    newbie = Junos::Ez::Hosts::Provider.new( ndev )      
+    newbie = Junos::Ez::StaticHosts::Provider.new( ndev )      
     newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
     Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )    
   end  
@@ -19,8 +23,12 @@ module Junos::Ez::Hosts
   
 end
 
-require 'junos-ez/system/hosts'
-  
+require 'junos-ez/system/st_hosts'
+
+### -----------------------------------------------------------------
+### manage static route entries
+### -----------------------------------------------------------------
+
 module Junos::Ez::StaticRoutes
   
     PROPERTIES = [
@@ -45,7 +53,11 @@ module Junos::Ez::StaticRoutes
     
 end
 
-require 'junos-ez/system/stroutes'
+require 'junos-ez/system/st_routes'
+
+### -----------------------------------------------------------------
+### the 'syscfg' is a work in progress, do not use ...
+### -----------------------------------------------------------------
 
 module Junos::Ez::SysConfig
   
