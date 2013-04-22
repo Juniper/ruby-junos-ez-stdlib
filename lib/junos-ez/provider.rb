@@ -6,7 +6,41 @@
 ##### ---------------------------------------------------------------
 
 module Junos; end
-module Junos::Ez; end
+  
+module Junos::Ez
+  
+  ### ---------------------------------------------------------------
+  ### rpc_errors - decodes the XML into an array of error/Hash
+  ### @@@ TBD: this should be moved into the 'netconf' gem
+  ### ---------------------------------------------------------------
+  
+  def self.rpc_errors( as_xml )
+    errs = as_xml.xpath('//rpc-error')
+    return nil if errs.count == 0         # safety check    
+    
+    retval = []
+    errs.each do |err|
+       err_h = {}       
+       # every error has a severity and message
+       err_h[:severity] = err.xpath('error-severity').text.strip
+       err_h[:message] = err.xpath('error-message').text.strip
+       
+       # some have an edit path error
+       unless ( err_path = err.xpath('error-path')).empty?
+         err_h[:edit_path] = err_path.text.strip 
+       end
+         
+       # some have addition error-info/bad-element ...
+       unless ( bad_i = err.xpath('error-info/bad-element')).empty?
+         err_h[:bad_identifier] = bad_i.text.strip
+       end
+       
+       retval << err_h
+    end
+    retval    
+  end
+
+end
   
 module Junos::Ez::Provider    
   
