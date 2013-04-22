@@ -220,6 +220,10 @@ class Junos::Ez::Provider::Parent
     as_hash = YAML.load_file( opts[:filename] )
     write_xml_config! xml_from_h_expanded( as_hash, opts )     
   end
+  
+  def create_from_hash!( as_hash, opts = {} )
+    write_xml_config! xml_from_h_expanded( as_hash, opts )     
+  end
 
   def to_h_expanded( opts = {} ) 
     to_h( opts ) 
