@@ -1,6 +1,6 @@
 =begin
 ---------------------------------------------------------------------
-Loader::Utils is a collection of methods used for loading 
+Config::Utils is a collection of methods used for loading 
 configuration files/templates and software images
 
    config! - load configuration onto device
@@ -14,9 +14,9 @@ configuration files/templates and software images
 ---------------------------------------------------------------------
 =end
 
-module Junos::Ez::Loader  
+module Junos::Ez::Config  
   def self.Utils( ndev, varsym )            
-    newbie = Junos::Ez::Loader::Provider.new( ndev )      
+    newbie = Junos::Ez::Config::Provider.new( ndev )      
     Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )    
   end          
 end
@@ -26,31 +26,10 @@ end
 ### -----------------------------------------------------------------
 ### -----------------------------------------------------------------
 
-class Junos::Ez::Loader::Provider < Junos::Ez::Provider::Parent
+class Junos::Ez::Config::Provider < Junos::Ez::Provider::Parent
   
   ### ---------------------------------------------------------------
-  ### image! - used to load a software image onto device
-  ###    suggested usage (for now) is that you use the 'scp'
-  ###    method of the Netconf::SSH object to copy the image to the
-  ###    device and then use this method to load the image.  
-  ###    @@@ TBD, provide copy functionality within this method
-  ###    @@@ as convience ...
-  ###
-  ### --- options --- 
-  ###
-  ### :filename => path to device local file 
-  ### :no_validate => true -- do not validate 
-  ### :no_copy => true -- do not save copy of package files
-  ### :unlink => true -- remove package after successful install
-  ### :reboot => true -- reboot once the loading completes  
-  ### ---------------------------------------------------------------
-  
-  def image!( opts = {} )
-    false ### @@@ TBD: implement this code ...
-  end
-  
-  ### ---------------------------------------------------------------
-  ### config! - used to load configuration files / templates.  This
+  ### load! - used to load configuration files / templates.  This
   ###    does not perform a 'commit', just the equivalent of the
   ###    load-configuration RPC
   ###
@@ -61,12 +40,13 @@ class Junos::Ez::Loader::Provider < Junos::Ez::Provider::Parent
   ###    .{conf,text,txt} <==> :text
   ###    .xml  <==> :xml
   ###    .set  <==> :set
+  ###
+  ### :content => String - string content of data (vs. :filename)
+  ###  
   ### :format =>  [:text, :set, :xml], default :text (curly-brace)
   ###    this will override any auto-format from the :filename
-  ### :content => String - string content of data (vs. :filename)
-  ### :template  - indicates file/content is an ERB
-  ###    => true - used current binding context; i.e. variables
-  ###              active in current context/block
+  ###
+  ### :binding  - indicates file/content is an ERB
   ###    => <object> - will grab the binding from this object
   ###                  using a bit of meta-programming magic
   ###    => <binding> - will use this binding
@@ -79,7 +59,7 @@ class Junos::Ez::Loader::Provider < Junos::Ez::Provider::Parent
   ###   raise Netconf::EditError otherwise
   ### ---------------------------------------------------------------
   
-  def config!( opts = {} )
+  def load!( opts = {} )
     raise ArgumentError unless opts[:content] || opts[:filename]
     
     content = opts[:content] || File.read( opts[:filename] )    
@@ -101,6 +81,20 @@ class Junos::Ez::Loader::Provider < Junos::Ez::Provider::Parent
     else
       raise ArgumentError "unspecified format"
     end   
+        
+    if opts[:binding]
+      erb = ERB.new( content, nil, '>' )
+      case opts[:binding]
+      when Binding
+        # binding was provided to use
+        content = erb.result( opts[:binding] )
+      when Object
+        obj = opts[:binding]
+        def obj.junos_ez_binding; binding end
+        content = erb.result( obj.junos_ez_binding )
+        class << obj; remove_method :junos_ez_binding end
+      end
+    end
     
     @ndev.rpc.load_configuration( content, attrs ) 
     true # everthing OK!    

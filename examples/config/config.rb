@@ -15,25 +15,26 @@ $stdout.puts "OK!"
 
 
 Junos::Ez::Provider( ndev )
-Junos::Ez::Loader::Utils( ndev, :load )
+Junos::Ez::Config::Utils( ndev, :cfg )
 
 # lock the candidate config 
-#    ndev.load.lock!
+#    ndev.cfg.lock!
 
 # examples of loading ...
-#    ndev.load.config! :filename => 'load_sample.conf'
-#    ndev.load.config! :content => File.read( 'load_sample.conf' ), :format => :text
-#    ndev.load.config! :filename => 'load_sample.set'
+#    ndev.cfg.load! :filename => 'load_sample.conf'
+#    ndev.cfg.load! :content => File.read( 'load_sample.conf' ), :format => :text
+#    ndev.cfg.load! :filename => 'load_sample.set'
+
 
 binding.pry
 
 # check to see if the config is OK to commit
-#   ndev.load.commit?  
+#   ndev.cfg.commit?  
 
 # perform the commit
-#   ndev.load.commit!
+#   ndev.cfg.commit!
 
 # unlock the config
-#   ndev.load.unlock!
+#   ndev.cfg.unlock!
 
 ndev.close
