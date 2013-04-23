@@ -3,10 +3,10 @@
 Config::Utils is a collection of methods used for loading 
 configuration files/templates and software images
 
-   config! - load configuration onto device
    commit! - commit configuration
    commit? - see if a candidate config is OK (commit-check)
    diff? - shows the diff of the candidate config w/current | rolback
+   load! - load configuration onto device
    lock! - take exclusive lock on config
    unlock! - release exclusive lock on config
    rollback! - perform a config rollback
