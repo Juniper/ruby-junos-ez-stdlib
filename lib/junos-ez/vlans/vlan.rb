@@ -16,17 +16,15 @@ class Junos::Ez::Vlans::Provider::VLAN < Junos::Ez::Vlans::Provider
   ### XML readers
   ### ---------------------------------------------------------------
 
-  def xml_read!    
-    cfg_xml = @ndev.rpc.get_configuration( xml_at_top )
-    return nil unless (@has_xml = cfg_xml.xpath('//vlan')[0])  
-    xml_read_parser( @has_xml, @has )  
+  def xml_get_has_xml( xml )
+    xml.xpath('//vlan')[0]    
   end
-  
+        
   def xml_read_parser( as_xml, as_hash )
-    status_from_junos( as_xml, as_hash )    
+    set_has_status( as_xml, as_hash )    
     as_hash[:vlan_id] = as_xml.xpath('vlan-id').text.to_i
-    as_hash[:description] = as_xml.xpath('description').text
-    as_hash[:no_mac_learning] = as_xml.xpath('no-mac-learning').empty? ? false : true    
+    xml_when_item(as_xml.xpath('description')){ |i| as_hash[:description] = i.text }
+    xml_when_item(as_xml.xpath('no-mac-learning')){ as_hash[:no_mac_learning] = true }
     return true
   end
   
