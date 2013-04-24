@@ -74,3 +74,37 @@ class Junos::Ez::Vlans::Provider::VLAN
   end
   
 end
+
+##### ---------------------------------------------------------------
+##### Provider operational methods
+##### ---------------------------------------------------------------
+
+class Junos::Ez::Vlans::Provider::VLAN
+
+  ### ---------------------------------------------------------------
+  ### interfaces - returns a Hash of each interface in the VLAN
+  ###    each interface (key) will identify:
+  ###    :mode = [ :access | :trunk ]
+  ###    :native = true if (:mode == :trunk) and this VLAN is the 
+  ###       native vlan-id (untagged packets)
+  ### ---------------------------------------------------------------
+  
+  def interfaces( opts = {} )
+    args = {}
+    args[:vlan_name] = @name 
+    args[:extensive] = true    
+    got = @ndev.rpc.get_vlan_information( args )
+    
+    members = got.xpath('vlan/vlan-detail/vlan-member-list/vlan-member')
+    ifs_h = {}
+    members.each do |port|
+      port_name = port.xpath('vlan-member-interface').text.split('.')[0]
+      port_h = {}
+      port_h[:mode] = port.xpath('vlan-member-port-mode').text.to_sym
+      native = (port.xpath('vlan-member-tagness').text == 'untagged')
+      port_h[:native] = true if( native and port_h[:mode] == :trunk)
+      ifs_h[port_name] = port_h
+    end
+    ifs_h    
+  end
+end
