@@ -90,6 +90,8 @@ class Junos::Ez::Vlans::Provider::VLAN
   ### ---------------------------------------------------------------
   
   def interfaces( opts = {} )
+    raise ArgumentError, "not a resource" if is_provider?
+    
     args = {}
     args[:vlan_name] = @name 
     args[:extensive] = true    

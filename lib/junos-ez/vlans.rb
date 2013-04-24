@@ -20,7 +20,7 @@ module Junos::Ez::Vlans
   end
   
   class Provider < Junos::Ez::Provider::Parent
-    # common parenting goes here ...
+    # common parenting goes here ...    
   end
   
 end
