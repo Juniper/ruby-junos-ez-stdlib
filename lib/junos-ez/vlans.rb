@@ -9,7 +9,7 @@ module Junos::Ez::Vlans
   ]  
 
   def self.Provider( ndev, varsym )        
-    newbie = case ndev.fact_get(:switch_style)
+    newbie = case ndev.fact :switch_style
     when :VLAN, :VLAN_NG
       Junos::Ez::Vlans::Provider::VLAN.new( ndev )
     when :BRIDGE_DOMAIN

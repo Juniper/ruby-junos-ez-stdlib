@@ -6,7 +6,7 @@ require 'junos-ez/srx'
 
 # login information for NETCONF session 
 
-login = { :target => 'ex4200-07', :username => 'jeremy',  :password => 'jeremy1',  }
+login = { :target => 'srx210', :username => 'jeremy',  :password => 'jeremy1',  }
 
 ## create a NETCONF object to manage the device and open the connection ...
 
