@@ -43,6 +43,8 @@ def copy_file_to_junos( ndev, file_on_server, file_on_junos )
   end
 end
 
+copy_file_to_junos( ndev, file_on_server, file_on_junos )
+
 ###
 ### check the MD5 checksum values
 ###
