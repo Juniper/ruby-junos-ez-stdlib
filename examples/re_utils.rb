@@ -5,6 +5,10 @@ require 'net/netconf/jnpr'
 require 'junos-ez/stdlib'
      
 # login information for NETCONF session 
+unless ARGV[0]
+  puts "You must specify a target"
+  exit 1
+end
 
 login = { :target => ARGV[0], :username => 'jeremy',  :password => 'jeremy1',  }
 
