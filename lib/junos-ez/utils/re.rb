@@ -112,11 +112,8 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
     got = @ndev.rpc.get_system_alarm_information
     alarms_a = []
     got.xpath('alarm-detail').each do |alarm|
-      alarm_h = {}
-      alarm_h[:at] = alarm.xpath('alarm-time').text.strip
-      alarm_h[:class] = alarm.xpath('alarm-class').text.strip
-      alarm_h[:description] = alarm.xpath('alarm-description').text.strip
-      alarm_h[:type] = alarm.xpath('alarm-type').text.strip
+      alarm_h = {}      
+      _alarm_info_to_h( alarm, alarm_h )
       alarms_a << alarm_h
     end
     return nil if alarms_a.empty?
@@ -132,10 +129,7 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
     alarms_a = []
     got.xpath('alarm-detail').each do |alarm|
       alarm_h = {}
-      alarm_h[:at] = alarm.xpath('alarm-time').text.strip
-      alarm_h[:class] = alarm.xpath('alarm-class').text.strip
-      alarm_h[:description] = alarm.xpath('alarm-description').text.strip
-      alarm_h[:type] = alarm.xpath('alarm-type').text.strip
+      _alarm_info_to_h( alarm, alarm_h )
       alarms_a << alarm_h
     end
     return nil if alarms_a.empty?
@@ -294,7 +288,6 @@ class Junos::Ez::RE::Provider
   end  
   
   def _system_memory_to_h( as_xml, as_h )
-    binding.pry
     
     summary = as_xml.xpath('system-memory-summary-information')[0]
     as_h[:memory_summary] = {
@@ -332,9 +325,6 @@ class Junos::Ez::RE::Provider
     as_xml.xpath('pmap-terse-information/pmap-terse-summary').each do |proc|
       proc_h = {}
       proc_name = proc.xpath('map-name | process-name').text.strip
-      if proc_name.empty?
-        binding.pry
-      end
       as_h[:procs][proc_name] = proc_h
       
       proc_h[:pid] = proc.xpath('pid').text.to_i
@@ -344,5 +334,11 @@ class Junos::Ez::RE::Provider
       proc_h[:resident_pct] = proc.xpath('resident-percent').text.to_f
     end    
   end
-
+  
+  def _alarm_info_to_h( alarm, alarm_h )
+    alarm_h[:at] = alarm.xpath('alarm-time').text.strip
+    alarm_h[:class] = alarm.xpath('alarm-class').text.strip
+    alarm_h[:description] = alarm.xpath('alarm-description').text.strip
+    alarm_h[:type] = alarm.xpath('alarm-type').text.strip
+  end
 end
