@@ -100,8 +100,12 @@ class Junos::Ez::Provider::Parent
   ### ---------------------------------------------------------------  
   
   def is_provider?; @name.nil? end
+
+  ### ---------------------------------------------------------------
+  ### is_new? - indicates if this is a new resource
+  ### ---------------------------------------------------------------  
     
-  def is_new?; @has[:_exist] || false end
+  def is_new?; (@has[:_exist] == false) || false end
       
   ### ---------------------------------------------------------------
   ### [property] resource property reader or 
@@ -282,7 +286,7 @@ class Junos::Ez::Provider::Parent
     par['delete'] = 'delete'
     rsp = write_xml_config!( xml.doc.root )
     @has[:_exist] = false
-    rsp
+    true # rsp ... don't return XML, but let's hear from the community...
   end
 
   ### ---------------------------------------------------------------
@@ -403,6 +407,9 @@ class Junos::Ez::Provider::Parent
     ## returns true/false
     
     xml_read_parser( @has_xml, @has )  
+    
+    ## return the Hash representation
+    self.has
   end
 
   ### ---------------------------------------------------------------
@@ -429,7 +436,12 @@ class Junos::Ez::Provider::Parent
     @has.merge! @should 
     @should.clear
     
-    return rsp
+    # returning 'true' for now.  might need to change this back
+    # to 'rsp' depending on the community feedback.  general approach is to not have to 
+    # deal with XML, unless it's an exception case.  the only time rsp is really
+    # needed is to look at warnings; i.e. not-errors.  errors will generate an exception, yo!
+    
+    return true
   end       
 
   ### ---------------------------------------------------------------
