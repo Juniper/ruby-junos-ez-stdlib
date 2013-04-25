@@ -1,10 +1,10 @@
 =begin
 ---------------------------------------------------------------------
-Fs::Utils is a collection of filesystem utility routines. These do 
+FS::Utils is a collection of filesystem utility routines. These do 
 not map to configuration resources.  However, the provider framework 
 lends itself well in case we need to do something later, yo!
 
-Each of the Fs::Util methods will provide back a rubyized structure
+Each of the FS::Util methods will provide back a rubyized structure
 by default.  The 'options' hash to each method will allow you to
 change the return result in either :text or Junos :xml as well.
 
@@ -12,6 +12,7 @@ The following is a quick list of the filesystem utility methods,
 these following the unix naming counterparts (mostly)
 
   cat - returns the contents of the file (String)
+  checksum - returns the checksum of a file
   cleanup? - returns Hash info of files that would be removed by ...
   cleanup! - performs a system storage cleanup
   cp! - local file copy (use 'scp' if you want to copy remote/local)
@@ -25,9 +26,9 @@ these following the unix naming counterparts (mostly)
 ---------------------------------------------------------------------
 =end
 
-module Junos::Ez::Fs  
+module Junos::Ez::FS  
   def self.Utils( ndev, varsym )            
-    newbie = Junos::Ez::Fs::Provider.new( ndev )      
+    newbie = Junos::Ez::FS::Provider.new( ndev )      
     Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )    
   end          
 end
@@ -39,7 +40,7 @@ end
 ### these are not in alphabetical order, but I should do that, yo!
 ### -----------------------------------------------------------------
 
-class Junos::Ez::Fs::Provider < Junos::Ez::Provider::Parent
+class Junos::Ez::FS::Provider < Junos::Ez::Provider::Parent
   
   ### -------------------------------------------------------------
   ### cwd - change the current working directory.  This method will
@@ -63,6 +64,23 @@ class Junos::Ez::Fs::Provider < Junos::Ez::Provider::Parent
   
   def pwd
     ndev.rpc.command("show cli directory").text.strip
+  end
+  
+  def checksum( method, path )    
+    got = case method
+    when :md5
+      @ndev.rpc.get_checksum_information( :path => path )
+    when :sha256
+      @ndev.rpc.get_sha256_checksum_information( :path => path )
+    when :sha1
+      @ndev.rpc.get_sha1_checksum_information( :path => path )
+    end    
+    
+    f_chk = got.xpath('file-checksum')
+    if (err = f_chk.xpath('rpc-error/error-message')[0])
+      return err.text.strip
+    end    
+    f_chk.xpath('checksum').text.strip    
   end
   
   ### -------------------------------------------------------------    
@@ -298,7 +316,7 @@ end # class Provider
 ### work-in-progress/under-investigation
 ### -----------------------------------------------------------------
 
-class Junos::Ez::Fs::Provider
+class Junos::Ez::FS::Provider
   private
   
   ### private method used to convert 'cleanup' file XML

@@ -11,5 +11,6 @@ require 'junos-ez/ip_ports'             # ip ports (v4)
 # utility libraries, not providers
 # -------------------------------------------------------------------
 
+require 'junos-ez/utils/re'
 require 'junos-ez/utils/fs'
 require 'junos-ez/utils/config'
