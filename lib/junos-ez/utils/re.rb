@@ -33,9 +33,8 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
   def users
   end
   
-  def install_software?( opts = {} )
-    raise ArgumentError "missing :package" unless opts[:package]    
-    got = @ndev.rpc.request_package_validate(:package_name => opts[:package]).parent
+  def validate_software?( package )
+    got = @ndev.rpc.request_package_validate(:package_name => package).parent
     errcode = got.xpath('package-result').text.to_i
     return true if errcode == 0
     

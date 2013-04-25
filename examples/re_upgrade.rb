@@ -43,6 +43,7 @@ def copy_file_to_junos( ndev, file_on_server, file_on_junos )
   end
 end
 
+puts "Copying file to Junos ..."
 copy_file_to_junos( ndev, file_on_server, file_on_junos )
 
 ###
@@ -52,11 +53,29 @@ copy_file_to_junos( ndev, file_on_server, file_on_junos )
 md5_on_s = Digest::MD5.file( file_on_server ).to_s
 md5_on_j = ndev.fs.checksum( :md5, file_on_junos )
 
-if md5_on_s == md5_on j
-  puts "the MD5 checksum matches"
+if md5_on_s != md5_on_j
+  puts "The MD5 checksum values do not match!"
+  ndev.close
+  exit 1
 end
 
-binding.pry
+puts "MD5 checksum matches ... proceeding ..."
+puts "Validating image ... please wait ..."
+
+unless ndev.re.validate_software?( file_on_junos )
+  puts "The softare does not validate!"
+  ndev.close
+  exit 1
+end
+
+puts "Installing image ... place wait ..."
+rc = ndev.re.install_software!( :package => file_on_junos, :no_validate => true )
+if rc != true
+  puts rc
+end
+
+### use pry if you want to 'look around'
+## -> binding.pry
 
 ### if you wanted to reboot the system now, you coud
 ### do the following ...
