@@ -280,12 +280,21 @@ end
 class Junos::Ez::L2ports::Provider::VLAN
   
   def build_list
-    @ndev.rpc.get_ethernet_switching_interface_information(:summary=>true).
-      xpath('interface/interface-name').collect{ |ifn| ifn.text.split('.')[0] }
+    
+    begin
+      got = @ndev.rpc.get_ethernet_switching_interface_information(:summary=>true)
+    rescue => e
+      # in this case, no ethernet-switching is enabled so return empty list
+      return []
+    end
+    
+    got.xpath('interface/interface-name').collect{ |ifn| ifn.text.split('.')[0] }
   end
   
   def build_catalog
     @catalog = {}    
+    return @catalog if list.empty?
+    
     @ndev.rpc.get_configuration{ |xml|
       xml.interfaces {
         list.each do |port_name|

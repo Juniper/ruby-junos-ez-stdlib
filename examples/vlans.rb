@@ -3,7 +3,7 @@ require 'junos-ez/stdlib'
 
 # login information for NETCONF session 
 
-login = { :target => 'ex4', :username => 'jeremy',  :password => 'jeremy1',  }
+login = { :target => ARGV[0], :username => 'jeremy',  :password => 'jeremy1',  }
 
 ## create a NETCONF object to manage the device and open the connection ...
 
@@ -17,10 +17,9 @@ Junos::Ez::Config::Utils( ndev, :cu )
 Junos::Ez::Vlans::Provider( ndev, :vlans )
 Junos::Ez::L2ports::Provider( ndev, :l2_ports )
 
-p = ndev.l2_ports['ge-0/0/4']
-binding.pry
-
 pp ndev.vlans.list
 pp ndev.vlans.catalog
+
+binding.pry
 
 ndev.close
