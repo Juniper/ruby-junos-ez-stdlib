@@ -18,8 +18,8 @@ puts "OK!"
 ## attach our private & utils that we need ...
 
 Junos::Ez::Provider( ndev )
-Junos::Ez::RE::Utils( ndev, :re )
-Junos::Ez::FS::Utils( ndev, :fs )
+Junos::Ez::RE::Utils( ndev, :re )       # routine-engine utils
+Junos::Ez::FS::Utils( ndev, :fs )       # filesystem utils
 
 ## upload the software image to the target device
 ## http://net-ssh.github.io/net-scp/
