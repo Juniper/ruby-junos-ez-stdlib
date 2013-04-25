@@ -8,7 +8,7 @@ class Junos::Ez::L1ports::Provider::SWITCH < Junos::Ez::L1ports::Provider
     xml = Nokogiri::XML::Builder.new {|xml| xml.configuration {
       xml.interfaces {
         xml.interface { 
-          xml.name name
+          xml.name @name
           return xml
         }
       }

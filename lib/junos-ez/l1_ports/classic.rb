@@ -4,11 +4,11 @@ class Junos::Ez::L1ports::Provider::CLASSIC < Junos::Ez::L1ports::Provider
   ### XML top placement
   ### ---------------------------------------------------------------
   
-  def xml_at_top
+  def xml_at_top    
     xml = Nokogiri::XML::Builder.new {|xml| xml.configuration {
       xml.interfaces {
         xml.interface { 
-          xml.name name
+          xml.name @name
           return xml
         }
       }

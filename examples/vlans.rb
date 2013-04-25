@@ -15,6 +15,7 @@ $stdout.puts "OK!"
 Junos::Ez::Provider( ndev )
 Junos::Ez::Config::Utils( ndev, :cu )
 Junos::Ez::Vlans::Provider( ndev, :vlans )
+Junos::Ez::L2ports::Provider( ndev, :l2_ports )
 
 binding.pry
 

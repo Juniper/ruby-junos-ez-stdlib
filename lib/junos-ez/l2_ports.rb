@@ -29,8 +29,8 @@ module Junos::Ez::L2ports
   
 end
 
+require 'junos-ez/l2_ports/vlan'
 =begin
-require 'junos-ez/l2ports/vlan'
 require 'junos-ez/l2ports/vlan_l2ng'
 require 'junos-ez/l2ports/bridge_domain'
 =end
