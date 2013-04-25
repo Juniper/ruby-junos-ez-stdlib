@@ -148,7 +148,19 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
   
   def memory
     got = @ndev.rpc.get_system_memory_information
-    binding.pry
+    ret_h = {}
+    unless (n_re = got.xpath('multi-routing-engine-item')).empty?
+      n_re.each do |this_re|
+        as_xml = this_re.xpath('system-memory-information')[0]
+        re_name = this_re.xpath('re-name').text.strip
+        ret_h[re_name] = {}
+        _system_memory_to_h( as_xml, ret_h[re_name] )
+      end      
+    else
+      ret_h['re0'] = {}
+      _system_memory_to_h( got, ret_h['re0'] )      
+    end
+    ret_h
   end
 
   ### ---------------------------------------------------------------
@@ -280,6 +292,57 @@ class Junos::Ez::RE::Provider
       :by => data.xpath('user').text.strip      
     }    
   end  
-
   
+  def _system_memory_to_h( as_xml, as_h )
+    binding.pry
+    
+    summary = as_xml.xpath('system-memory-summary-information')[0]
+    as_h[:memory_summary] = {
+      :total => {
+        :size => summary.xpath('system-memory-total').text.to_i,
+        :percentage => summary.xpath('system-memory-total-percent').text.to_i
+      },
+      :reserved => {
+        :size => summary.xpath('system-memory-reserved').text.to_i,
+        :percentage => summary.xpath('system-memory-reserved-percent').text.to_i      
+      },
+      :wired => {
+        :size => summary.xpath('system-memory-wired').text.to_i,
+        :percentage => summary.xpath('system-memory-wired-percent').text.to_i            
+      },
+      :active => {
+        :size => summary.xpath('system-memory-active').text.to_i,
+        :percentage => summary.xpath('system-memory-active-percent').text.to_i                  
+      },
+      :inactive => {
+        :size => summary.xpath('system-memory-inactive').text.to_i,
+        :percentage => summary.xpath('system-memory-inactive-percent').text.to_i                  
+      },
+      :cache => {
+        :size => summary.xpath('system-memory-cache').text.to_i,
+        :percentage => summary.xpath('system-memory-cache-percent').text.to_i                  
+      },
+      :free => {
+        :size => summary.xpath('system-memory-free').text.to_i,
+        :percentage => summary.xpath('system-memory-free-percent').text.to_i                  
+      }
+    }
+    
+    as_h[:procs] = {}
+    as_xml.xpath('pmap-terse-information/pmap-terse-summary').each do |proc|
+      proc_h = {}
+      proc_name = proc.xpath('map-name | process-name').text.strip
+      if proc_name.empty?
+        binding.pry
+      end
+      as_h[:procs][proc_name] = proc_h
+      
+      proc_h[:pid] = proc.xpath('pid').text.to_i
+      proc_h[:size] = proc.xpath('size').text.to_i
+      proc_h[:size_pct] = proc.xpath('size-percent').text.to_f
+      proc_h[:resident] = proc.xpath('resident').text.to_i
+      proc_h[:resident_pct] = proc.xpath('resident-percent').text.to_f
+    end    
+  end
+
 end
