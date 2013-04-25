@@ -58,4 +58,9 @@ end
 
 binding.pry
 
+### if you wanted to reboot the system now, you coud
+### do the following ...
+
+## -> ndev.re.reboot!
+
 ndev.close
