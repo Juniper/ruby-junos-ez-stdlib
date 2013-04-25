@@ -6,7 +6,7 @@ require 'junos-ez/stdlib'
 
 # login information for NETCONF session 
 
-login = { :target => 'vsrx', :username => 'jeremy',  :password => 'jeremy1',  }
+login = { :target => ARGV[0], :username => 'jeremy',  :password => 'jeremy1',  }
 
 ## create a NETCONF object to manage the device and open the connection ...
 

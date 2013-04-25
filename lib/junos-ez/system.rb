@@ -79,6 +79,8 @@ module Junos::Ez::SysConfig
   ]
   
   def self.Provider( ndev, varsym )            
+    raise ArgumentError "work-in-progress ..."
+    
     newbie = Junos::Ez::SysConfig::Provider.new( ndev )      
     newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
     Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )    
