@@ -103,6 +103,12 @@ ndev.close
   
 # PROVIDERS
 
+  - L1ports: Physical port management
+  - L2ports: Ethernet port (VLAN) management
+  - Vlans: VLAN resource management
+  - IPports: IP v4 port management
+  - StaticHosts: Static Hosts [system static-host-mapping ...]  
+  - StaticRoutes: Static Routes [routing-options static ...] 
 
 # UTILITIES
 
