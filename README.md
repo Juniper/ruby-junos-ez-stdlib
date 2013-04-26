@@ -46,7 +46,7 @@ The framework is comprised of these basic eloements:
   
 # EXAMPLE USAGE
   
-````ruby
+```ruby
 require 'pp'
 require 'net/netconf/jnpr'
 require 'junos-ez/stdlib'
@@ -99,7 +99,7 @@ pp ndev.l1_ports.list
 pp ndev.l1_ports.catalog
 
 ndev.close
-````
+```
   
 # PROVIDERS
 
