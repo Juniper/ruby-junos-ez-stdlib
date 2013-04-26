@@ -127,12 +127,93 @@ There are a few things to note on this example:
   3.  **You** get to chose the provider instance variable name (in this case `l2_ports`, there are is no 
       hard-coding going on in this framework, yo! (except for the `facts` variable)
 
-## Selecting a Resource from a Provider
+## Listing Providers on a Netconf::SSH Object
 
-## Creating a new Resource
+When you bind providers to a `Netconf::SSH` object, you can always get a list of what exists:
+
+```ruby
+pp ndev.providers
+
+# [:l1_ports, :ip_ports, :l2_ports]
+```
+
+In a future rev of this framework, this may include not only the instance variable, but also the
+provider's Class. But you can always get that information from inspecting the actual instance
+variable, still TBD on this.
 
 ## Resource List
 
+You can obtain a list of managed resources using the `list` or `list!` method.  This method
+will return an Array of names.  Again these names could be simple strings or complex values.
+The `list!` method causes the framework to re-read from the device.  The `list` method uses the cached value.  
+If there is no-cached value, the framework will read from the device, so you don't need to explicity
+use `list!` unless you need to force the cache update.
+
+```ruby
+pp ndev.l2_ports.list
+["fe-0/0/2", "fe-0/0/3", "fe-0/0/6"]
+```
+
 ## Resource Catalog
 
-  
+You can also obtain the provider's catalog, which is a Hash of resources keyed by name and
+each value is the Hash of the associated properties.  The `catalog` and `catalog!` methods
+work the same as described in the list section above.
+
+```ruby
+pp ndev.l2_ports.catalog
+{"fe-0/0/2"=>
+  {:_active=>true,
+   :_exist=>true,
+   :vlan_tagging=>true,
+   :tagged_vlans=>["Red", "Green", "Blue"]},
+ "fe-0/0/3"=>{:_active=>true, :_exist=>true, :vlan_tagging=>false},
+ "fe-0/0/6"=>
+  {:_active=>true,
+   :_exist=>true,
+   :vlan_tagging=>false,
+   :untagged_vlan=>"Blue"}}
+```
+
+## Selecting a Resource from a Provider
+
+You select a resource from a provider using the `[]` operator and providing a name.  The 
+name could be a simple string as shown in the previous example, or could be a complex name
+like an Array.  If you take a look a the SRX library (separate repo), you can see that
+the Junos::Ez::SRX::Policies::Provider name is an Array of [ from_zone_name, to_zone_name ].  
+
+```ruby
+# select L2 switching port "ge-0/0/0" ...
+
+port = ndev.l2_ports['ge-0/0/0']
+```
+
+## Creating a new Resource
+
+There are two ways to create a resource.  One is using the `create` or `create!` methods.
+The `create` method is used to create the new resource but not write it do the device.  The
+`create!` method does both the creation and the write to the device.  The `create` method
+can also be given a block, so you can setup the contents of the new resource.  Here's an
+example that creates some config and then deactivates it.
+
+```ruby
+ndev.l2_ports.create('ge-0/0/20') do |port|
+   port[:description] = "I am port 20"
+   port[:untagged_vlan] = "Blue"
+   port.write!
+   port.deactivate!
+end
+```
+
+The second way is to simply select a resource by name that doesn't exist.  So let's
+say you want to create a new L2port for `ge-0/0/20`.  It would look something like this:
+
+```ruby
+port = ndev.l2_ports['ge-0/0/20']
+
+puts "I don't exist" unless port.exists?
+
+port[:description] = "I am port 20"
+port[:untagged_vlan] = "Storage"
+port.write!
+```
