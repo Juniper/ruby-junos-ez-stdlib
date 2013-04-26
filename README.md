@@ -116,7 +116,17 @@ ndev.close
     the configuration.
   
   - Filesystem:
+  
+    These functions provide you "unix-like" commands that return data in Hash forms rather than
+    as string output you'd normally have to screen-scraps.  These methods include `ls`, `df`, `pwd`,
+    `cwd`, `cleanup`, and `cleanup!`
+
   - Routing-Engine:
+  
+    These functions provide a general collection to information and functioanlity for handling 
+    routing-engine (RE) processes.  These functions `reboot!`, `shutdown!`, `install_software!`, 
+    `ping`.  Information gathering such as memory-usage, current users, and RE status information
+    is also made available through this collection.
 
 # DEPENDENCIES
 
