@@ -91,13 +91,22 @@ pp ndev.l1_ports.catalog
 ndev.close
 ````
   
+# PROVIDERS
+
+
 # UTILITIES
 
   - Config:
+    
+    These functions allow you to load config snippets, do commit checks, look at config diffs, etc.
+    Generally speaking, you would want to use the Providers/Resources framework to manage specific 
+    items in the config.  This utility library is very useful when doing the initial commissioning
+    process, where you do not (cannot) model every aspect of Junos.  These utilities can also be
+    used in conjunction with Providers/Resources, specifically around locking/unlocking and committing
+    the configuration.
+  
   - Filesystem:
   - Routing-Engine:
-
-# PROVIDERS
 
 # DEPENDENCIES
 
