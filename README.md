@@ -5,8 +5,8 @@ Ruby framework to support Junos OS based device management automation.
 This is the "standard library" or "core" set of functionality that should work on most/all Junos OS based devices.  
 
 This framework is build on top of the NETCONF gem which uses XML as the fundamental data-exchange.  So no 
-"automating the CLI" or using SNMP.  The purpose of this framework is to enable automation development 
-without requiring specific Junos XML knowledge or domain experties.
+"automating the CLI" or using SNMP.  The purpose of this framework is to **enable automation development 
+without requiring specific Junos XML knowledge or domain experties**.
 
 Further documentation can be found in the *docs* subdirectory.
 
@@ -42,10 +42,6 @@ The framework is comprised of these basic eloements:
     allow you to easily push config snippets in "curly-brace", "set", or XML formats.  The
     **routing-engine** utilities, for example, will allow you to easily upgrade software, check
     memory usage, and do `ping` operations.
-  
-# UTILITIES
-
-# PROVIDERS
   
 # EXAMPLE USAGE
   
@@ -95,6 +91,10 @@ pp ndev.l1_ports.catalog
 ndev.close
 ````
   
+# UTILITIES
+
+# PROVIDERS
+
 # DEPENDENCIES
 
   * gem netconf
