@@ -65,25 +65,34 @@ print "Connecting to device #{login[:target]} ... "
 ndev.open
 puts "OK!"
 
-## Now bind providers to the device object.
-## the 'Junos::Ez::Provider' must be first before all others
-## this provider will setup the device 'facts'.  The other providers
-## allow you to define the instance variables; so this example
-## is using 'l1_ports' and 'ip_ports', but you could name them
-## what you like, yo!
+## Now bind providers to the device object. The 'Junos::Ez::Provider' must be first.
+## This will retrieve the device 'facts'.  The other providers allow you to define the 
+## provider variables; so this example is using 'l1_ports' and 'ip_ports', but you could name 
+## them what you like, yo!
 
 Junos::Ez::Provider( ndev )
 Junos::Ez::L1ports::Provider( ndev, :l1_ports )
 Junos::Ez::IPports::Provider( ndev, :ip_ports )
 
-## drop into interactive mode to play around ... let's look
-## at what the device has for facts ...
+# -----------------------------------------------------------
+# Facts ...
+# -----------------------------------------------------------
 
-pp ndev.facts.list
-pp ndev.facts.catalog
+# show the device softare version fact
 pp ndev.fact :version
 
-## now look at specific providers like the physical (l1) ports ...
+# show the device serial-number face
+pp ndev.fact :serialnumber
+
+# get a list of all available facts (Array)
+pp ndev.facts.list
+
+# get a hash of all facts and their associated values
+pp ndev.facts.catalog
+
+# -----------------------------------------------------------
+# Layer 1 (physical ports) Resources ...
+# -----------------------------------------------------------
 
 pp ndev.l1_ports.list
 pp ndev.l1_ports.catalog
