@@ -243,6 +243,33 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
     got.xpath('//request-reboot-status').text.strip
   end
   
+  def ping( opts = {} )
+    arg_options = [ 
+      :host,
+      :do_not_fragment, :inet, :inet6, :strict,      
+      :count, :interface, :interval, :mac_address,
+      :routing_instance, :size, :source, :tos, :ttl, :wait
+    ]
+    
+    args = {}
+    opts.each do |k,v|
+      if arg_options.include? k
+        args[k] = v
+      else
+        raise ArgumentError, "unrecognized option #{k}"
+      end
+    end
+    
+    args[:count] ||= 1
+        
+    got = @ndev.rpc.ping( args )
+    return true if got.xpath('ping-success')[0]
+    
+    # if the caller privded a 'failure block' then call that now,
+    # otherwise, just return false
+    
+    return (block_given?) ? yield(got) : false
+  end
 end
 
 ### -----------------------------------------------------------------
