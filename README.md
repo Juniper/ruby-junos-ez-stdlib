@@ -39,7 +39,8 @@ The framework is comprised of these basic eloements:
   - Utilities:
 
     Utilities are simply collections of functions.  The **configuration** utilities, for example, will
-    allow you to easily push config snippets in "curly-brace", "set", or XML formats.  The
+    allow you to easily push config snippets in "curly-brace", "set", or XML formats.  Very useful
+    for unmanaged provider/resources (like initial configuration of the device).  The
     **routing-engine** utilities, for example, will allow you to easily upgrade software, check
     memory usage, and do `ping` operations.
   
