@@ -32,9 +32,13 @@ The framework is comprised of these basic eloements:
   - Providers:
 
     Providers allow you to manage a collection of resource, and most commonly, select a resource.  
-    A provider also allows you to obtain a list of resources (Array of *names*) or a catalog 
-    (Hash of resource properties).  Providers may include resource specific functionality, like using 
-    complex YAML/Hash data for easy import/export and provisioning with Junos
+    The purpose of a provider/resource is to automate the life-cycle of common changes, like adding
+    VLANs, or ports to a VLAN.  A provider also allows you to obtain a `list` of resources 
+    (Array of *names*) or a `catalog` (Hash of resource properties).  Providers may include resource 
+    specific functionality, like using complex YAML/Hash data for easy import/export and provisioning 
+    with Junos.  If you need the ability to simply apply config-snippets that you do not need to model
+    as resources (as you might for initial device commissioning), the Utilities library is where you 
+    want to start.
   
   - Utilities:
 
@@ -124,7 +128,8 @@ ndev.close
   
 # PROVIDERS
 
-Providers manage access to individual resources and their associated properties.  For more
+Providers manage access to individual resources and their associated properties.  Providers/resources exists
+for managing life-cycle common changes that you generally need as part of a larger workflow process.  For more
 documentation on Providers/Resources, see the *docs* directory.
 
   - L1ports: Physical port management
