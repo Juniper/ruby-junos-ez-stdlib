@@ -38,7 +38,7 @@ The framework is comprised of these basic eloements:
   
   - Utilities:
 
-    Utilities are simply collections of functions.  The **filesystem** utilities, for example, will
+    Utilities are simply collections of functions.  The **configuration** utilities, for example, will
     allow you to easily push config snippets in "curly-brace", "set", or XML formats.  The
     **routing-engine** utilities, for example, will allow you to easily upgrade software, check
     memory usage, and do `ping` operations.
@@ -92,6 +92,10 @@ ndev.close
 ````
   
 # UTILITIES
+
+  - Config:
+  - Filesystem:
+  - Routing-Engine:
 
 # PROVIDERS
 
