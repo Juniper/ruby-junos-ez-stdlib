@@ -6,7 +6,7 @@ This is the "standard library" or "core" set of functionality that should work o
 
 This framework is build on top of the NETCONF gem which uses XML as the fundamental data-exchange.  So no 
 "automating the CLI" or using SNMP.  The purpose of this framework is to **enable automation development 
-without requiring specific Junos XML knowledge or domain experties**.
+without requiring specific Junos XML knowledge or domain expertise**.
 
 Further documentation can be found in the *docs* subdirectory.
 
