@@ -17,7 +17,10 @@ The framework is comprised of these basic eloements:
   - Facts: 
 
     A Hash of name/value pairs of information auto-collected.  Fact values can be Hash structures as well
-    so you can have deeply nested fact data.  You can also define your own facts in addition to the "stdlib" facts
+    so you can have deeply nested fact data.  You can also define your own facts in addition to the "stdlib" facts.
+    The facts are used by the framework to create a platform indepent layer of abstraction.  This means
+    that managing a VLAN, for example, is the same regardless of the underlying hardware platofrm (EX, QFX,
+    MX, SRX, ...)
     
   - Resources: 
 
