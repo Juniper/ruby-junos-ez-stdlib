@@ -74,6 +74,7 @@ puts "OK!"
 Junos::Ez::Provider( ndev )
 Junos::Ez::L1ports::Provider( ndev, :l1_ports )
 Junos::Ez::IPports::Provider( ndev, :ip_ports )
+Junoz::Ez::Config::Utils( ndev, :cu )
 
 # -----------------------------------------------------------
 # Facts ...
@@ -98,10 +99,33 @@ pp ndev.facts.catalog
 pp ndev.l1_ports.list
 pp ndev.l1_ports.catalog
 
+# select port 'ge-0/0/0' and display the contents
+# of the properties (like port, speed, description)
+
+ge_0 = ndev.l1_ports['ge-0/0/0']
+pp ge_0.to_h
+
+# change port to disable, this will write the change
+# but not commit it.
+
+ge_0[:admin] = :down
+ge_0.write!
+
+# show the diff of the change to the screen
+
+puts ndev.cu.diff?
+
+# now rollback the change, since we don't want to save it.
+
+ndev.cu.rollback!
+
 ndev.close
 ```
   
 # PROVIDERS
+
+Providers manage access to individual resources and their associated properties.  For more
+documentation on Providers/Resources, see the *docs* directory.
 
   - L1ports: Physical port management
   - L2ports: Ethernet port (VLAN) management
