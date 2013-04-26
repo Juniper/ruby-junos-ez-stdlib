@@ -96,5 +96,39 @@ resource does not exist, for example.
 
 # PROVIDERS
 
+Providers enable access to resources.  So how to you bind a provider to a Netconf::SSH (netconf) object?
+This is done by the provider's `Provider` method.  For example, if you want to use the
+L2port provider, you bind it to the netconf object like so:
+
+```ruby
+
+# creating a netconf object, here login is a hash defining login info
+
+ndev = Netconf::SSH.new( login )
+
+# connect to the target
+
+ndev.open
+
+# bind providers to this object
+
+Junos::Ez::Provider( ndev )
+Junos::Ez::L2ports::Provider( ndev, :l2_ports )
+```
+
+There are a few things to note on this example:
+
+  1.  This framework is built around the NETCONF gem as all of the underlying code access the Junos XML
+      API via the NETCONF protocol
+  2.  You **MUST** use the `Junos::Ez::Provider` before any other providers as this sets up the Netconf::SSH
+      object for future bindings.
+  3.  **You** get to chose the provider instance variable name, there are is no hard-coding going on 
+      in this framework, yo! (except for the `facts` variable)
+
+## Selecting a Resource from a Provider
+
+## Resource List
+
+## Resource Catalog
 
   
