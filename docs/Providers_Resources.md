@@ -120,10 +120,12 @@ There are a few things to note on this example:
 
   1.  This framework is built around the NETCONF gem as all of the underlying code access the Junos XML
       API via the NETCONF protocol
-  2.  You **MUST** use the `Junos::Ez::Provider` before any other providers as this sets up the Netconf::SSH
+
+  2.  You **MUST** use the `Junos::Ez::Provider` before any other providers as this sets up the `Netconf::SSH`
       object for future bindings.
-  3.  **You** get to chose the provider instance variable name, there are is no hard-coding going on 
-      in this framework, yo! (except for the `facts` variable)
+
+  3.  **You** get to chose the provider instance variable name (in this case `l2_ports`, there are is no 
+      hard-coding going on in this framework, yo! (except for the `facts` variable)
 
 ## Selecting a Resource from a Provider
 
