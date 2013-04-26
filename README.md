@@ -6,7 +6,7 @@ This is the "standard library" or "core" set of functionality that should work o
 
 This framework is build on top of the NETCONF gem which uses XML as the fundamental data-exchange.  So no 
 "automating the CLI" or using SNMP.  The purpose of this framework is to **enable automation development 
-without requiring specific Junos XML knowledge or domain experties**.
+without requiring specific Junos XML knowledge**.
 
 Further documentation can be found in the *docs* subdirectory.
 
@@ -32,20 +32,25 @@ The framework is comprised of these basic eloements:
   - Providers:
 
     Providers allow you to manage a collection of resource, and most commonly, select a resource.  
-    A provider also allows you to obtain a list of resources (Array of *names*) or a catalog 
-    (Hash of resource properties).  Providers may include resource specific functionality, like using 
-    complex YAML/Hash data for easy import/export and provisioning with Junos
+    The purpose of a provider/resource is to automate the life-cycle of common changes, like adding
+    VLANs, or ports to a VLAN.  A provider also allows you to obtain a `list` of resources 
+    (Array of *names*) or a `catalog` (Hash of resource properties).  Providers may include resource 
+    specific functionality, like using complex YAML/Hash data for easy import/export and provisioning 
+    with Junos.  If you need the ability to simply apply config-snippets that you do not need to model
+    as resources (as you might for initial device commissioning), the Utilities library is where you 
+    want to start.
   
   - Utilities:
 
-    Utilities are simply collections of functions.  The **filesystem** utilities, for example, will
-    allow you to easily push config snippets in "curly-brace", "set", or XML formats.  The
+    Utilities are simply collections of functions.  The **configuration** utilities, for example, will
+    allow you to easily push config snippets in "curly-brace", "set", or XML formats.  Very useful
+    for unmanaged provider/resources (like initial configuration of the device).  The
     **routing-engine** utilities, for example, will allow you to easily upgrade software, check
     memory usage, and do `ping` operations.
   
 # EXAMPLE USAGE
   
-````ruby
+```ruby
 require 'pp'
 require 'net/netconf/jnpr'
 require 'junos-ez/stdlib'
@@ -65,35 +70,98 @@ print "Connecting to device #{login[:target]} ... "
 ndev.open
 puts "OK!"
 
-## Now bind providers to the device object.
-## the 'Junos::Ez::Provider' must be first before all others
-## this provider will setup the device 'facts'.  The other providers
-## allow you to define the instance variables; so this example
-## is using 'l1_ports' and 'ip_ports', but you could name them
-## what you like, yo!
+## Now bind providers to the device object. The 'Junos::Ez::Provider' must be first.
+## This will retrieve the device 'facts'.  The other providers allow you to define the 
+## provider variables; so this example is using 'l1_ports' and 'ip_ports', but you could name 
+## them what you like, yo!
 
 Junos::Ez::Provider( ndev )
 Junos::Ez::L1ports::Provider( ndev, :l1_ports )
 Junos::Ez::IPports::Provider( ndev, :ip_ports )
+Junoz::Ez::Config::Utils( ndev, :cu )
 
-## drop into interactive mode to play around ... let's look
-## at what the device has for facts ...
+# -----------------------------------------------------------
+# Facts ...
+# -----------------------------------------------------------
 
-pp ndev.facts.list
-pp ndev.facts.catalog
+# show the device softare version fact
 pp ndev.fact :version
 
-## now look at specific providers like the physical (l1) ports ...
+# show the device serial-number face
+pp ndev.fact :serialnumber
+
+# get a list of all available facts (Array)
+pp ndev.facts.list
+
+# get a hash of all facts and their associated values
+pp ndev.facts.catalog
+
+# -----------------------------------------------------------
+# Layer 1 (physical ports) Resources ...
+# -----------------------------------------------------------
 
 pp ndev.l1_ports.list
 pp ndev.l1_ports.catalog
 
+# select port 'ge-0/0/0' and display the contents
+# of the properties (like port, speed, description)
+
+ge_0 = ndev.l1_ports['ge-0/0/0']
+pp ge_0.to_h
+
+# change port to disable, this will write the change
+# but not commit it.
+
+ge_0[:admin] = :down
+ge_0.write!
+
+# show the diff of the change to the screen
+
+puts ndev.cu.diff?
+
+# now rollback the change, since we don't want to save it.
+
+ndev.cu.rollback!
+
 ndev.close
-````
+```
   
+# PROVIDERS
+
+Providers manage access to individual resources and their associated properties.  Providers/resources exists
+for managing life-cycle common changes that you generally need as part of a larger workflow process.  For more
+documentation on Providers/Resources, see the *docs* directory.
+
+  - L1ports: Physical port management
+  - L2ports: Ethernet port (VLAN) management
+  - Vlans: VLAN resource management
+  - IPports: IP v4 port management
+  - StaticHosts: Static Hosts [system static-host-mapping ...]  
+  - StaticRoutes: Static Routes [routing-options static ...] 
+
 # UTILITIES
 
-# PROVIDERS
+  - Config:
+    
+    These functions allow you to load config snippets, do commit checks, look at config diffs, etc.
+    Generally speaking, you would want to use the Providers/Resources framework to manage specific 
+    items in the config.  This utility library is very useful when doing the initial commissioning
+    process, where you do not (cannot) model every aspect of Junos.  These utilities can also be
+    used in conjunction with Providers/Resources, specifically around locking/unlocking and committing
+    the configuration.
+  
+  - Filesystem:
+  
+    These functions provide you "unix-like" commands that return data in Hash forms rather than
+    as string output you'd normally have to screen-scraps.  These methods include `ls`, `df`, `pwd`,
+    `cwd`, `cleanup`, and `cleanup!`
+
+  - Routing-Engine:
+  
+    These functions provide a general collection to information and functioanlity for handling 
+    routing-engine (RE) processes.  These functions `reboot!`, `shutdown!`, `install_software!`, 
+    `ping`.  Information gathering such as memory-usage, current users, and RE status information
+    is also made available through this collection.
 
 # DEPENDENCIES
 
