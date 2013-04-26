@@ -127,6 +127,8 @@ There are a few things to note on this example:
 
 ## Selecting a Resource from a Provider
 
+## Creating a new Resource
+
 ## Resource List
 
 ## Resource Catalog
