@@ -4,9 +4,13 @@ require 'net/netconf/jnpr'
 require 'junos-ez/stdlib'
 require 'junos-ez/srx'
 
-# login information for NETCONF session 
+unless ARGV[0]
+  puts "You must specify a target"
+  exit 1
+end
 
-login = { :target => 'srx210', :username => 'jeremy',  :password => 'jeremy1',  }
+# login information for NETCONF session 
+login = { :target => ARGV[0], :username => 'jeremy',  :password => 'jeremy1',  }
 
 ## create a NETCONF object to manage the device and open the connection ...
 
