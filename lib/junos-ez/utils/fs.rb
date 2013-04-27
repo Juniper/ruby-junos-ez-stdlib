@@ -160,6 +160,10 @@ class Junos::Ez::FS::Provider < Junos::Ez::Provider::Parent
         f_h[:links] = file.xpath('file-links').text.to_i
         f_h[:size] = file.xpath('file-size').text.to_i
         
+        xml_when_item(file.xpath('file-symlink-target')) { |i|
+          f_h[:symlink] = i.text.strip
+        }
+        
         fp = file.xpath('file-permissions')[0]
         f_h[:permissions_text] = fp.attribute('format').value
         f_h[:permissions] = fp.text.to_i
@@ -172,7 +176,8 @@ class Junos::Ez::FS::Provider < Junos::Ez::Provider::Parent
       ls_hash[ dir_name ] = dir_hash        
     end # each directory
     
-    ls_hash      
+    return nil if ls_hash.empty?
+    ls_hash
   end # method: ls
   
   ### -------------------------------------------------------------

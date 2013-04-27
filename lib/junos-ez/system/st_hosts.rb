@@ -1,3 +1,21 @@
+module Junos::Ez::StaticHosts
+  
+  PROPERTIES = [
+    :ip,                    # ipv4 address :String
+    :ip6,                   # ipv6 address :String
+  ]
+  
+  def self.Provider( ndev, varsym )            
+    newbie = Junos::Ez::StaticHosts::Provider.new( ndev )      
+    newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
+    Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )    
+  end  
+  
+  class Provider < Junos::Ez::Provider::Parent
+  end
+  
+end
+
 class Junos::Ez::StaticHosts::Provider
   
   ### ---------------------------------------------------------------
