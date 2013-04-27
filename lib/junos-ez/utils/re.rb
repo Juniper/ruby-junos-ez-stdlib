@@ -163,18 +163,19 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
   
   def users
     got = @ndev.rpc.get_system_users_information
-    users_h = {}
+    users_a = []
     got.xpath('uptime-information/user-table/user-entry').each do |user|
       user_h = {}
-      user_name = user.xpath('user').text.strip
+      users_a << user_h
+      
+      user_h[:name] = user.xpath('user').text.strip
       user_h[:tty] = user.xpath('tty').text.strip
       user_h[:from] = user.xpath('from').text.strip
       user_h[:login_time] = user.xpath('login-time').text.strip
       user_h[:idle_time] = user.xpath('idel-time').text.strip
       user_h[:command] = user.xpath('command').text.strip
-      users_h[user_name] = user_h
     end
-    users_h
+    users_a
   end
 
   ### ---------------------------------------------------------------
