@@ -44,3 +44,7 @@ pp ndev.re.uptime
 
   - `reboot!` - "request system reboot" (!! NO CONFIRM !!)
   - `shutdown!` - "request system power-off" (!! NO CONFIRM !!)
+
+# GORY-DETAILS
+
+More docs coming soon ...
