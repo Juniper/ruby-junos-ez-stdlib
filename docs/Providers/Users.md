@@ -2,6 +2,10 @@
 
 Manages the on-target configured users, located under Junos `[edit system login]` stanza. 
 
+# RESOURCE NAME SELECTOR
+
+The *name* selector is the user-name String.
+
 # PROPERTIES
 
   - `:class` - String, The user priviledge class (like "read-only", or "super-user")
@@ -11,6 +15,19 @@ Manages the on-target configured users, located under Junos `[edit system login]
   - `:ssh_keys` - SSH keys (READ/ONLY)
 
 If you need to modify the user's ssh-keys, see the `load_ssh_key!` method in the next section.
+
+# USAGE
+
+```ruby
+
+# bind :users to provide access to the local login configuration
+
+Junos::Ez::Users::Provider( ndev, :users )
+
+user = ndev.users["jeremy"]
+
+puts "#{user.name} does not exist!" unless user.exists?
+```
 
 # RESOURCE METHODS
 
