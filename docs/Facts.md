@@ -42,8 +42,8 @@ Junos::Ez::Provider( ndev )
 # do a quick dump of all facts
 
 pp ndev.facts.catalog
-
--> {:hardwaremodel=>"SRX210H",
+-> 
+{:hardwaremodel=>"SRX210H",
  :serialnumber=>"AD2909AA0096",
  :hostname=>"srx210",
  :domain=>"",
