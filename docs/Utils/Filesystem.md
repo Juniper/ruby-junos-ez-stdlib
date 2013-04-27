@@ -71,6 +71,8 @@ pp ndev.fs.ls '/var/home/jeremy', :detail => true
   - `mv!` - "file move", i.e. move / rename files
   - `rm!` - "file delete", i.e. deletes files
 
-## ... more docs comming ...
+# GORY DETAILS
+
+... more docs comming ...
 
 
