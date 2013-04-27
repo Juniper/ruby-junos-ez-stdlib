@@ -7,5 +7,11 @@
     
   - 0.0.11: 2013-04-29
   
-    Updated Junos::Ez::RE::Utils.  #memory changed :procs from Hash to Array.  #users changed return from Hash to Array
+    - Updated Junos::Ez::RE::Utils.  
+      - #memory changed :procs from Hash to Array.  
+      - #users changed return from Hash to Array
+    
+  - 0.0.12: 2013-04-29
+    
+    Updated Junos::Ez::FS:Utils#ls to include :symlink information.
     
