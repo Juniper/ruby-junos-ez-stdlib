@@ -2,16 +2,12 @@
 =end
 
 module Junos::Ez::UserAuths
-
-  PROPERTIES = [ 
-    :publickey            # String
-  ]  
   
-  VALID_KEY_TYPES = ['ssh-rsa','ssh-dss']
+  VALID_KEY_TYPES = ['ssh-rsa','ssh-dsa']
 
   def self.Provider( ndev, varsym )            
     newbie = Junos::Ez::UserAuths::Provider.new( ndev )            
-    newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
+    newbie.properties = Junos::Ez::Provider::PROPERTIES
     Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )
   end
   
@@ -49,22 +45,26 @@ class Junos::Ez::UserAuths::Provider
   ### ---------------------------------------------------------------
 
   def xml_get_has_xml( xml )
-    xml.xpath('//user/authentication/*')[0]
+    @should[:_active] = true              # mark it so it will write!    
+    xml.xpath('//user/authentication/*')[0]    
   end
         
   def xml_read_parser( as_xml, as_hash )
-    set_has_status( as_xml, as_hash )     
-    as_hash[:publickey] = as_xml.xpath('name').text.strip
+    set_has_status( as_xml, as_hash )
   end    
   
   ### ---------------------------------------------------------------
   ### XML writers
-  ### ---------------------------------------------------------------  
+  ### ---------------------------------------------------------------
   
-  def xml_change_publickey( xml )
-    true
-  end
-
+  ## !! since we're not actually modifying any properties, we need
+  ## !! to overload the xml_build_change method to simply return
+  ## !! the config at-top (includes ssh name)
+  
+  def xml_build_change( xml_at_here = nil )
+    xml_at_top.doc.root
+  end  
+  
 end
 
 ##### ---------------------------------------------------------------

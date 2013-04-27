@@ -1,6 +1,8 @@
 =begin
 =end
 
+require 'junos-ez/system/userauths'
+
 module Junos::Ez::Users
 
   PROPERTIES = [ 
@@ -160,13 +162,12 @@ class Junos::Ez::Users::Provider
   
   ## ----------------------------------------------------------------
   ## get a Hash that is used as the 'name' for obtaining a resource
-  ## for Junos::Ez::UserAuths
+  ## for Junos::Ez::UserAuths::Provider
   ## ----------------------------------------------------------------
 
-  def ssh_key_name( keytype, index = 0 )
+  def ssh_key( keytype, index = 0 )
     return nil unless @has[:ssh_keys]
-    return nil unless @has[:ssh_keys][keytype]
-    
+    return nil unless @has[:ssh_keys][keytype]    
     ret_h = {:user => @name, :keytype => keytype}
     ret_h[:publickey] = @has[:ssh_keys][keytype][index]
     ret_h
@@ -185,22 +186,29 @@ class Junos::Ez::Users::Provider
   end
   
   ## ----------------------------------------------------------------
-  ## load an SSH public key file that is stored on the local server
-  ## into the user account.  Return the resulting key object.
+  ## load an SSH public key  & return the resulting key object.
+  ## You can provide the publickey either as :publickey or
+  ## contents will be read from :filename
   ## ----------------------------------------------------------------
 
-  def load_ssh_key!( file )
-    publickey = File.read( file ).strip
+  def load_ssh_key!( opts = {} )
+    publickey = opts[:publickey] || File.read( opts[:filename] ).strip
+    raise ArgumentError, "no public-key specified" unless publickey
+    
+    # nab the provider for handling ssh-keys, since we'll use that
+    # for key resource management
+    
     @auth_provd ||= get_userauth_provd    
     raise StandardError, "No Junos::Ez::UserAuths::Provider" unless @auth_provd
+    
+    # extract the key-type from the public key.
     keytype = publickey[0..6]
     keytype = 'ssh-dsa' if keytype == 'ssh-dss'
-    raise ArgumentError, "Unknown ssh key-type #{keytype}" unless ['ssh-rsa','ssh-dsa'].include? keytype
+    raise ArgumentError, "Unknown ssh key-type #{keytype}" unless Junos::Ez::UserAuths::VALID_KEY_TYPES.include? keytype
     
     # ok, we've got everything we need to add the key, so here we go.
     key_name = {:user => @name, :keytype => keytype, :publickey => publickey }
     key = @auth_provd[ key_name ]
-    key[:publickey] = publickey
     key.write!
     
     # return the key in case the caller wants it

@@ -21,10 +21,11 @@ $stdout.puts "OK!"
 
 Junos::Ez::Provider( ndev )
 Junos::Ez::Users::Provider( ndev, :users )
-Junos::Ez::UserAuths::Provider( ndev, :auths )
+Junos::Ez::UserAuths::Provider( ndev, :sshkeys )
 Junos::Ez::Config::Utils( ndev, :cu )
 
 user = ndev.users["jeremy"]
+user.load_ssh_key! :filename=>'/home/jschulman/.ssh/keys/key1.pub'
 
 binding.pry
 
