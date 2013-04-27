@@ -23,7 +23,7 @@ pp ndev.re.uptime
     {:at=>"2013-04-27 19:48:42 UTC", :ago=>"02:39:42", :by=>"jeremy"}}}
 ```
 
-# UTILITY METHODS
+# METHODS
 
 ## Information
 
