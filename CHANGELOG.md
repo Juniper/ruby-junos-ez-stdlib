@@ -14,6 +14,6 @@
   0.0.12: 2013-04-29 (In-Progress)
   
     Updated Junos::Ez::FS:Utils#ls to include :symlink information
-    Adding Junos::Ez::Users::Provider
-    Adding Junos::Ez::UserSSHKeys::Provider
+    Adding Junos::Ez::Users::Provider for login management
+    Adding Junos::Ez::UserAuths::Provider for SSH-key management
     
