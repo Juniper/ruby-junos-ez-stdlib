@@ -27,14 +27,14 @@ end
 # any L2port resource
 
 pp port.properties
-
--> [:_exist, :_active, :description, :untagged_vlan, :tagged_vlans, :vlan_tagging]
+-> 
+[:_exist, :_active, :description, :untagged_vlan, :tagged_vlans, :vlan_tagging]
 
 # now look at the specific values for this resource by pp the assocaite hash
 
 pp port.to_h
-
--> {"ge-0/0/0"=>
+-> 
+{"ge-0/0/0"=>
   {:_active=>true,
    :_exist=>true,
    :vlan_tagging=>true,
@@ -70,8 +70,8 @@ You can obtain the entire `@has` property hash has using the `to_h` method.  Thi
 port = ndev.l1_ports["ge-0/0/1"]
 
 pp port.to_h
-
--> {"ge-0/0/1"=>
+-> 
+{"ge-0/0/1"=>
   {:_active=>true,
    :_exist=>true,
    :admin=>:up,
@@ -85,11 +85,9 @@ You can also obtain just a specific property using the `[]` operator:
 
 ```ruby
 pp port[:admin]
-
--> :up
+-> 
+:up
 ```
-
-
 
 ## Modifying Properties
 
@@ -108,8 +106,8 @@ You can also obtain the `@should` property hash using the `to_h` method and prov
 port[:admin] = :down
 
 pp port.to_h( :write )
-
--> {"ge-0/0/1"=>{:admin=>:down}}
+-> 
+{"ge-0/0/1"=>{:admin=>:down}}
 ```
 
 _NOTE: The `@should` property hash only contains the changes that will be applied, not every property value._
@@ -216,8 +214,8 @@ When you bind providers to a netconf object, you can always get a list of what e
 
 ```ruby
 pp ndev.providers
-
--> [:l1_ports, :ip_ports, :l2_ports]
+-> 
+[:l1_ports, :ip_ports, :l2_ports]
 ```
 
 ## Resource List
@@ -230,8 +228,8 @@ use `list!` unless you need to force the cache update.
 
 ```ruby
 pp ndev.l2_ports.list
-
--> ["fe-0/0/2", "fe-0/0/3", "fe-0/0/6"]
+-> 
+["fe-0/0/2", "fe-0/0/3", "fe-0/0/6"]
 ```
 
 ## Resource Catalog
@@ -242,8 +240,8 @@ work the same as described in the list section above.
 
 ```ruby
 pp ndev.l2_ports.catalog
-
--> {"fe-0/0/2"=>
+-> 
+{"fe-0/0/2"=>
   {:_active=>true,
    :_exist=>true,
    :vlan_tagging=>true,
