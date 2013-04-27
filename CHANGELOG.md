@@ -11,7 +11,9 @@
       #memory changed :procs from Hash to Array  
       #users changed return from Hash to Array
     
-  0.0.12: 2013-04-29    
+  0.0.12: 2013-04-29 (In-Progress)
   
-    Updated Junos::Ez::FS:Utils#ls to include :symlink information.
+    Updated Junos::Ez::FS:Utils#ls to include :symlink information
+    Adding Junos::Ez::Users::Provider
+    Adding Junos::Ez::UserSSHKeys::Provider
     
