@@ -21,7 +21,10 @@ $stdout.puts "OK!"
 
 Junos::Ez::Provider( ndev )
 Junos::Ez::Users::Provider( ndev, :users )
+Junos::Ez::UserAuths::Provider( ndev, :auths )
 Junos::Ez::Config::Utils( ndev, :cu )
+
+user = ndev.users["jeremy"]
 
 binding.pry
 

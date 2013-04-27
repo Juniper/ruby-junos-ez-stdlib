@@ -8,6 +8,7 @@ module Junos::Ez::Users
     :class,                   # User Class, String
     :fullname,                # Full Name, String
     :password,                # Encrypted password  
+    :ssh_keys,                # READ-ONLY, Hash of SSH public keys
   ]  
 
   def self.Provider( ndev, varsym )            
@@ -59,7 +60,17 @@ class Junos::Ez::Users::Provider
     
     xml_when_item(as_xml.xpath('authentication/encrypted-password')) {|i|
       as_hash[:password] = i.text
-    }    
+    }
+  
+    # READ-ONLY capture the keys
+    unless (keys = as_xml.xpath('authentication/ssh-rsa')).empty?
+      @has[:ssh_keys] ||= {}
+      @has[:ssh_keys]['ssh-rsa'] = keys.collect{|key| key.text.strip}
+    end
+    unless (keys = as_xml.xpath('authentication/ssh-dsa')).empty?
+      @has[:ssh_keys] ||= {}      
+      @has[:ssh_keys]['ssh-dsa'] = keys.collect{|key| key.text.strip}
+    end
   end  
 
   ### ---------------------------------------------------------------    
@@ -129,7 +140,7 @@ class Junos::Ez::Users::Provider
 end
 
 ##### ---------------------------------------------------------------
-##### Provider Resource Methods
+##### Resource Methods
 ##### ---------------------------------------------------------------
 
 class Junos::Ez::Users::Provider
@@ -145,6 +156,55 @@ class Junos::Ez::Users::Provider
     }
     @ndev.rpc.load_configuration( xml )
     return true
+  end
+  
+  ## ----------------------------------------------------------------
+  ## get a Hash that is used as the 'name' for obtaining a resource
+  ## for Junos::Ez::UserAuths
+  ## ----------------------------------------------------------------
+
+  def ssh_key_name( keytype, index = 0 )
+    return nil unless @has[:ssh_keys]
+    return nil unless @has[:ssh_keys][keytype]
+    
+    ret_h = {:user => @name, :keytype => keytype}
+    ret_h[:publickey] = @has[:ssh_keys][keytype][index]
+    ret_h
+  end
+  
+  ##
+  ## @@ need to move this code into the main provider
+  ## @@ as a utility  ...
+  ##
+  
+  def get_userauth_provd
+    @ndev.providers.each do |p|
+      obj = @ndev.send(p)
+      return obj if obj.class == Junos::Ez::UserAuths::Provider
+    end
+  end
+  
+  ## ----------------------------------------------------------------
+  ## load an SSH public key file that is stored on the local server
+  ## into the user account.  Return the resulting key object.
+  ## ----------------------------------------------------------------
+
+  def load_ssh_key!( file )
+    publickey = File.read( file ).strip
+    @auth_provd ||= get_userauth_provd    
+    raise StandardError, "No Junos::Ez::UserAuths::Provider" unless @auth_provd
+    keytype = publickey[0..6]
+    keytype = 'ssh-dsa' if keytype == 'ssh-dss'
+    raise ArgumentError, "Unknown ssh key-type #{keytype}" unless ['ssh-rsa','ssh-dsa'].include? keytype
+    
+    # ok, we've got everything we need to add the key, so here we go.
+    key_name = {:user => @name, :keytype => keytype, :publickey => publickey }
+    key = @auth_provd[ key_name ]
+    key[:publickey] = publickey
+    key.write!
+    
+    # return the key in case the caller wants it
+    key
   end
   
 end

@@ -3,6 +3,7 @@ require "junos-ez/provider"
 require 'junos-ez/system/st_hosts'
 require 'junos-ez/system/st_routes'
 require 'junos-ez/system/users'
+require 'junos-ez/system/userauths'
 
 ### -----------------------------------------------------------------
 ### the 'syscfg' is a work in progress, do not use ...
