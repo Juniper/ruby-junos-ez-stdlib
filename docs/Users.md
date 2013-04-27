@@ -36,7 +36,7 @@ user.to_h
    :password=>"XRykM8Grm0R0A"}}
 
 # set the password with plaintext value, then re-read the config from the device
-user.password = 
+user.password = "n3wpassw0rd"
 user.read!
 
 user.to_h
