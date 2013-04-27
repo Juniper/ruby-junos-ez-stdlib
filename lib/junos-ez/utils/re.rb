@@ -348,18 +348,22 @@ class Junos::Ez::RE::Provider
       }
     }
     
-    as_h[:procs] = {}
+    # create an Array of process information.  The process-names are 
+    # not guaranteed to be unique, so do this as an Array vs. Hash
+    
+    as_h[:procs] = []
     as_xml.xpath('pmap-terse-information/pmap-terse-summary').each do |proc|
       proc_h = {}
-      proc_name = proc.xpath('map-name | process-name').text.strip
-      as_h[:procs][proc_name] = proc_h
+      as_h[:procs] << proc_h
       
+      proc_h[:name] = proc.xpath('map-name | process-name').text.strip 
       proc_h[:pid] = proc.xpath('pid').text.to_i
       proc_h[:size] = proc.xpath('size').text.to_i
       proc_h[:size_pct] = proc.xpath('size-percent').text.to_f
       proc_h[:resident] = proc.xpath('resident').text.to_i
       proc_h[:resident_pct] = proc.xpath('resident-percent').text.to_f
-    end    
+    end 
+    
   end
   
   def _alarm_info_to_h( alarm, alarm_h )
