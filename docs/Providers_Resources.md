@@ -3,8 +3,12 @@
 Let's start with Resources before we get to Providers.  Resources are generally where all "the action" happens. 
 The primary purpose of a resource is to allow you to make configuration changes without having to know
 the underlying Junos XML configuration.  When you have a resource, you can always get a list of the properties 
-available to you.  Here's an example of looking at a an ethernet switching port using the L2ports provider.
-This is just a snippet of code, so for now, know that `l2_ports` is the provider assigned to the `ndev` object.
+available to you.  
+
+Here's an example of looking at a an ethernet switching port using the L2ports provider.
+This is just a snippet of code, and they use the (->) notation to indicate standard output results.
+
+For the following example assume that `l2_ports` is the provider assigned to the `ndev` object.  The `ndev` object is of class `Netconf::SSH` (or has this as a parent class)
 
 ```ruby
 
@@ -24,18 +28,18 @@ end
 
 pp port.properties
 
-## [:_exist, :_active, :description, :untagged_vlan, :tagged_vlans, :vlan_tagging]
+-> [:_exist, :_active, :description, :untagged_vlan, :tagged_vlans, :vlan_tagging]
 
 # now look at the specific values for this resource by pp the assocaite hash
 
 pp port.to_h
 
-# {"ge-0/0/0"=>
-#   {:_active=>true,
-#    :_exist=>true,
-#    :vlan_tagging=>true,
-#    :tagged_vlans=>["Red", "Green", "Blue"],
-#    :untagged_vlan=>nil}}
+-> {"ge-0/0/0"=>
+  {:_active=>true,
+   :_exist=>true,
+   :vlan_tagging=>true,
+   :tagged_vlans=>["Red", "Green", "Blue"],
+   :untagged_vlan=>nil}}
 ```
 
 ## Resource Methods
@@ -58,9 +62,38 @@ the `@has` variable.  When modifying properties, the changed values are stored i
 write-to hash `@should` variable.  These instance variable are made accessible, but you
 should not access them directly.  See next section for changing the property values.
 
+## Reading Properties
+
+You can obtain the entire `@has` property hash has using the `to_h` method.  This example selects the "ge-0/0/0" physical port and dumps the property hash:
+
+```ruby
+port = ndev.l1_ports["ge-0/0/1"]
+
+pp port.to_h
+
+-> {"ge-0/0/1"=>
+  {:_active=>true,
+   :_exist=>true,
+   :admin=>:up,
+   :duplex=>:auto,
+   :speed=>:auto,
+   :unit_count=>26}}
+
+```
+
+You can also obtain just a specific property using the `[]` operator:
+
+```ruby
+pp port[:admin]
+
+-> :up
+```
+
+
+
 ## Modifying Properties
 
-Modifying the resource property is simply making use of the []= operator.  For example,
+Modifying the resource property is simply making use of the `[]=` operator.  For example,
 setting the `:untagged_vlan` to "Black" and writing that back to the device would
 look something like this:
 
@@ -68,6 +101,18 @@ look something like this:
 port[:untagged_vlan] = "Black"
 port.write!
 ```
+
+You can also obtain the `@should` property hash using the `to_h` method and providing the optional `:write` argument:
+
+```ruby
+port[:admin] = :down
+
+pp port.to_h( :write )
+
+-> {"ge-0/0/1"=>{:admin=>:down}}
+```
+
+_NOTE: The `@should` property hash only contains the changes that will be applied, not every property value._
 
 When you execute the `write!` method, the framework will examine the contents of
 the `@should` hash to determine what changes need to be made.  On success the
@@ -96,9 +141,12 @@ resource does not exist, for example.
 
 # PROVIDERS
 
-Providers enable access to resources.  So how to you bind a provider to a Netconf::SSH (netconf) object?
-This is done by the provider's `Provider` method.  For example, if you want to use the
-L2port provider, you bind it to the netconf object like so:
+Providers enable access to, and information about resources.  So how to you bind a provider to a 
+Netconf::SSH (netconf) object? This is done by the provider's `Provider` method.  There are
+two techniques for *bindng* a provider to a netconf object.  
+
+One method is to bind the provider after the call to `Netconf::SSH#open`.  For example, if you want 
+to use the L2port provider, you bind it to the netconf object like so:
 
 ```ruby
 
@@ -116,30 +164,61 @@ Junos::Ez::Provider( ndev )
 Junos::Ez::L2ports::Provider( ndev, :l2_ports )
 ```
 
-There are a few things to note on this example:
+But let's say that you want to create multiple `Netconf::SSH` objects and you don't want to
+programmatically do the binding each time?  You can define a new class inheriting `Netconf::SSH` and
+overload the `open` method, for example:
+
+```ruby
+class MyJunosSwitch < Netconf::SSH
+   def open
+      # must be first to open the connection to the target
+      super                      
+      
+      # bind init provider, this will retrieve facts
+      Junos::Ez::Provider( self )  
+      
+      # bind other providers you want this object to have
+      Junos::Ez::L2ports::Provider( self, :l2_ports )
+      Junos::Ez::Vlans::Provider( self, :vlans )
+   end
+end
+
+# now open a few devices ...
+
+dev1 = MyJunosSwitch.new( login )
+dev2 = MyJunosSwitch.new( login )
+
+dev1.open
+dev2.open
+
+pp dev1.vlans.list
+pp dev2.vlans.list
+
+dev1.close
+dev2.close
+```
+
+There are a few things to note on these example:
 
   1.  This framework is built around the NETCONF gem as all of the underlying code access the Junos XML
       API via the NETCONF protocol
 
   2.  You **MUST** use the `Junos::Ez::Provider` before any other providers as this sets up the `Netconf::SSH`
-      object for future bindings.
+      object for future bindings and reads the `facts` from the target. These facts can then be
+      used by other provider libraries to abstract target specific differences
 
   3.  **You** get to chose the provider instance variable name (in this case `l2_ports`, there are is no 
       hard-coding going on in this framework, yo! (except for the `facts` variable)
 
-## Listing Providers on a Netconf::SSH Object
+## Listing Providers
 
-When you bind providers to a `Netconf::SSH` object, you can always get a list of what exists:
+When you bind providers to a netconf object, you can always get a list of what exists:
 
 ```ruby
 pp ndev.providers
 
-# [:l1_ports, :ip_ports, :l2_ports]
+-> [:l1_ports, :ip_ports, :l2_ports]
 ```
-
-In a future rev of this framework, this may include not only the instance variable, but also the
-provider's Class. But you can always get that information from inspecting the actual instance
-variable, still TBD on this.
 
 ## Resource List
 
@@ -151,7 +230,8 @@ use `list!` unless you need to force the cache update.
 
 ```ruby
 pp ndev.l2_ports.list
-["fe-0/0/2", "fe-0/0/3", "fe-0/0/6"]
+
+-> ["fe-0/0/2", "fe-0/0/3", "fe-0/0/6"]
 ```
 
 ## Resource Catalog
@@ -162,7 +242,8 @@ work the same as described in the list section above.
 
 ```ruby
 pp ndev.l2_ports.catalog
-{"fe-0/0/2"=>
+
+-> {"fe-0/0/2"=>
   {:_active=>true,
    :_exist=>true,
    :vlan_tagging=>true,
@@ -177,16 +258,18 @@ pp ndev.l2_ports.catalog
 
 ## Selecting a Resource from a Provider
 
-You select a resource from a provider using the `[]` operator and providing a name.  The 
+You select a resource from a provider using the `[]` operator and identifying the resource by *name*.  The 
 name could be a simple string as shown in the previous example, or could be a complex name
 like an Array.  If you take a look a the SRX library (separate repo), you can see that
-the Junos::Ez::SRX::Policies::Provider name is an Array of [ from_zone_name, to_zone_name ].  
+the `Junos::Ez::SRX::Policies::Provider` name is an Array of [ from_zone_name, to_zone_name ].  
+
+Here is an example of selecting an ethernet switching port, "ge-0/0/0":
 
 ```ruby
-# select L2 switching port "ge-0/0/0" ...
-
 port = ndev.l2_ports['ge-0/0/0']
 ```
+
+When a resource is selected, the framework will automatically `read!` retrieve the configuration.
 
 ## Creating a new Resource
 
@@ -204,6 +287,8 @@ ndev.l2_ports.create('ge-0/0/20') do |port|
    port.deactivate!
 end
 ```
+The above example will also return the new resource object.   So you could use the Ruby
+block as a default initializer, and then continue to make changes to the resource.  
 
 The second way is to simply select a resource by name that doesn't exist.  So let's
 say you want to create a new L2port for `ge-0/0/20`.  It would look something like this:
