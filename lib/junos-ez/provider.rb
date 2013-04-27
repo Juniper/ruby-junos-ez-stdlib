@@ -9,6 +9,8 @@ module Junos; end
   
 module Junos::Ez
   
+  VERSION = "0.0.10"
+  
   ### ---------------------------------------------------------------
   ### rpc_errors - decodes the XML into an array of error/Hash
   ### @@@ TBD: this should be moved into the 'netconf' gem
