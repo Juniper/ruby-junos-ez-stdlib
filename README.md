@@ -166,7 +166,7 @@ documentation on Providers/Resources, see the *docs* directory.
 # DEPENDENCIES
 
   * gem netconf
-  * Junos OS based products, see TESTED-DEVICES.md
+  * Junos OS based products
   
 # INSTALLATION 
 
