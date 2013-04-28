@@ -179,3 +179,13 @@ documentation on Providers/Resources, see the *docs* directory.
 # LICENSES
 
    BSD-2, See LICENSE file
+
+# SUPPORT
+
+Support for this software is made available exclusively through Github repo issue tracking.  You are also welcome to contact the CONTRIBUTORS directly via their provided contact information.  
+
+If you find a bug, please open an issue against this repo.
+
+If you have suggestions or ideas, please write them up and add them to the "SUGGESTION-BOX" folder of this repo (via pull request).  This way we can share the ideas with the community and crowdsource for feature delivery.
+
+Thank you!
