@@ -2,21 +2,9 @@
 
 Manages the on-target configured users, located under Junos `[edit system login]` stanza. 
 
-# RESOURCE NAME SELECTOR
-
-The *name* selector is the user-name String.
-
-# PROPERTIES
-
-  - `:class` - String, The user priviledge class (like "read-only", or "super-user")
-  - `:uid` - Number, User ID (unix).  If not provided, Junos will auto-create
-  - `:fullname` - String, User Full Name
-  - `:password` - Junos encrypted password
-  - `:ssh_keys` - SSH keys (READ/ONLY)
-
-If you need to modify the user's ssh-keys, see the `load_ssh_key!` method in the next section.
-
 # USAGE
+
+The provider *name* selector is the user-name String.
 
 ```ruby
 
@@ -28,6 +16,18 @@ user = ndev.users["jeremy"]
 
 puts "#{user.name} does not exist!" unless user.exists?
 ```
+
+# PROPERTIES
+
+  - `:class` - String, The user priviledge class (like "read-only", or "super-user")
+  - `:uid` - Number, User ID (unix).  If not provided, Junos will auto-create
+  - `:fullname` - String, User Full Name
+  - `:password` - Junos encrypted password
+  - `:ssh_keys` - SSH keys (READ/ONLY)
+
+If you need to modify the user's ssh-keys, see the `load_ssh_key!` method in the next section.
+
+
 
 # RESOURCE METHODS
 
