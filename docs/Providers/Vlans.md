@@ -27,3 +27,17 @@ puts "VLAN: #{vlan.name} does not exists!" unless vlan.exists?
 ## interfaces
 
 This method will return a Hash structure of interfaces bound to this VLAN.
+```ruby
+ndev.vlans["Green"].interfaces
+-> 
+{"ge-0/0/22"=>{:mode=>:trunk},
+ "ge-0/0/0"=>{:mode=>:trunk, :native=>true},
+ "ge-0/0/1"=>{:mode=>:trunk, :native=>true},
+ "ge-0/0/2"=>{:mode=>:trunk, :native=>true},
+ "ge-0/0/3"=>{:mode=>:trunk, :native=>true},
+ "ge-0/0/5"=>{:mode=>:trunk, :native=>true},
+ "ge-0/0/6"=>{:mode=>:trunk, :native=>true},
+ "ge-0/0/7"=>{:mode=>:trunk, :native=>true},
+ "ge-0/0/20"=>{:mode=>:access},
+ "ge-0/0/21"=>{:mode=>:access}}
+```
