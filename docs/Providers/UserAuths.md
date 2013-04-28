@@ -2,15 +2,13 @@
 
 Manages user account ssh-keys, RSA or DSA.  
 
-# RESOURCE NAME SELECTOR
+# USAGE
 
-The *name* for accessing the provider is a Hash comprised of the following key/value pairs:
+The provider *name* for accessing the provider is a Hash comprised of the following key/value pairs:
 
   - `:user` - String, user-name
   - `:keytype` - String, one of ['ssh-rsa', 'ssh-dsa']
   - `:publickey` - String, the public key value
-
-# USAGE
 
 ```ruby
 
