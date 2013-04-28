@@ -38,6 +38,6 @@ No additional methods at this time ...
   
 Comming soon:
 
-  - EX platforms release in 2013
+  - EX platforms released in 2013
   - MX5, MX10, MX40, MX80, MX240, MX480, MX960
 
