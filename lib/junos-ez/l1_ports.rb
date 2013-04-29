@@ -10,6 +10,8 @@ module Junos::Ez::L1ports
     :duplex,              # [ :auto, :half, :full ]
     :unit_count,          # number of configured units
   ]  
+  
+  IFS_NAME_FILTER = '[fgx]e-*'
 
   def self.Provider( ndev, varsym )            
     newbie = case ndev.fact( :ifd_style )
@@ -47,7 +49,7 @@ class Junos::Ez::L1ports::Provider < Junos::Ez::Provider::Parent
     @ndev.rpc.get_interface_information({
         :media => true,
         :terse => true,
-        :interface_name => '[fgx]e-*'
+        :interface_name => Junos::Ez::L1ports::IFS_NAME_FILTER
     }).xpath('physical-interface/name').collect do |ifs|
       ifs.text.strip
     end
@@ -56,22 +58,59 @@ class Junos::Ez::L1ports::Provider < Junos::Ez::Provider::Parent
   def build_catalog
     @catalog = {}
     
-    @ndev.rpc.get_configuration{|xml|
-      xml.interfaces {
-        list!.each do |ifs|
+    # we could have a large list of interfaces, so
+    # we need to break this up into individual "gets"
+    
+    list!.each do |ifs_name|
+      @ndev.rpc.get_configuration{ |xml|
+        xml.interfaces {
           xml.interface {
-            xml.name ifs
+            xml.name ifs_name
             xml_read_filter( xml )
           }
-        end
-      }
-    }.xpath('interfaces/interface').each do |ifs_xml|
-      ifs_name = ifs_xml.xpath('name').text
-      @catalog[ifs_name] = {}
-      xml_read_parser( ifs_xml, @catalog[ifs_name] )
+        }
+      }.xpath('interfaces/interface').each do |ifs_xml|
+        @catalog[ifs_name] = {}
+        xml_read_parser( ifs_xml, @catalog[ifs_name] )
+      end
     end
     
     return @catalog
+  end
+  
+  ### ---------------------------------------------------------------
+  ###  Resource methods
+  ### ---------------------------------------------------------------  
+  
+  ## returns a Hash of status information, from "show interface ..."
+  ## basic information, not absolutely everything.  but if a 
+  ## block is given, then pass the XML to the block.
+  
+  def status
+    
+    got = @ndev.rpc.get_interface_information(:interface_name => @name, :media => true )
+    phy = got.xpath('physical-interface')[0]
+    return nil unless phy
+    
+    ret_h = {}
+    ret_h[:macaddr] = phy.xpath('current-physical-address').text.strip    
+    ret_h[:oper_status] = phy.xpath('oper-status').text.strip
+    ret_h[:admin_status] = phy.xpath('admin-status').text.strip
+    ret_h[:mtu] = phy.xpath('mtu').text.to_i
+    ret_h[:speed] = {:admin => phy.xpath('speed').text.strip }
+    ret_h[:duplex] = {:admin => phy.xpath('duplex').text.strip }
+    ret_h[:autoneg] = phy.xpath('if-auto-negotiation').text.strip 
+    
+    if ret_h[:autoneg] == "enabled"
+      autoneg = phy.xpath('ethernet-autonegotiation')[0]
+      ret_h[:speed][:oper] = autoneg.xpath('link-partner-speed').text.strip
+      ret_h[:duplex][:oper] = autoneg.xpath('link-partner-duplexity').text.strip
+    end
+    
+    # if a block is given, then it means the caller wants to process the XML data.
+    yield( phy ) if block_given?
+    
+    ret_h
   end
   
 end  

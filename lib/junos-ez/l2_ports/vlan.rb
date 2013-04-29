@@ -190,6 +190,8 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
     del = v_has - v_should
     add = v_should - v_has 
     
+    binding.pry
+    
     if add or del
       xml.vlan {
         del.each { |v| xml.members v, Netconf::JunosConfig::DELETE }
@@ -340,24 +342,23 @@ class Junos::Ez::L2ports::Provider::VLAN
   
   def build_catalog
     @catalog = {}    
-    return @catalog if list.empty?
+    return @catalog if list!.empty?
     
-    @ndev.rpc.get_configuration{ |xml|
-      xml.interfaces {
-        list.each do |port_name|
-          Nokogiri::XML::Builder.with( xml.parent ) do |x1|
-            x1.interface { x1.name port_name
-              x1.unit { x1.name '0' }
-            }
-          end        
-        end
-      }      
-    }.xpath('interfaces/interface').each do |ifs|
-      ifs_name = ifs.xpath('name').text
-      unit = ifs.xpath('unit')[0]
-      @catalog[ifs_name] = {}
-      xml_read_parser( unit, @catalog[ifs_name] )
-    end
+    list.each do |ifs_name|
+      @ndev.rpc.get_configuration{ |xml|
+        xml.interfaces {
+          xml.interface {
+            xml.name ifs_name
+            xml.unit { xml.name '0' }
+          }
+        }
+      }.xpath('interfaces/interface').each do |ifs_xml|
+        @catalog[ifs_name] = {}
+        unit = ifs_xml.xpath('unit')[0]        
+        xml_read_parser( unit, @catalog[ifs_name] )
+      end
+    end    
+    
     @catalog
   end
   
