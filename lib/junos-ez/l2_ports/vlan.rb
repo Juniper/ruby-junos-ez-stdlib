@@ -93,11 +93,14 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
   def xml_on_delete( xml )
     return unless @under_vlans
     return if @under_vlans.empty?
-    
+    _xml_del_under_vlans( xml, @under_vlans )
+  end   
+  
+  def _xml_del_under_vlans( xml, vlans )
     Nokogiri::XML::Builder.with( xml.doc.root ) do |dot|
       dot.vlans {
         x_vlans = dot
-        @under_vlans.each do |vlan|
+        vlans.each do |vlan|
           Nokogiri::XML::Builder.with( x_vlans.parent ) do |xv|
             xv.vlan {
               xv.name vlan 
@@ -106,8 +109,8 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
           end
         end      
       }
-    end
-  end   
+    end    
+  end
   
   ### ---------------------------------------------------------------
   ### XML property writers
@@ -174,23 +177,27 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
   def upd_tagged_vlans( xml )        
     return false unless should_trunk?
     
-    v_should = if @should[:tagged_vlans]
-      @should[:tagged_vlans].to_set
-    else
-      Set.new
-    end
-        
+    @should[:tagged_vlans] = @should[:tagged_vlans].to_set if @should[:tagged_vlans].kind_of? Array
+
+    v_should = @should[:tagged_vlans] || Set.new
+  
     if v_should.empty?
       xml.vlan Netconf::JunosConfig::DELETE
       return true
-   end
+    end
     
+    @has[:tagged_vlans] = @has[:tagged_vlans].to_set if @has[:tagged_vlans].kind_of? Array    
     v_has = @has[:tagged_vlans] || Set.new    
     
     del = v_has - v_should
     add = v_should - v_has 
+
+    del_under_vlans = del & @under_vlans
     
-    binding.pry
+    unless del_under_vlans.empty?
+      del = del ^ @under_vlans
+      _xml_del_under_vlans( xml, del_under_vlans )
+    end
     
     if add or del
       xml.vlan {

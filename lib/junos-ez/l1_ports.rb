@@ -93,7 +93,8 @@ class Junos::Ez::L1ports::Provider < Junos::Ez::Provider::Parent
     return nil unless phy
     
     ret_h = {}
-    ret_h[:macaddr] = phy.xpath('current-physical-address').text.strip    
+    ret_h[:macaddr] = phy.xpath('current-physical-address').text.strip 
+    xml_when_item(phy.xpath('description')){|i| ret_h[:description] = i.text.strip }
     ret_h[:oper_status] = phy.xpath('oper-status').text.strip
     ret_h[:admin_status] = phy.xpath('admin-status').text.strip
     ret_h[:mtu] = phy.xpath('mtu').text.to_i
