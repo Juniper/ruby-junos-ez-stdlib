@@ -178,27 +178,22 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
     return false unless should_trunk?
     
     @should[:tagged_vlans] = @should[:tagged_vlans].to_set if @should[:tagged_vlans].kind_of? Array
-
-    v_should = @should[:tagged_vlans] || Set.new
-  
-    if v_should.empty?
-      xml.vlan Netconf::JunosConfig::DELETE
-      return true
-    end
-    
     @has[:tagged_vlans] = @has[:tagged_vlans].to_set if @has[:tagged_vlans].kind_of? Array    
+
+    v_should = @should[:tagged_vlans] || Set.new    
     v_has = @has[:tagged_vlans] || Set.new    
     
     del = v_has - v_should
     add = v_should - v_has 
 
-    del_under_vlans = del & @under_vlans
-    
+    del_under_vlans = del & @under_vlans    
+
     unless del_under_vlans.empty?
       del = del ^ @under_vlans
       _xml_del_under_vlans( xml, del_under_vlans )
+      @under_vlans = []
     end
-    
+
     if add or del
       xml.vlan {
         del.each { |v| xml.members v, Netconf::JunosConfig::DELETE }
