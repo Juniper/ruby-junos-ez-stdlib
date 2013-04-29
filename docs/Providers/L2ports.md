@@ -22,7 +22,7 @@ puts "port #{port.name} is not a switch-port!" unless port.exists?
 # PROPERTIES
 
   - `:description` - String description at the logical interface level
-  - `:untagged_valn` - String, VLAN-name for packets without VLAN tags
+  - `:untagged_vlan` - String, VLAN-name for packets without VLAN tags
   - `:tagged_vlans` - Array of VLAN-names for packets with VLAN tags
   - `:vlan_tagging` - [true | false] - indicates if this port accepts packets with VLAN tags
 
