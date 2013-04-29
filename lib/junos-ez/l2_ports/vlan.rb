@@ -52,18 +52,63 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
 
     f_eth = as_xml.xpath('family/ethernet-switching')        
     as_hash[:vlan_tagging] = f_eth.xpath('port-mode').text.chomp == 'trunk' 
-
+    
+    # obtain a copy of the running state, this is needed in case the config
+    # is located under the [edit vlans] stanza vs. [edit interfaces]
+    
+    ifs_name = @name || as_xml.xpath('ancestor::interface/name').text.strip
+    eth_port_vlans = _get_eth_port_vlans_h( ifs_name )
+    @under_vlans = []
+    
     # --- access port        
+    
     if as_hash[:vlan_tagging] == false
-      xml_when_item(f_eth.xpath('vlan/members')){|i| as_hash[:untagged_vlan] = i.text.chomp }
+      xml_when_item(f_eth.xpath('vlan/members')){ |i| as_hash[:untagged_vlan] = i.text.chomp }
+      unless as_hash[:untagged_vlan]
+        as_hash[:untagged_vlan] = eth_port_vlans[:untagged]
+        @under_vlans << eth_port_vlans[:untagged]
+      end
       return
     end
     
     # --- trunk port    
+    
     xml_when_item(f_eth.xpath('native-vlan-id')){|i| as_hash[:untagged_vlan] = i.text.chomp }
-    as_hash[:tagged_vlans] = f_eth.xpath('vlan/members').collect { |v| v.text.chomp }    
+    as_hash[:untagged_vlan] ||= eth_port_vlans[:untagged]    
+    as_hash[:tagged_vlans] = f_eth.xpath('vlan/members').collect { |v| v.text.chomp }.to_set   
+    (eth_port_vlans[:tagged] - as_hash[:tagged_vlans]).each do |vlan|
+      as_hash[:tagged_vlans] << vlan
+      @under_vlans << vlan
+    end
+    
   end
     
+  ### ---------------------------------------------------------------
+  ### XML on_create, on_delete handlers
+  ### ---------------------------------------------------------------   
+  
+  ## overload the xml_on_delete method since we may need
+  ## to do some cleanup work in the [edit vlans] stanza
+  
+  def xml_on_delete( xml )
+    return unless @under_vlans
+    return if @under_vlans.empty?
+    
+    Nokogiri::XML::Builder.with( xml.doc.root ) do |dot|
+      dot.vlans {
+        x_vlans = dot
+        @under_vlans.each do |vlan|
+          Nokogiri::XML::Builder.with( x_vlans.parent ) do |xv|
+            xv.vlan {
+              xv.name vlan 
+              xv.interface(Netconf::JunosConfig::DELETE) { xv.name @name }
+            }
+          end
+        end      
+      }
+    end
+  end   
+  
   ### ---------------------------------------------------------------
   ### XML property writers
   ### ---------------------------------------------------------------    
@@ -83,8 +128,8 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
   def xml_build_change( xml_at_here = nil )
     @should[:untagged_vlan] ||= @has[:untagged_vlan]    
     super xml_build_at_here( xml_at_top )
-  end
-     
+  end  
+  
   ## ----------------------------------------------------------------
   ## :description
   ## ----------------------------------------------------------------
@@ -129,16 +174,18 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
   def upd_tagged_vlans( xml )        
     return false unless should_trunk?
     
-    v_should = @should[:tagged_vlans] || []
-    
+    v_should = if @should[:tagged_vlans]
+      @should[:tagged_vlans].to_set
+    else
+      Set.new
+    end
+        
     if v_should.empty?
       xml.vlan Netconf::JunosConfig::DELETE
       return true
    end
     
-    v_has = @has[:tagged_vlans] || []    
-    v_has = v_has.map(&:to_s)    
-    v_should = v_should.map(&:to_s)    
+    v_has = @has[:tagged_vlans] || Set.new    
     
     del = v_has - v_should
     add = v_should - v_has 
@@ -314,4 +361,37 @@ class Junos::Ez::L2ports::Provider::VLAN
     @catalog
   end
   
+end
+
+##### ---------------------------------------------------------------
+#####               !!!!! PRIVATE METHODS !!!!
+##### ---------------------------------------------------------------
+
+class Junos::Ez::L2ports::Provider::VLAN
+  private
+  
+  def _get_eth_port_vlans_h( ifs_name )
+    
+    got = @ndev.rpc.get_ethernet_switching_interface_information(:interface_name => ifs_name)
+    ret_h = {:untagged => nil, :tagged => Set.new }
+    got.xpath('//interface-vlan-member').each do |vlan|
+      vlan_name = vlan.xpath('interface-vlan-name').text.strip      
+      tgdy = vlan.xpath('interface-vlan-member-tagness').text.strip
+      if tgdy == 'untagged'
+        ret_h[:untagged] = vlan_name
+      else
+        ret_h[:tagged] << vlan_name
+      end
+    end
+    ret_h
+  end
+  
+end
+
+##### ---------------------------------------------------------------
+##### Resource Methods
+##### ---------------------------------------------------------------
+
+class Junos::Ez::L2ports::Provider::VLAN
+  # none.
 end

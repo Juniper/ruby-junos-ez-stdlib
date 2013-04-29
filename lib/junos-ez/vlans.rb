@@ -3,9 +3,10 @@ require "junos-ez/provider"
 module Junos::Ez::Vlans
 
   PROPERTIES = [
-     :vlan_id, 
-     :description, 
-     :no_mac_learning
+     :vlan_id,                  # Fixnum, [ 1 .. 4094 ]
+     :description,              # String, description
+     :no_mac_learning,          # [ true | nil ] - used to disable MAC-address learning
+     :interfaces,               # READ-ONLY, array of bound interface names
   ]  
 
   def self.Provider( ndev, varsym )        
@@ -21,6 +22,7 @@ module Junos::Ez::Vlans
   
   class Provider < Junos::Ez::Provider::Parent
     # common parenting goes here ...    
+    
   end
   
 end

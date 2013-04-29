@@ -6,7 +6,7 @@ module Junos::Ez::L2ports
   PROPERTIES = [ 
     :description,           # String | nil
     :untagged_vlan,         # String | nil
-    :tagged_vlans,          # Array of String | nil
+    :tagged_vlans,          # Set of String | nil
     :vlan_tagging           # true | false
   ]  
 

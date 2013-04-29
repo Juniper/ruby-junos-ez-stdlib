@@ -5,11 +5,13 @@
 ##### scope of impact.  Thank you.
 ##### ---------------------------------------------------------------
 
+require 'set'
+
 module Junos; end
   
 module Junos::Ez
   
-  VERSION = "0.0.12"
+  VERSION = "0.0.15"
   
   ### ---------------------------------------------------------------
   ### rpc_errors - decodes the XML into an array of error/Hash
@@ -286,6 +288,7 @@ class Junos::Ez::Provider::Parent
     xml = xml_at_top
     par = xml.instance_variable_get(:@parent)    
     par['delete'] = 'delete'
+    xml_on_delete( xml )
     rsp = write_xml_config!( xml.doc.root )
     @has[:_exist] = false
     true # rsp ... don't return XML, but let's hear from the community...
