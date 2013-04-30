@@ -1,4 +1,4 @@
-# Configuration Utilities
+# Junos::Ez::Config::Utils
 
 A collection of methods to perform file / template based configuration, and configuration control functions, like "commit", "show | compare", "rollback", etc.
 
@@ -42,5 +42,67 @@ ndev.close
   - `rollback!` - performs rollback of config
 
 # GORY DETAILS
+
+## lock!
+Attempt exclusive config, returns true or raises Netconf::LockError
+
+## load!( opts = {} )
+Loads configuration snippets or templates (ERB)
+
+The options Hash enables the following controls:
+
+    :filename => String
+
+Identifies filename on local-system.  File can contain either static config or template in ERB format. The framework will identify the format-style of the content by the filename extension.  You can override this behavior      using the `:format` option.  By default, the framework will map extensions to :format as follow:
+  - *.{conf,text,txt} <==> :text
+  - *.xml  <==> :xml
+  - *.set  <==> :set
+
+```
+:content => String
+```
+Ccontent of configuration, rather than loading it from a file.  Handy if you are loading the same content on many devices, and you don't want to keep re-reading it from a file
+      
+    :format => symbol
+    
+Identifies the format-style of the configuration.  The default is :text
+    :text - indcates "text" or "curly-brace" style
+    :set - "set" commands, one per line
+    :xml - native Junos XML
+      
+    
+    
+  ###    this will override any auto-format from the :filename
+  ###
+  ### :binding  - indicates file/content is an ERB
+  ###    => <object> - will grab the binding from this object
+  ###                  using a bit of meta-programming magic
+  ###    => <binding> - will use this binding
+  ###
+  ### :replace! => true - enables the 'replace' option
+  ### :overwrite! => true - enables the 'overwrite' optoin
+  ###
+  ### --- returns ---
+  ###   true if the configuration is loaded OK
+  ###   raise Netconf::EditError otherwise
+  ### ---------------------------------------------------------------
+
+## diff?
+Returns String of "show | compare" as String
+
+## commit?
+Checks the candidate config for validation, returns true or Hash of errors
+
+## commit!( opts = {} )
+
+    opts[:
+
+Performs commit, returns true or raises Netconf::CommitError 
+
+## unlock! 
+Releases exclusive lock on config
+
+## rollback!( rollback_id = )
+Performs rollback of config
 
 ... more docs comming soon ...
