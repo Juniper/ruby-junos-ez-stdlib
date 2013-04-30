@@ -47,45 +47,48 @@ ndev.close
 Attempt exclusive config, returns true or raises Netconf::LockError
 
 ## load!( opts = {} )
-Loads configuration snippets or templates (ERB)
+
+Loads configuration snippets or templates (ERB).  This method does **not** commit the change, only loads the contents into the candidate configuration.  If the load was successful, this method will return `true`. Otherwise it will raise a `Netconf::EditError` exception.
 
 The options Hash enables the following controls:
 
-    :filename => String
 
+```
+:filename => String
+```
 Identifies filename on local-system.  File can contain either static config or template in ERB format. The framework will identify the format-style of the content by the filename extension.  You can override this behavior      using the `:format` option.  By default, the framework will map extensions to :format as follow:
-  - *.{conf,text,txt} <==> :text
-  - *.xml  <==> :xml
-  - *.set  <==> :set
+    *.{conf,text,txt} <==> :text
+    *.xml  <==> :xml
+    *.set  <==> :set
 
 ```
 :content => String
 ```
 Ccontent of configuration, rather than loading it from a file.  Handy if you are loading the same content on many devices, and you don't want to keep re-reading it from a file
-      
-    :format => symbol
-    
-Identifies the format-style of the configuration.  The default is :text
+
+```
+:format => Symbol
+```
+
+Identifies the format-style of the configuration.  The default is `:text`.  Setting this option will override the `:filename` extension style mapping.
     :text - indcates "text" or "curly-brace" style
     :set - "set" commands, one per line
     :xml - native Junos XML
       
-    
-    
-  ###    this will override any auto-format from the :filename
-  ###
-  ### :binding  - indicates file/content is an ERB
-  ###    => <object> - will grab the binding from this object
-  ###                  using a bit of meta-programming magic
-  ###    => <binding> - will use this binding
-  ###
-  ### :replace! => true - enables the 'replace' option
-  ### :overwrite! => true - enables the 'overwrite' optoin
-  ###
-  ### --- returns ---
-  ###   true if the configuration is loaded OK
-  ###   raise Netconf::EditError otherwise
-  ### ---------------------------------------------------------------
+```
+:binding => Object | Binding
+``` 
+Required when the configuration content is a Ruby ERB template.  If `:binding` is an Object, then that object becomes the scope of the variables available to the template.  If you want to use the *current scope*, then using the `binding` variable that is availble (it is always there)  
+
+```
+:replace! 
+```
+=> true - enables the 'replace' option
+```  
+:overwrite!
+```
+=> true - enables the 'overwrite' optoin
+
 
 ## diff?
 Returns String of "show | compare" as String
