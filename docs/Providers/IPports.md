@@ -56,7 +56,6 @@ pp port.status
 {:l1_oper_status=>:up,
  :oper_status=>:up,
  :snmp_index=>522,
- :port_index=>75,
  :packets_rx=>0,
  :packets_tx=>18}
 ```
