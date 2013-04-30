@@ -300,3 +300,16 @@ port[:description] = "I am port 20"
 port[:untagged_vlan] = "Storage"
 port.write!
 ```
+
+### Interating Resources
+
+You can use the `each` method to interate through each managed resource.  For example:
+
+```ruby
+ndev.l1_ports.each do |port|
+  status = port.status
+  if (port[:admin] == :up) and (status[:oper_status] != :up)
+    puts "Port #{port.name} should be up, and isn't!
+  end
+end
+```
