@@ -27,6 +27,8 @@ puts "IPv4 port #{port.name} does not exist!" unless port.exists?
   - `:tag_id` - Fixnum, used if the phyiscal port is vlan-tagging (but not L2port)
   - `:mtu` - Fixnum, MTU value assigned for IP packets (but not L1port MTU)
   - `:address` - String in "ip/prefix" format.  For example "192.168.10.12/24"
+  - `:acl_in` - Name of input ACL (firewall-filter)
+  - `:acl_out` - Name of output ACL
 
 # METHODS
 
