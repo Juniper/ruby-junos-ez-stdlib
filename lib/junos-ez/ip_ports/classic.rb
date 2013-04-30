@@ -7,13 +7,13 @@ class Junos::Ez::IPports::Provider::CLASSIC < Junos::Ez::IPports::Provider
   def xml_at_top    
     
     # if just the IFD is given as the name, default to unit "0"
-    @ifd, @ifl = @name.split '.'
-    @ifl ||= "0"
+    @ifd, @ifd_unit = @name.split '.'
+    @ifd_unit ||= "0"
     
     Nokogiri::XML::Builder.new{ |x| x.configuration{ 
       x.interfaces { x.interface { x.name @ifd
         x.unit {
-          x.name @ifl
+          x.name @ifd_unit
           return x
         }
       }}
@@ -99,6 +99,25 @@ class Junos::Ez::IPports::Provider::CLASSIC < Junos::Ez::IPports::Provider
     }}}}    
   end
 
+end
+
+##### ---------------------------------------------------------------
+##### Resource Methods
+##### ---------------------------------------------------------------
+
+class Junos::Ez::IPports::Provider::CLASSIC
+  def status
+    got = @ndev.rpc.get_interface_information( :interface_name => @ifd+'.'+@ifd_unit )
+    ifs = got.xpath('logical-interface')[0]  
+    ret_h = {}
+    ret_h[:l1_oper_status] = (ifs.xpath('if-config-flags/iff-device-down')[0]) ? :down : :up
+    ret_h[:oper_status] = (ifs.xpath('address-family//ifaf-down')[0]) ? :down : :up    
+    ret_h[:snmp_index] = ifs.xpath('snmp-index').text.to_i
+    ret_h[:port_index] = ifs.xpath('local-index').text.to_i
+    ret_h[:packets_rx] = ifs.xpath('traffic-statistics/input-packets').text.to_i
+    ret_h[:packets_tx] = ifs.xpath('traffic-statistics/output-packets').text.to_i
+    ret_h
+  end
 end
 
 ##### ---------------------------------------------------------------
