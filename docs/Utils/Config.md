@@ -44,7 +44,7 @@ ndev.close
 # GORY DETAILS
 
 ## lock!
-Attempt exclusive config, returns true or raises Netconf::LockError
+Attempt exclusive config, returns `true` if you now have the lock, or raises `Netconf::LockError` exception if the lock is not available
 
 ## load!( opts = {} )
 
@@ -95,21 +95,27 @@ When `true` the provided configuraiton will **COMPLETELY OVERWRITE** any existin
 When `true` enables the Junos *replace* option.  This is required if your configuration changes utilize either the `replace:` statement in text-format style or the `replace="replace"` attribute in XML-format style.  You do not need to set this option if you are using the set-format style.
 
 ## diff?
-Returns String of "show | compare" as String
+Returns String of "show | compare" as String.  If there is no diff, then this method returns `nil`.
 
 ## commit?
-Checks the candidate config for validation, returns true or Hash of errors
+
+Checks the candidate config for validation, returns `true` or Hash of errors
 
 ## commit!( opts = {} )
 
-    opts[:
+Performs commit, returns `true` or raises `Netconf::CommitError`.  Available options are:
 
-Performs commit, returns true or raises Netconf::CommitError 
+    :comment => String
+A commit log comment that is available when retrieving the commit log.
+
+    :confirm => Fixnum-Minutes
+Identifies a timeout in minutes to automatically rollback the configuration unless you explicitly issue another commit action.  This is very useful if you think your configuration changes may lock you out of the device.
 
 ## unlock! 
-Releases exclusive lock on config
 
-## rollback!( rollback_id = )
-Performs rollback of config
+Releases exclusive lock on config.  If you do not posses the lock, this method will raise an `Netconf::RpcError` exception.
 
-... more docs comming soon ...
+## rollback!( rollback_id = 0 )
+
+Loads a rollback of config, does not commit.
+
