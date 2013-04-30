@@ -99,7 +99,18 @@ Returns String of "show | compare" as String.  If there is no diff, then this me
 
 ## commit?
 
-Checks the candidate config for validation, returns `true` or Hash of errors
+Checks the candidate config for validation, returns `true` or Array of errors.
+
+The following is an example errors:
+```ruby
+ndev.cu.commit?
+->
+[{:severity=>"error",
+  :message=>"Referenced filter 'foo' is not defined",
+  :edit_path=>"[edit interfaces ge-0/0/8 unit 0 family inet]",
+  :bad_identifier=>"filter"},
+ {:severity=>"error", :message=>"configuration check-out failed"}]
+```
 
 ## commit!( opts = {} )
 
