@@ -32,4 +32,31 @@ puts "IPv4 port #{port.name} does not exist!" unless port.exists?
 
 # METHODS
 
-No additional methods are available at this time ....
+## status
+
+Returns a Hash of status information about the IP unit interface.
+```ruby
+port = ndev.ip_ports["ge-0/0/8.0"]
+
+# display the configuration information
+pp port.to_h
+-> 
+{"ge-0/0/8.0"=>
+  {:_active=>true,
+   :_exist=>true,
+   :admin=>:up,
+   :description=>"this is port8",
+   :address=>"192.168.100.1/24",
+   :acl_in=>"foo",
+   :acl_out=>"bar"}}
+
+# display the status information
+pp port.status
+-> 
+{:l1_oper_status=>:up,
+ :oper_status=>:up,
+ :snmp_index=>522,
+ :port_index=>75,
+ :packets_rx=>0,
+ :packets_tx=>18}
+```
