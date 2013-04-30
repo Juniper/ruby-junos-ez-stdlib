@@ -8,7 +8,9 @@ module Junos::Ez::IPports
     :description,       # general description text
     :tag_id,            # VLAN tag-id for vlan-tag enabled ports
     :mtu,               # MTU value as number
-    :address            # ip/prefix as text, e.g. "192.168.10.22/24"
+    :address,           # ip/prefix as text, e.g. "192.168.10.22/24"
+    :acl_in,            # input ACL name
+    :acl_out,           # output ACL name
   ]  
 
   def self.Provider( ndev, varsym )            

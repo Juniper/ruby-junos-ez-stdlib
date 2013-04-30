@@ -162,7 +162,7 @@ class Junos::Ez::Config::Provider < Junos::Ez::Provider::Parent
   ### current candidate configuration loaded and the rollback_id
   ###
   ### --- returns ---
-  ###    false if no diff
+  ###    nil if no diff
   ###    String of diff output otherwise
   ### ---------------------------------------------------------------
   
@@ -170,7 +170,7 @@ class Junos::Ez::Config::Provider < Junos::Ez::Provider::Parent
     raise ArgumentError, "invalid rollback #{rollback_id}" unless ( rollback_id >= 0 and rollback_id <= 50 )    
     got = ndev.rpc.get_configuration( :compare=>'rollback', :rollback=> rollback_id.to_s )
     diff = got.xpath('configuration-output').text
-    return false if diff == "\n"
+    return nil if diff == "\n"
     diff
   end
   

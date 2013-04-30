@@ -43,14 +43,22 @@ class Junos::Ez::IPports::Provider::CLASSIC < Junos::Ez::IPports::Provider
     
   def xml_read_parser( as_xml, as_hash )
     set_has_status( as_xml, as_hash )    
-    
+
+    as_hash[:admin] = as_xml.xpath('disable').empty? ? :up : :down    
     ifa_inet = as_xml.xpath('family/inet')
     
-    as_hash[:tag_id] = as_xml.xpath('vlan-id').text.to_i
-    as_hash[:description] = as_xml.xpath('description').text
-    as_hash[:mtu] = ifa_inet.xpath('mtu').text.to_i || nil
+    xml_when_item(as_xml.xpath('vlan-id')){ |i| as_hash[:tag_id] = i.text.to_i }
+    xml_when_item(as_xml.xpath('description')){ |i| as_hash[:description] = i.text }
+    xml_when_item(ifa_inet.xpath('mtu')){ |i| as_hash[:mtu] = i.text.to_i }   
+    
+    # @@@ assuming a single IP address; prolly need to be more specific ...
     as_hash[:address] = ifa_inet.xpath('address/name').text || nil
-    as_hash[:admin] = as_xml.xpath('disable').empty? ? :up : :down
+    
+    # check for firewall-filters (aka ACLs)
+    if (fw_acl = ifa_inet.xpath('filter')[0])
+      xml_when_item( fw_acl.xpath('input/filter-name')){ |i| as_hash[:acl_in] = i.text.strip }
+      xml_when_item( fw_acl.xpath('output/filter-name')){ |i| as_hash[:acl_out] = i.text.strip }
+    end
     
     return true
   end  
@@ -61,14 +69,11 @@ class Junos::Ez::IPports::Provider::CLASSIC < Junos::Ez::IPports::Provider
   
   def xml_change_address( xml )
     xml.family { xml.inet {
+      # delete the old address and replace it with the new one ...
       if @has[:address]
-        xml.address( Netconf::JunosConfig::DELETE ) {
-          xml.name @has[:address]
-        }
+        xml.address( Netconf::JunosConfig::DELETE ) { xml.name @has[:address] }
       end
-      xml.address { 
-        xml.name @should[:address] 
-      }
+      xml.address { xml.name @should[:address] }
     }}
   end
   
@@ -81,6 +86,18 @@ class Junos::Ez::IPports::Provider::CLASSIC < Junos::Ez::IPports::Provider
       xml_set_or_delete( xml, 'mtu', @should[:mtu] )
     }}
   end   
+  
+  def xml_change_acl_in( xml )
+    xml.family { xml.inet { xml.filter { xml.input {
+      xml_set_or_delete( xml, 'filter-name', @should[:acl_in] )
+    }}}}
+  end
+  
+  def xml_change_acl_out( xml )
+    xml.family { xml.inet { xml.filter { xml.output {
+      xml_set_or_delete( xml, 'filter-name', @should[:acl_out] )      
+    }}}}    
+  end
 
 end
 
