@@ -56,10 +56,11 @@ The options Hash enables the following controls:
 ```
 :filename => String
 ```
-Identifies filename on local-system.  File can contain either static config or template in ERB format. The framework will identify the format-style of the content by the filename extension.  You can override this behavior      using the `:format` option.  By default, the framework will map extensions to :format as follow:
-    *.{conf,text,txt} <==> :text
-    *.xml  <==> :xml
-    *.set  <==> :set
+Identifies filename on local-system.  File can contain either static config or template in ERB format. The framework will identify the format-style of the content by the filename extension.  You can override this behavior using the `:format` option.  By default, the framework will map extensions to `:format` as follow:
+
+  - `:text` when *.{conf,text,txt}
+  - `:set` when *.set
+  - `:xml` when *.xml
 
 ```
 :content => String
@@ -71,24 +72,27 @@ Ccontent of configuration, rather than loading it from a file.  Handy if you are
 ```
 
 Identifies the format-style of the configuration.  The default is `:text`.  Setting this option will override the `:filename` extension style mapping.
-    :text - indcates "text" or "curly-brace" style
-    :set - "set" commands, one per line
-    :xml - native Junos XML
+
+  `:text` - indcates "text" or "curly-brace" style
+  
+  `:set` - "set" commands, one per line
+  
+  `:xml` - native Junos XML
       
 ```
 :binding => Object | Binding
 ``` 
 Required when the configuration content is a Ruby ERB template.  If `:binding` is an Object, then that object becomes the scope of the variables available to the template.  If you want to use the *current scope*, then using the `binding` variable that is availble (it is always there)  
 
-```
-:replace! 
-```
-=> true - enables the 'replace' option
 ```  
 :overwrite!
 ```
-=> true - enables the 'overwrite' optoin
+When `true` the provided configuraiton will **COMPLETELY OVERWRITE** any existing configuration.  This is useful when writing an entire configuration from scratch.
 
+```
+:replace! 
+```
+When `true` enables the Junos *replace* option.  This is required if your configuration changes utilize either the `replace:` statement in text-format style or the `replace="replace"` attribute in XML-format style.  You do not need to set this option if you are using the set-format style.
 
 ## diff?
 Returns String of "show | compare" as String
