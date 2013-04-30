@@ -93,34 +93,15 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
   def xml_on_delete( xml )
     return unless @under_vlans
     return if @under_vlans.empty?
-    _xml_del_under_vlans( xml, @under_vlans )
+    
+    _xml_rm_under_vlans( xml, @under_vlans )
   end   
-  
-  def _xml_del_under_vlans( xml, vlans )
-    Nokogiri::XML::Builder.with( xml.doc.root ) do |dot|
-      dot.vlans {
-        x_vlans = dot
-        vlans.each do |vlan|
-          Nokogiri::XML::Builder.with( x_vlans.parent ) do |xv|
-            xv.vlan {
-              xv.name vlan 
-              xv.interface(Netconf::JunosConfig::DELETE) { xv.name @name }
-            }
-          end
-        end      
-      }
-    end    
-  end
   
   ### ---------------------------------------------------------------
   ### XML property writers
   ### ---------------------------------------------------------------    
   
-  ## overload the xml_build_change method so we can 'copy-thru'
-  ## some of the has -> should values.  this way we don't need
-  ## to munge all of the state-transition code.
-  
-  def xml_build_at_here( xml )
+  def xml_at_here( xml )
     xml.family {
       xml.send(:'ethernet-switching') {
         return xml
@@ -128,11 +109,15 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
     }
   end
   
-  def xml_build_change( xml_at_here = nil )
-    @should[:untagged_vlan] ||= @has[:untagged_vlan]    
-    super xml_build_at_here( xml_at_top )
+  def xml_build_change( nop = nil )
+    
+    if mode_changed?
+      @should[:untagged_vlan] ||= @has[:untagged_vlan]    
+    end
+    
+    super xml_at_here( xml_at_top )
   end  
-  
+
   ## ----------------------------------------------------------------
   ## :description
   ## ----------------------------------------------------------------
@@ -158,6 +143,7 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
     # when the vlan_tagging value changes then this method
     # will trigger updates to the untagged_vlan and tagged_vlans
     # resource values as well.
+    # !!! DO NOT SWAP THIS ORDER untagged processing *MUST* BE FIRST!
     
     upd_untagged_vlan( xml )
     upd_tagged_vlans( xml ) 
@@ -190,7 +176,7 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
 
     unless del_under_vlans.empty?
       del = del ^ @under_vlans
-      _xml_del_under_vlans( xml, del_under_vlans )
+      _xml_rm_under_vlans( xml, del_under_vlans )
       @under_vlans = []
     end
 
@@ -268,6 +254,7 @@ class Junos::Ez::L2ports::Provider::VLAN
   def self.change_untagged_vlan( this, xml )
     @@ez_l2_jmptbl ||= init_jump_table    
     proc = @@ez_l2_jmptbl[this.is_trunk?][this.should_trunk?][this.should[:untagged_vlan].nil?]
+    pp proc
     proc.call( this, xml )
   end
   
@@ -277,46 +264,46 @@ class Junos::Ez::L2ports::Provider::VLAN
   ### -------------------------------------------------------------
   
   def self.ac_ac_nountg( this, xml )
-    xml.vlan Netconf::JunosConfig::DELETE
+    this._xml_rm_ac_untagged_vlan( xml )
   end
   
   def self.ac_tr_nountg( this, xml )      
-    unless (untg_vlan = this.has[:tagged_vlans]).nil?
-      xml.vlan {
-        xml.members untg_vlan, Netconf::JunosConfig::DELETE
-      }              
+    unless (untg_vlan = this.has[:untagged_vlan]).nil?
+      this._xml_rm_ac_untagged_vlan( xml )
     end
   end
   
   def self.tr_ac_nountg( this, xml )
-    xml.send :'native-vlan-id', Netconf::JunosConfig::DELETE              
-    xml.vlan( Netconf::JunosConfig::DELETE ) if this.has[:tagged_vlans]
+    xml.send :'native-vlan-id', Netconf::JunosConfig::DELETE
+    this._xml_rm_these_vlans( xml, this.has[:tagged_vlans ] ) if this.has[:tagged_vlans]    
   end
   
   def self.tr_tr_nountg( this, xml )
     xml.send :'native-vlan-id', Netconf::JunosConfig::DELETE              
   end
   
+  ## ----------------------------------------------------------------
+  ## transition where port WILL-HAVE untagged-vlan
+  ## ----------------------------------------------------------------
+  
   def self.ac_ac_untg( this, xml )
-    xml.vlan( Netconf::JunosConfig::REPLACE ) {
+    this._xml_rm_ac_untagged_vlan( xml )
+    xml.vlan {
       xml.members this.should[:untagged_vlan]
     }            
   end
   
   def self.ac_tr_untg( this, xml )      
+    # move untagged vlan to native-vlan-id ...    
     was_untg_vlan = this.has[:untagged_vlan]
-    
-    xml.vlan( Netconf::JunosConfig::REPLACE ) { 
-      xml.members was_untg_vlan, Netconf::JunosConfig::DELETE if was_untg_vlan
-    }
-    xml.send :'native-vlan-id', this.should[:untagged_vlan]              
+    xml.send :'native-vlan-id', this.should[:untagged_vlan]       
+    this._xml_rm_ac_untagged_vlan( xml ) if was_untg_vlan   
   end
   
-  def self.tr_ac_untg( this, xml )
-    xml.send :'native-vlan-id', Netconf::JunosConfig::DELETE              
-    xml.vlan( Netconf::JunosConfig::REPLACE ) {
-      xml.members this.should[:untagged_vlan]
-    }            
+  def self.tr_ac_untg( this, xml )    
+    xml.send :'native-vlan-id', Netconf::JunosConfig::DELETE 
+    this._xml_rm_these_vlans( xml, this.has[:tagged_vlans ] ) if this.has[:tagged_vlans]         
+    xml.vlan { xml.members this.should[:untagged_vlan] }
   end
   
   def self.tr_tr_untg( this, xml )
@@ -391,10 +378,56 @@ class Junos::Ez::L2ports::Provider::VLAN
   
 end
 
-##### ---------------------------------------------------------------
-##### Resource Methods
-##### ---------------------------------------------------------------
+
+### ---------------------------------------------------------------
+### [edit vlans] - for interfaces configured here ...
+### ---------------------------------------------------------------
 
 class Junos::Ez::L2ports::Provider::VLAN
-  # none.
+  
+    def _xml_edit_under_vlans( xml )
+    Nokogiri::XML::Builder.with( xml.doc.root ) do |dot|
+      dot.vlans {
+        return dot
+      }
+    end      
+  end
+  
+  def _xml_rm_under_vlans( xml, vlans )
+    at_vlans = _xml_edit_under_vlans( xml )
+    vlans.each do |vlan_name|
+      Nokogiri::XML::Builder.with( at_vlans.parent ) do |this|
+        this.vlan {
+          this.name vlan_name
+          this.interface( Netconf::JunosConfig::DELETE ) { this.name @name }
+        }
+      end
+    end
+  end
+  
+  def _xml_rm_ac_untagged_vlan( xml )
+    if @under_vlans.empty?
+      xml.vlan Netconf::JunosConfig::DELETE    
+    else
+      _xml_rm_under_vlans( xml, [ @has[:untagged_vlan ] ] )
+      @under_vlans = []    
+    end
+  end
+  
+  def _xml_rm_these_vlans( xml, vlans )
+    if @under_vlans.empty?
+      xml.vlan( Netconf::JunosConfig::DELETE ) 
+    else
+      # could be a mix between [edit vlans] and [edit interfaces] ...
+      v_has = vlans.to_set
+      del_under_vlans = v_has & @under_vlans
+      _xml_rm_under_vlans( xml, del_under_vlans )
+      if v_has ^ @under_vlans
+        xml.vlan( Netconf::JunosConfig::DELETE ) 
+      end
+      @under_vlans = []        
+    end
+  end
+  
 end
+

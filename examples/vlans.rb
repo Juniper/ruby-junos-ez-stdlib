@@ -22,9 +22,10 @@ Junos::Ez::Vlans::Provider( ndev, :vlans )
 Junos::Ez::L1ports::Provider( ndev, :l1_ports )
 Junos::Ez::L2ports::Provider( ndev, :l2_ports )
 
-pp ndev.vlans.list
-pp ndev.vlans.catalog
+# pp ndev.vlans.list
+# pp ndev.vlans.catalog
 
+port = ndev.l2_ports['ge-0/0/6']
 binding.pry
 
 ndev.close
