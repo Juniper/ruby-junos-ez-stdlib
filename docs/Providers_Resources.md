@@ -288,6 +288,17 @@ end
 The above example will also return the new resource object.   So you could use the Ruby
 block as a default initializer, and then continue to make changes to the resource.  
 
+The `create` method takes an optional 2nd argument, a Hash of the resource properties.  So you could do the following equivalent:
+
+```ruby
+data = {:description => "I am port 20", :untagged_vlan => "Blue" }
+
+ndev.l2_ports.create('ge-0/0/20', data) do |port|
+   port.write!
+   port.deactivate!
+end
+```
+
 The second way is to simply select a resource by name that doesn't exist.  So let's
 say you want to create a new L2port for `ge-0/0/20`.  It would look something like this:
 
