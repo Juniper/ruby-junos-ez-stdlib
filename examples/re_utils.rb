@@ -24,6 +24,7 @@ puts "OK!"
 Junos::Ez::Provider( ndev )
 Junos::Ez::RE::Utils( ndev, :re )
 Junos::Ez::FS::Utils( ndev, :fs )
+Junos::Ez::Config::Utils( ndev, :cu )
 
 binding.pry
 

@@ -10,6 +10,7 @@ configuration files/templates and software images
    lock! - take exclusive lock on config
    unlock! - release exclusive lock on config
    rollback! - perform a config rollback
+   get_config - returns requested config in "text" format-style
    
 ---------------------------------------------------------------------
 =end
@@ -198,6 +199,32 @@ class Junos::Ez::Config::Provider < Junos::Ez::Provider::Parent
   def unlock!
     @ndev.rpc.unlock_configuration
     true
+  end
+  
+  ### ---------------------------------------------------------------
+  ### get_config - returns String of requested (or entire) config
+  ### in "text" (curly-brace) format.  The 'rqst' argument 
+  ### identifies the scope of the config, for example:
+  ###
+  ### .get_config( "interfaces ge-0/0/0" )
+  ###
+  ### ---------------------------------------------------------------
+  
+  def get_config( rqst = nil )
+    scope = "show configuration"
+    scope.concat( " " + rqst ) if rqst
+    begin
+      @ndev.rpc.command( scope, :format => 'text' ).xpath('configuration-output').text
+    rescue NoMethodError
+      # indicates no configuration found
+      nil
+    rescue => e
+      # indicates error in request 
+      err = e.rsp.xpath('rpc-error')[0]
+      err_info = err.xpath('error-info/bad-element').text
+      err_msg = err.xpath('error-message').text
+      err_msg + ": " + err_info
+    end
   end
   
 end # class Provider    

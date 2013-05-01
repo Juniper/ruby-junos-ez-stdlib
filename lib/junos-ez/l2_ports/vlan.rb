@@ -110,6 +110,7 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
   end
   
   def xml_build_change( nop = nil )
+    @under_vlans ||= []       # handles case for create'd port
     
     if mode_changed?
       @should[:untagged_vlan] ||= @has[:untagged_vlan]    
@@ -254,7 +255,6 @@ class Junos::Ez::L2ports::Provider::VLAN
   def self.change_untagged_vlan( this, xml )
     @@ez_l2_jmptbl ||= init_jump_table    
     proc = @@ez_l2_jmptbl[this.is_trunk?][this.should_trunk?][this.should[:untagged_vlan].nil?]
-    pp proc
     proc.call( this, xml )
   end
   
