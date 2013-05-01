@@ -40,6 +40,7 @@ ndev.close
   - `commit!` - performs commit, returns true or raises Netconf::CommitError 
   - `unlock!` - releases exclusive lock on config
   - `rollback!` - performs rollback of config
+  - `get_config` - returns text-format of configuration
 
 # GORY DETAILS
 
@@ -130,3 +131,31 @@ Releases exclusive lock on config.  If you do not posses the lock, this method w
 
 Loads a rollback of config, does not commit.
 
+## get_config( scope = nil )
+
+Returns the text-style format of the request config.  If `scope` is `nil` then the entire configuration is returned.  If the `scope` is invalid (asking for the "foo" stanza for example), then a string with "ERROR!" is returned.  If the requested config is non-existant (asking for non-existant interface), then `nil` is returned.
+
+Successful request:
+```ruby
+puts ndev.cu.get_config "interfaces ge-0/0/0"
+->
+unit 0 {
+    family inet {
+        address 192.168.56.2/24;
+    }
+}
+```
+
+Valid request, but not config:
+```ruby
+puts ndev.cu.get_config "interfaces ge-0/0/3"
+-> 
+nil
+```
+
+Invalid request:
+```ruby
+puts ndev.cu.get_config "foober jazzbot"
+->
+ERROR! syntax error: foober
+```
