@@ -208,6 +208,10 @@ class Junos::Ez::Config::Provider < Junos::Ez::Provider::Parent
   ###
   ### .get_config( "interfaces ge-0/0/0" )
   ###
+  ### If there is no configuration available, 'nil' is returned
+  ###
+  ### If there is an error in the request, that will be returned 
+  ###   as a String with "ERROR!" prepended
   ### ---------------------------------------------------------------
   
   def get_config( rqst = nil )
@@ -223,7 +227,7 @@ class Junos::Ez::Config::Provider < Junos::Ez::Provider::Parent
       err = e.rsp.xpath('rpc-error')[0]
       err_info = err.xpath('error-info/bad-element').text
       err_msg = err.xpath('error-message').text
-      err_msg + ": " + err_info
+      "ERROR! " + err_msg + ": " + err_info
     end
   end
   
