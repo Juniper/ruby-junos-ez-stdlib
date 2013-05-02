@@ -105,7 +105,43 @@ nil
 
 ## memory
 
-Returns a Hash structure of "show system memory" information
+Returns a Hash structure of "show system memory" information.  Each key is the RE indentifier.  A target with a single RE would look like the following.  Note that the `:procs` Array is the process array, with each element as a Hash of process specific information.
+```ruby
+pp ndev.re.memory
+-> 
+{"re0"=>
+  {:memory_summary=>
+    {:total=>{:size=>1035668, :percentage=>100},
+     :reserved=>{:size=>18688, :percentage=>1},
+     :wired=>{:size=>492936, :percentage=>47},
+     :active=>{:size=>184152, :percentage=>17},
+     :inactive=>{:size=>65192, :percentage=>6},
+     :cache=>{:size=>261140, :percentage=>25},
+     :free=>{:size=>12660, :percentage=>1}},
+   :procs=>
+    [{:name=>"kernel",
+      :pid=>0,
+      :size=>569704,
+      :size_pct=>54.49,
+      :resident=>90304,
+      :resident_pct=>8.71},
+     {:name=>"/sbin/pmap",
+      :pid=>2768,
+      :size=>4764,
+      :size_pct=>0.15,
+      :resident=>1000,
+      :resident_pct=>0.09},
+     {:name=>"file: (mgd) /proc/2766/file (jeremy)",
+      :pid=>2765,
+      :size=>727896,
+      :size_pct=>23.16,
+      :resident=>18904,
+      :resident_pct=>1.82},
+      #
+      # snip, omitted full array for sake of sanity ...
+      #
+    ]}}
+```
 
 ## users 
 
