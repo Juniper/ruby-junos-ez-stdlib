@@ -46,7 +46,7 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
     status_h = {}
     got.xpath('//route-engine').each do |re|
       re_h = {}      
-      slot_id = re.xpath('slot').text.to_i
+      slot_id = "re" + re.xpath('slot').text
       status_h[slot_id] = re_h
       
       re_h[:model] = re.xpath('model').text.strip
@@ -173,6 +173,7 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
       user_h[:from] = user.xpath('from').text.strip
       user_h[:login_time] = user.xpath('login-time').text.strip
       user_h[:idle_time] = user.xpath('idel-time').text.strip
+      user_h[:idle_time] = nil if user_h[:idle_time].empty?
       user_h[:command] = user.xpath('command').text.strip
     end
     users_a
@@ -224,7 +225,16 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
   ### ---------------------------------------------------------------
   
   def reboot!( opts = {} )    
-    got = @ndev.rpc.request_reboot            
+    arg_options = [:in, :at]
+    args = {}
+    opts.each do |k,v|
+      if arg_options.include? k
+        args[k] = v
+      else
+        raise ArgumentError, "unrecognized option #{k}"
+      end
+    end    
+    got = @ndev.rpc.request_reboot( args )
     got.xpath('request-reboot-status').text.strip
   end
 
@@ -233,10 +243,19 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
   ### ---------------------------------------------------------------
   
   def shutdown!( opts = {} )
+    arg_options = [:in, :at]
+    args = {}
+    opts.each do |k,v|
+      if arg_options.include? k
+        args[k] = v
+      else
+        raise ArgumentError, "unrecognized option #{k}"
+      end
+    end        
     ## some Junos devices will throw an RPC error exception which is really
     ## a warning, and some do not.  So we need to trap that here.
     begin
-      got = @ndev.rpc.request_power_off
+      got = @ndev.rpc.request_power_off( args )
     rescue => e
       retmsg = e.rsp.xpath('//error-message').text.strip + "\n"  
       return retmsg + e.rsp.xpath('//request-reboot-status').text.strip

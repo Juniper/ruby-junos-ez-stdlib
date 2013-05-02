@@ -73,7 +73,7 @@ unless ndev.re.validate_software?( file_on_junos )
   exit 1
 end
 
-puts "Installing image ... place wait ..."
+puts "Installing image ... please wait ..."
 rc = ndev.re.install_software!( :package => file_on_junos, :no_validate => true )
 if rc != true
   puts rc
