@@ -84,11 +84,24 @@ pp ndev.re.uptime
 ```
 ## system_alarms
 
-Returns a Hash structure of "show system alarms" information
+Returns an Array of Hash structure of "show system alarms" information.  If there are no alarms, this method returns `nil`.  For example, a target with a single alarm:
+```ruby
+pp ndev.re.system_alarms
+-> 
+[{:at=>"2013-05-02 17:38:03 UTC",
+  :class=>"Minor",
+  :description=>"Rescue configuration is not set",
+  :type=>"Configuration"}]
+```
 
 ## chassis_alarms
 
-Returns a Hash structure of "show chassis alarms" information
+Returns an Array Hash structure of "show chassis alarms" information.  If there are no alarms, this method returns `nil`.  For example, a target with no chassis alarms:
+```ruby
+pp ndev.re.chassis_alarms
+->
+nil
+```
 
 ## memory
 
@@ -96,7 +109,17 @@ Returns a Hash structure of "show system memory" information
 
 ## users 
 
-Returns a Hash structure of "show system users" information
+Returns a Array structure of "show system users" information.  Each Array item is a Hash structure of user information.  A target with a single user logged in would look like:
+```ruby
+pp ndev.re.users
+-> 
+[{:name=>"jeremy",
+  :tty=>"p0",
+  :from=>"192.168.56.1",
+  :login_time=>"5:45PM",
+  :idle_time=>"",
+  :command=>"-cli (cli)"}]
+```
 
 ## validate_software?
 
@@ -108,7 +131,18 @@ Performs the equivalent of "request system software add ..." and returns `true` 
 
 ## rollback_software!
 
-Performs the equivalent of "request system software rollback"
+Performs the equivalent of "request system software rollback".  The result of the operation is returned as a String.  For example, a successful rollback would look like this:
+```ruby
+pp ndev.re.rollback_software!
+-> 
+"Restoring boot file package\njunos-12.1I20130422_2129_jni-domestic will become active at next reboot\nWARNING: A reboot is required to load this software correctly\nWARNING:     Use the 'request system reboot' command\nWARNING:         when software installation is complete"
+```
+An unsuccessful rollback would look like this:
+```ruby
+pp ndev.re.rollback_software!
+-> 
+"WARNING: Cannot rollback, /packages/junos is not valid"
+```
 
 ## reboot!( opts = {} )
 
