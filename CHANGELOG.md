@@ -21,3 +21,14 @@
   
     Completed initial documentation.  Still more work to be done with these files
     but the "enough to get started" information is now available
+
+  0.0.15: 2013-05-02
+  
+    L2ports - added support for framework to read [edit vlans] stanza to recognize interfaces configured
+    there vs. under [edit interfaces]
+    
+    IPports - added :acl_in and :acl_out for stateless ACL filtering.  added .status method to return
+    runtime status information about the port
+    
+    RE::Utils - misc updates, and documentation
+    FS::Utils - misc updates, and documentation
