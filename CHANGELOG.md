@@ -31,4 +31,3 @@
     runtime status information about the port
     
     RE::Utils - misc updates, and documentation
-    FS::Utils - misc updates, and documentation
