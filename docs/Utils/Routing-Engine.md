@@ -1,4 +1,4 @@
-# Routing-Engine Utilities
+# Junos::Ez::RE::Utils
 
 A collection of methods to access routing-engine specific functions and information.  These methods return data in Hash / Array structures so the information can be programmatically accessible, rather than scraping CLI or navigating Junos XML.
 
@@ -47,4 +47,53 @@ pp ndev.re.uptime
 
 # GORY DETAILS
 
-... more docs coming soon ...
+## status
+
+Returns a Hash structure of "show chassis routing-engine" information
+
+## uptime
+
+Returns a Hash structure of "show system uptime" information
+
+## system_alarms
+
+Returns a Hash structure of "show system alarms" information
+
+## chassis_alarms
+
+Returns a Hash structure of "show chassis alarms" information
+
+## memory
+
+Returns a Hash structure of "show system memory" information
+
+## users 
+
+Returns a Hash structure of "show system users" information
+
+## validate_software?
+
+Performs the equivalent of "request system software validate..." and returns `true` if the software passes validation or a ...
+
+## install_software! 
+
+Performs the equivalent of "request system software add ..." and returns `true` if the operation was successful or ...
+
+## rollback_software!
+
+Performs the equivalent of "request system software rollback"
+
+##   reboot! 
+
+Performs the "request system reboot" action.  There is **NO** confirmation prompt, so once you've executed this method, the action begins.
+
+Once this command executes the NETCONF session to the target will eventually terminate.  You can trap the `I::dont::know` exception to detect this event.
+
+## `shutdown!` 
+
+Performs the "request system power-off" action.  There is **NO** confirmation prompt, so once you've executed this method, the action begins.
+
+Once this command executes the NETCONF session to the target will eventually terminate.  You can trap the `I::dont::know` exception to detect this event.
+
+
+
