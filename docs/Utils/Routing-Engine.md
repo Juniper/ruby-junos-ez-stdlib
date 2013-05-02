@@ -123,11 +123,49 @@ pp ndev.re.users
 
 ## validate_software?
 
-Performs the equivalent of "request system software validate..." and returns `true` if the software passes validation or a ...
+Performs the equivalent of "request system software validate..." and returns `true` if the software passes validation or a String indicating the error message.  The following is an example that simply checks for true:
+```ruby
+unless ndev.re.validate_software?( file_on_junos )
+  puts "The softare does not validate!"
+  ndev.close
+  exit 1
+end
+```
 
 ## install_software! 
 
-Performs the equivalent of "request system software add ..." and returns `true` if the operation was successful or ...
+Performs the equivalent of "request system software add ..." and returns `true` if the operation was successful or a String indicating the error message.  The following example illustrates an error message:
+
+```ruby
+puts "Installing image ... please wait ..."
+rc = ndev.re.install_software!( :package => file_on_junos, :no_validate => true )
+if rc != true
+  puts rc
+end
+```
+With the results of the `rc` String:
+```
+Verified junos-boot-vsrx-12.1I20130415_junos_121_x44_d15.0-576602.tgz signed by PackageDevelopment_12_1_0
+Verified junos-vsrx-12.1I20130415_junos_121_x44_d15.0-576602-domestic signed by PackageDevelopment_12_1_0
+
+WARNING:     The software that is being installed has limited support.
+WARNING:     Run 'file show /etc/notices/unsupported.txt' for details.
+
+Available space: -49868 require: 4641
+
+WARNING: The /cf filesystem is low on free disk space.
+WARNING: This package requires 4641k free, but there
+WARNING: is only -49868k available.
+
+WARNING: This installation attempt will be aborted.
+WARNING: If you wish to force the installation despite these warnings
+WARNING: you may use the 'force' option on the command line.
+ERROR: junos-12.1I20130415_junos_121_x44_d15.0-576602-domestic fails requirements check
+Installation failed for package '/var/tmp/junos-vsrx-domestic.tgz'
+WARNING: Not enough space in /var/tmp to unpack junos-12.1I20130415_junos_121_x44_d15.0-576602.tgz
+WARNING: Use 'request system storage cleanup' and
+WARNING: the 'unlink' option to improve the chances of success
+```
 
 ## rollback_software!
 
