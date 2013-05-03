@@ -38,23 +38,27 @@ file_on_junos = '/var/tmp/' + file_name
 
 def copy_file_to_junos( ndev, file_on_server, file_on_junos )  
   mgr_i = cur_i = 0
+  backitup = 8.chr * 4
   ndev.scp.upload!( file_on_server, file_on_junos ) do |ch, name, sent, total|  
     pct = (sent.to_f / total.to_f) * 100
     mgr_i = pct.to_i
     if mgr_i != cur_i
       cur_i = mgr_i
-      puts cur_i.to_s + "%"
+      printf "%4s", cur_i.to_s + "%"
+      print backitup
     end    
   end
 end
 
-puts "Copying file to Junos ..."
+print "Copying file to Junos ... "
 copy_file_to_junos( ndev, file_on_server, file_on_junos )
+puts "OK!    "
 
 ###
 ### check the MD5 checksum values
 ###
 
+print "Validating MD5 checksum ... "
 md5_on_s = Digest::MD5.file( file_on_server ).to_s
 md5_on_j = ndev.fs.checksum( :md5, file_on_junos )
 
@@ -64,8 +68,9 @@ if md5_on_s != md5_on_j
   exit 1
 end
 
-puts "MD5 checksum matches ... proceeding ..."
-puts "Validating image ... please wait ..."
+puts "OK!"
+
+print "Validating image ... please wait ... "
 
 unless ndev.re.software_validate?( file_on_junos )
   puts "The softare does not validate!"
@@ -73,18 +78,22 @@ unless ndev.re.software_validate?( file_on_junos )
   exit 1
 end
 
-puts "Installing image ... please wait ..."
+puts "OK!"
+
+print "Installing image ... please wait ... "
 rc = ndev.re.software_install!( :package => file_on_junos, :no_validate => true )
 if rc != true
   puts rc
 end
 
+puts "OK!"
+
 ### use pry if you want to 'look around'
 ## -> binding.pry
 
-### if you wanted to reboot the system now, you coud
-### do the following ...
-
-## -> ndev.re.reboot!
+if ARGV[1] == 'reboot'
+  puts "Rebooting!"
+  ndev.re.reboot!
+end
 
 ndev.close

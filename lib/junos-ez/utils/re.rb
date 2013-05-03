@@ -6,15 +6,23 @@ a misc. collection of methods that perform basic automation tasks
 like upgrading software or getting process information.  The 
 following lists the methods and the equivalent Junos CLI commands
 
-- status: show chassis routing-engine
-- uptime: show system uptime
-- system_alarms: show system alarms
-- chassis_alarms: show chassis alarms
-- memory: show system memeory
-- users: show system users
-- software_install!: request system software add 
-- software_rollback!: request system software rollback
-- software_validate?: request system software validate
+- status            show chassis routing-engine
+- uptime            show system uptime
+- system_alarms     show system alarms
+- chassis_alarms    show chassis alarms
+- memory            show system memeory
+- users             show system users
+
+- software_install!     request system software add 
+- software_rollback!    request system software rollback
+- software_validate?    request system software validate
+- software_images       - provides image file names for current/rollback
+
+- license_install!      request system license add          !! TBD !!
+- license_rm!           request system license delete
+- license_save          request system license save         !! TBD !!
+- licenses              show system license
+
 - reboot!: request system reboot (no confirm!!)
 - shutdown!: request system power-off (no confirm!!)
   
@@ -179,6 +187,12 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
     users_a
   end
 
+  ### ===============================================================
+  ###
+  ###                   Software related methods
+  ###
+  ### ===============================================================
+  
   ### ---------------------------------------------------------------
   ### software_validate? - request system software validate ...
   ### ---------------------------------------------------------------
@@ -219,7 +233,30 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
     got = @ndev.rpc.request_package_rollback
     got.text.strip
   end
+  
+  def software_images
+    ls_pkgs = @ndev.rpc.file_list(:path=>'/packages')
+    symlink = ls_pkgs.xpath('//file-symlink-target')[0]
+    if symlink
+      ls_pkgs = @ndev.rpc.file_list(:path => symlink.text.strip)
+    end
+    
+    junos_symlink = ls_pkgs.xpath('//file-information[normalize-space(file-name) = "junos"]')[0]
+    junos_old_symlink = ls_pkgs.xpath('//file-information[normalize-space(file-name) = "junos.old"]')[0]
+    
+    ret_h = {}    
+    ret_h[:rollback] = (junos_old_symlink) ? junos_old_symlink.xpath('file-symlink-target').text.strip : nil
+    ret_h[:current] = (junos_symlink) ? junos_symlink.xpath('file-symlink-target').text.strip : ret_h[:rollback]
+    
+    ret_h
+  end
 
+  ### ===============================================================
+  ###
+  ###             Misc Routing Engine Commands & Controls
+  ###
+  ### ===============================================================
+  
   ### ---------------------------------------------------------------
   ### reboot! - request system reboot (no confirm!!)
   ### ---------------------------------------------------------------
@@ -290,6 +327,132 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
     
     return (block_given?) ? yield(got) : false
   end
+  
+  ### ===============================================================
+  ###
+  ###                   License related methods
+  ###
+  ### ===============================================================
+  
+  ## ----------------------------------------------------------------
+  ## - retrieve Hash of license information.  
+  ##
+  ## By default this will provide the license installed
+  ## information.  
+  ## 
+  ## --- returns ---
+  ## - Hash of data if there are licenses
+  ## - nil if no licenses
+  ##
+  ## --- options ---
+  ## :keys => true
+  ##    Will include the key-text for the license
+  ##
+  ## ----------------------------------------------------------------
+  
+  def licenses( opts = {} )
+    
+    got = @ndev.rpc.get_license_summary_information
+    licenses = got.xpath('license-information/license')
+    return nil if licenses.empty?
+    
+    ret_h = {}
+    licenses.each do |lic|
+      lic_h = {}
+      ret_h[lic.xpath('name').text.strip] = lic_h
+      
+      lic_h[:state] = lic.xpath('license-state').text.strip
+      lic_h[:version] = lic.xpath('license-version').text.strip
+      lic_h[:serialnumber] = lic.xpath('software-sn').text.strip
+      lic_h[:customer] = lic.xpath('customer-reference').text.strip
+      
+      features = lic.xpath('feature-block/feature')
+      unless features.empty?
+        feats_h = {}
+        lic_h[:features] = feats_h
+        features.each do |feat|
+          feat_h = {}
+          feats_h[feat.xpath('name').text.strip] = feat_h
+          feat_h[:description] = feat.xpath('description').text.strip
+          v_info = feat.xpath('validity-information')[0]
+          case v_info.xpath('validity-type').text.strip
+          when 'date-based'
+            feat_h[:date_start] = v_info.xpath('start-date').text.strip
+            feat_h[:date_end] = v_info.xpath('end-date').text.strip
+          end
+        end # each features
+      end # if features
+    end # each license
+    
+    ## now check to see if the :keys have been requested.  if so
+    ## then get that data, and store back into the return Hash.
+    
+    if opts[:keys]
+      got = @ndev.rpc.get_license_key_information
+      got.xpath('license-key').each do |key|
+        name = key.xpath('name').text.strip
+        ret_h[name][:key] = key.xpath('key-data').text
+      end
+    end    
+    
+    ret_h
+  end
+
+  ## ----------------------------------------------------------------  
+  ## add a license 
+  ##
+  ## --- returns ---
+  ## true - key added OK
+  ## String - error message otherwise
+  ##
+  ## --- options ---
+  ## :key => String
+  ##    The key text
+  ##
+  ## :filename => String
+  ##    Path to licence-file on server
+  ## ----------------------------------------------------------------
+  
+  def license_install!( opts = {} )
+    args = {}
+    if opts[:key]
+      args[:key_data] = opts[:key]
+    elsif opts[:filename]
+      args[:key_data] = File.read(opts[:filename]).strip
+    end
+    got = @ndev.rpc.request_license_add( args )
+    success = got.xpath('add-success')[0]
+    return true if success
+    got.xpath('//message').text.strip
+  end
+
+  ## ----------------------------------------------------------------  
+  ## remove a license 
+  ##
+  ## license_id is the String license-id or the special name :all
+  ## ----------------------------------------------------------------
+  
+  def license_rm!( license_id )
+    args = {}
+    if license_id == :all
+      args[:all] = true
+    else
+      args[:license_identifier] = license_id
+    end
+    got = @ndev.rpc.request_license_delete( args )
+    ### @@@ need to test return cases ... for now, just return
+    ### the 'got' XML
+    got
+  end
+
+  ## ----------------------------------------------------------------  
+  ## save licenses (plr!) to a file 
+  ## ----------------------------------------------------------------
+  
+  def license_save( opts = {} )
+    raise StandardError, "not implemented yet"
+  end
+  
 end
 
 ### -----------------------------------------------------------------
