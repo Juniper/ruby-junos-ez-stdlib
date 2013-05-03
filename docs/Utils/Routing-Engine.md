@@ -281,9 +281,40 @@ Instructs Junos to reboot after `:in` minutes from the time of calling `reboot!`
 ```
 Instructs Junos to reboot at a specific date and time.  The format of `:at` is YYYYMMDDHHMM, where HH is the 24-hour (military) time.  For example HH = 01 is 1am and HH=13 is 1pm.  If you omit the YYYY, MM, or DD options the current values apply.  For example `:at => 1730` is 1:30pm today.
 
-## `license_install!` <a name="license_install">
+## `license_install!( opts = {} )` <a name="license_install">
+Installs the provided license.  This method will return `true` if the key is installed correctly or a String message indicating the error.
 
-## `license_rm!` <a name="license_rm">
+The following options are supported, you **MUST** use either `:key` or `:filename` to provide the license ASCII-text.
+```
+:key
+```
+The ASCII-text of the key.
+```
+:filename
+```
+The path to the file on the server (not Junos) that contains the ASCII-text of the key.
+
+The following illustates how to load a key from the server filesystem.
+```ruby
+ndev.re.license_install! :filename=>'/cygwin/home/jschulman/license.txt'
+->
+true
+```
+## `license_rm!( license_id )` <a name="license_rm">
+Removes either a specific license or `:all` licenses from the target.  This method will return `true` if the action was successful, or a String error-message otherwise.
+
+Removing a specific license:
+```ruby
+ndev.re.license_rm! "JUNOS410496"
+->
+true
+```
+Removing all licenses
+```ruby
+ndev.re.license_rm! :all
+->
+true
+```
 
 ## `licenses( opts = {} )` <a name="licenses">
 
