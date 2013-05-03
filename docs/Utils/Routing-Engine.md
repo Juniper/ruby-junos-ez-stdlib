@@ -360,7 +360,18 @@ pp ndev.re.licenses :keys=>true
     "\nJUNOS410496 aeaqec agaia3 27n65m fq4ojr g4ztaq jqgayd\n            smrqg4 2aye2m ifbfmu DEADBEF k3tjob sxelkt\n  <snip>"}}
 ```
 
+## `ping( host, opts = {} )` <a name="ping">
 
-## `ping`
+Issues a 'ping' from the Junos target, very handy for troubleshooting.  This method will return `true` if the ping action was successful, or `false` otherwise.
 
+The following options are supported, and they are the same as documented by the Junos techpubs:
+      :do_not_fragment, :inet, :inet6, :strict,      
+      :count, :interface, :interval, :mac_address,
+      :routing_instance, :size, :source, :tos, :ttl, :wait
 
+Here is a ping example that uses the 'do-no-fragment' and 'count' options:
+```ruby
+ndev.re.ping "192.168.56.1", :count => 5, :do_not_fragment => true
+->
+true
+```
