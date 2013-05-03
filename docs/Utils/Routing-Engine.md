@@ -213,7 +213,7 @@ pp ndev.re.software_rollback!
 ```
 An unsuccessful rollback would look like this:
 ```ruby
-pp ndev.re.rollback_software!
+pp ndev.re.software_rollback!
 -> 
 "WARNING: Cannot rollback, /packages/junos is not valid"
 ```
