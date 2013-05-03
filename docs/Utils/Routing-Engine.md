@@ -236,7 +236,7 @@ Performs the equivalent of "request system software rollback".  The result of th
 ```ruby
 pp ndev.re.software_rollback!
 -> 
-"Restoring boot file package\njunos-12.1I20130422_2129_jni-domestic will become active at next reboot\nWARNING: A reboot is required to load this software correctly\nWARNING:     Use the 'request system reboot' command\nWARNING:         when software installation is complete"
+"Restoring boot file package\njunos-12.1I20130415_junos_121_x44_d15.0-576602-domestic will become active at next reboot\nWARNING: A reboot is required to load this software correctly\nWARNING:     Use the 'request system reboot' command\nWARNING:         when software installation is complete"
 ```
 An unsuccessful rollback would look like this:
 ```ruby
@@ -276,7 +276,50 @@ Instructs Junos to reboot at a specific date and time.  The format of `:at` is Y
 
 ## `license_rm!` <a name="license_rm">
 
-## `licenses`
+## `licenses( opts = {} )` <a name="licenses">
+
+Returns a Hash structure of information gathered from the "show system license" command.
+
+The following options are supported:
+```
+:keys => true
+```
+Returns the license key value in ASCII text format.
+
+Without the `:keys` option:
+
+```ruby
+pp ndev.re.licenses
+-> 
+{"JUNOS410496"=>
+  {:state=>"valid",
+   :version=>"2",
+   :serialnumber=>"91730A00092074",
+   :customer=>"LABVSRXJuniper-SEs",
+   :features=>
+    {"all"=>
+      {:description=>"All features",
+       :date_start=>"2013-02-05",
+       :date_end=>"2014-02-06"}}}}
+```
+With the `:keys` option:
+```ruby
+pp ndev.re.licenses :keys=>true
+-> 
+{"JUNOS410496"=>
+  {:state=>"valid",
+   :version=>"2",
+   :serialnumber=>"91730A00092074",
+   :customer=>"LABVSRXJuniper-SEs",
+   :features=>
+    {"all"=>
+      {:description=>"All features",
+       :date_start=>"2013-02-05",
+       :date_end=>"2014-02-06"}},
+   :key=>
+    "\nJUNOS410496 aeaqec agaia3 27n65m fq4ojr g4ztaq jqgayd\n            smrqg4 2aye2m ifbfmu DEADBEF k3tjob sxelkt\n  <snip>"}}
+```
+
 
 ## `ping`
 
