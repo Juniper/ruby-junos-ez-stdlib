@@ -27,34 +27,34 @@ pp ndev.re.uptime
 
 ## Informational
 
-  - `status` - "show chassis routing-engine" information
-  - `uptime` - "show system uptime" information
-  - `system_alarms` - "show system alarms" information
-  - `chassis_alarms` - "show chassis alarms" information
-  - `memory` - "show system memory" information
-  - `users` - "show system users" information
+  - [`status`](#status) - "show chassis routing-engine" information
+  - [`uptime`](#uptime) - "show system uptime" information
+  - [`system_alarms`](#system_alarms) - "show system alarms" information
+  - [`chassis_alarms`](#chassis_alarms) - "show chassis alarms" information
+  - [`memory`](#memory) - "show system memory" information
+  - [`users`](#users) - "show system users" information
 
 ## Software Image
 
-  - `software_validate?` - "request system software validate..."
-  - `software_install!` - "request system software add ..."
-  - `software_rollback!` - "request system software rollback"
-  - `software_images` - indicates current/rollback image file names
+  - [`software_validate?`](#software_validate) - "request system software validate..."
+  - [`software_install!`](#software_install) - "request system software add ..."
+  - [`software_rollback!`](#software_rollback) - "request system software rollback"
+  - [`software_images`](#software_images) - indicates current/rollback image file names
 
 ## License Management
 
-  - `license_install!` - "request system license add"
-  - `license_rm!` - "request system license delete"
-  - `licenses` - "show system license"
+  - [`license_install!`](#license_install) - "request system license add"
+  - [`license_rm!`](#license_rm) - "request system license delete"
+  - [`licenses`](#licenses) - "show system license"
 
 ## System Controls
 
-  - `reboot!` - "request system reboot" (!! NO CONFIRM !!)
-  - `shutdown!` - "request system power-off" (!! NO CONFIRM !!)
+  - [`reboot!`](#reboot) - "request system reboot" (!! NO CONFIRM !!)
+  - [`shutdown!`](#shutdown) - "request system power-off" (!! NO CONFIRM !!)
 
 ## Miscellaneous
 
-  - `ping` - Perform a "ping" command
+  - [`ping`](#ping) - Perform a "ping" command
 
 # GORY DETAILS
 
@@ -168,7 +168,7 @@ pp ndev.re.users
   :command=>"-cli (cli)"}]
 ```
 
-## `software_validate?`
+## `software_validate?` <a name="software_validate">
 
 Performs the equivalent of "request system software validate..." and returns `true` if the software passes validation or a String indicating the error message.  The following is an example that simply checks for true:
 ```ruby
@@ -179,7 +179,7 @@ unless ndev.re.software_validate?( file_on_junos )
 end
 ```
 
-## `software_install!` 
+## `software_install!` <a name="software_install">
 
 Performs the equivalent of "request system software add ..." and returns `true` if the operation was successful or a String indicating the error message.  The following example illustrates an error message:
 
@@ -214,7 +214,7 @@ WARNING: Use 'request system storage cleanup' and
 WARNING: the 'unlink' option to improve the chances of success
 ```
 
-## `software_rollback!`
+## `software_rollback!` <a name="software_rollback">
 
 Performs the equivalent of "request system software rollback".  The result of the operation is returned as a String.  For example, a successful rollback would look like this:
 ```ruby
@@ -229,8 +229,7 @@ pp ndev.re.software_rollback!
 "WARNING: Cannot rollback, /packages/junos is not valid"
 ```
 
-## `reboot!( opts = {} )`
-
+## `reboot!( opts = {} )` <a name="reboot">
 Performs the "request system reboot" action.  There is **NO** confirmation prompt, so once you've executed this method, the action begins.  Once this command executes the NETCONF session to the target will eventually terminate.  You can trap the `Net::SSH::Disconnect` exception to detect this event.
 
 The option Hash provides for the following controls:
@@ -243,7 +242,7 @@ Instructs Junos to reboot after `:in` minutes from the time of calling `reboot!`
 ```
 Instructs Junos to reboot at a specific date and time.  The format of `:at` is YYYYMMDDHHMM, where HH is the 24-hour (military) time.  For example HH = 01 is 1am and HH=13 is 1pm.  If you omit the YYYY, MM, or DD options the current values apply.  For example `:at => 1730` is 1:30pm today.
 
-## `shutdown!( opts = {} )`
+## `shutdown!( opts = {} )` <a name="shutdown">
 
 Performs the "request system power-off" action.  There is **NO** confirmation prompt, so once you've executed this method, the action begins.  Once this command executes the NETCONF session to the target will eventually terminate.  You can trap the `Net::SSH::Disconnect` exception to detect this event.
 
