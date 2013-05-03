@@ -11,7 +11,7 @@ module Junos; end
   
 module Junos::Ez
   
-  VERSION = "0.0.15"
+  VERSION = "0.0.16"
   
   ### ---------------------------------------------------------------
   ### rpc_errors - decodes the XML into an array of error/Hash

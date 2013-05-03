@@ -216,6 +216,7 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
     args = { :package_name => opts[:package] }
     args[:no_validate] = true if opts[:no_validate]
     args[:unlink] = true if opts[:unlink]
+    args[:reboot] = true if opts[:reboot]
     
     got = @ndev.rpc.request_package_add( args ).parent
     errcode = got.xpath('package-result').text.to_i
@@ -300,15 +301,14 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
     got.xpath('//request-reboot-status').text.strip
   end
   
-  def ping( opts = {} )
+  def ping( host, opts = {} )
     arg_options = [ 
-      :host,
       :do_not_fragment, :inet, :inet6, :strict,      
       :count, :interface, :interval, :mac_address,
       :routing_instance, :size, :source, :tos, :ttl, :wait
     ]
     
-    args = {}
+    args = {:host => host}
     opts.each do |k,v|
       if arg_options.include? k
         args[k] = v
