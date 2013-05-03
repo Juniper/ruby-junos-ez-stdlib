@@ -179,9 +179,25 @@ unless ndev.re.software_validate?( file_on_junos )
 end
 ```
 
-## `software_install!` <a name="software_install">
+## `software_install!( opts = {} )` <a name="software_install">
 
-Performs the equivalent of "request system software add ..." and returns `true` if the operation was successful or a String indicating the error message.  The following example illustrates an error message:
+Performs the equivalent of "request system software add ..." and returns `true` if the operation was successful or a String indicating the error message.  
+
+The following options are supported:
+```
+:no_validate => true
+```
+Instructs Junos not to validate the software image.  You should use this option if your program explicity calls `software_validate?` first, since you don't want to do the validation twice.
+```
+:unlink => true
+```
+Instructs Junos to remove the software package file (.tgz) after the installation has completed. 
+```
+:reboot => true
+```
+Instructs Junos to reboot the RE after the software has been installed successfully.
+
+The following example illustrates an error message:
 
 ```ruby
 puts "Installing image ... please wait ..."
