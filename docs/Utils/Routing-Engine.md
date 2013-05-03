@@ -256,7 +256,7 @@ Instructs Junos to reboot after `:in` minutes from the time of calling `reboot!`
 ```
 Instructs Junos to reboot at a specific date and time.  The format of `:at` is YYYYMMDDHHMM, where HH is the 24-hour (military) time.  For example HH = 01 is 1am and HH=13 is 1pm.  If you omit the YYYY, MM, or DD options the current values apply.  For example `:at => 1730` is 1:30pm today.
 
-## `license_install!` <a name="license_install>
+## `license_install!` <a name="license_install">
 
 ## `license_rm!` <a name="license_rm">
 
