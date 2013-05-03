@@ -31,3 +31,10 @@
     runtime status information about the port
     
     RE::Utils - misc updates, and documentation
+
+  0.0.16: 2013-05-03
+  
+    RE::Utils - added support for license-key management.  Renamed "software" methods from "xxx_software"
+    to "software_xxx" to be consistent with other naming usage.  Updated docs.
+  
+ 
