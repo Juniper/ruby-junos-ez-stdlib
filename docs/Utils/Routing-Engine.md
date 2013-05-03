@@ -168,6 +168,15 @@ pp ndev.re.users
   :command=>"-cli (cli)"}]
 ```
 
+## `software_images`
+Returns a Hash of the currnet and rollback image file-names.
+```ruby
+pp ndev.re.software_images
+-> 
+{:rollback=>"junos-12.1I20130415_junos_121_x44_d15.0-576602-domestic",
+ :current=>"junos-12.1I20130322_2104_slt-builder-domestic"}
+```
+
 ## `software_validate?` <a name="software_validate">
 
 Performs the equivalent of "request system software validate..." and returns `true` if the software passes validation or a String indicating the error message.  The following is an example that simply checks for true:
