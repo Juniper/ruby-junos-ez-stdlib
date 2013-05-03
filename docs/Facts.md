@@ -46,8 +46,8 @@ pp ndev.facts.catalog
 {:hardwaremodel=>"SRX210H",
  :serialnumber=>"AD2909AA0096",
  :hostname=>"srx210",
- :domain=>"",
- :fqdn=>"srx210",
+ :domain=>"workflowsherpas.com",
+ :fqdn=>"srx210.workflowsherpas.com",
  :RE=>
   {:status=>"OK",
    :model=>"RE-SRX210H",
