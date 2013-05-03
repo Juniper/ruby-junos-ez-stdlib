@@ -1,4 +1,4 @@
-# Junos::Ez::RE::Utils
+# `Junos::Ez::RE::Utils`
 
 A collection of methods to access routing-engine specific functions and information.  These methods return data in Hash / Array structures so the information can be programmatically accessible, rather than scraping CLI or navigating Junos XML.
 
