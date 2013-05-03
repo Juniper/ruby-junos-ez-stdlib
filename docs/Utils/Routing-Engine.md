@@ -36,9 +36,9 @@ pp ndev.re.uptime
 
 ## Software Image
 
-  - `validate_software?` - "request system software validate..."
-  - `install_software!` - "request system software add ..."
-  - `rollback_software!` - "request system software rollback"
+  - `software_validate?` - "request system software validate..."
+  - `software_install!` - "request system software add ..."
+  - `software_rollback!` - "request system software rollback"
 
 ## System Controls
 
@@ -157,24 +157,24 @@ pp ndev.re.users
   :command=>"-cli (cli)"}]
 ```
 
-## validate_software?
+## software_validate?
 
 Performs the equivalent of "request system software validate..." and returns `true` if the software passes validation or a String indicating the error message.  The following is an example that simply checks for true:
 ```ruby
-unless ndev.re.validate_software?( file_on_junos )
+unless ndev.re.software_validate?( file_on_junos )
   puts "The softare does not validate!"
   ndev.close
   exit 1
 end
 ```
 
-## install_software! 
+## software_install! 
 
 Performs the equivalent of "request system software add ..." and returns `true` if the operation was successful or a String indicating the error message.  The following example illustrates an error message:
 
 ```ruby
 puts "Installing image ... please wait ..."
-rc = ndev.re.install_software!( :package => file_on_junos, :no_validate => true )
+rc = ndev.re.software_install!( :package => file_on_junos, :no_validate => true )
 if rc != true
   puts rc
 end
@@ -203,11 +203,11 @@ WARNING: Use 'request system storage cleanup' and
 WARNING: the 'unlink' option to improve the chances of success
 ```
 
-## rollback_software!
+## software_rollback!
 
 Performs the equivalent of "request system software rollback".  The result of the operation is returned as a String.  For example, a successful rollback would look like this:
 ```ruby
-pp ndev.re.rollback_software!
+pp ndev.re.software_rollback!
 -> 
 "Restoring boot file package\njunos-12.1I20130422_2129_jni-domestic will become active at next reboot\nWARNING: A reboot is required to load this software correctly\nWARNING:     Use the 'request system reboot' command\nWARNING:         when software installation is complete"
 ```
