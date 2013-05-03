@@ -25,7 +25,7 @@ pp ndev.re.uptime
 
 # METHODS
 
-## Information
+## Informational
 
   - `status` - "show chassis routing-engine" information
   - `uptime` - "show system uptime" information
@@ -39,6 +39,13 @@ pp ndev.re.uptime
   - `software_validate?` - "request system software validate..."
   - `software_install!` - "request system software add ..."
   - `software_rollback!` - "request system software rollback"
+  - `software_images` - indicates current/rollback image file names
+
+## License Management
+
+  - `license_install!` - "request system license add"
+  - `license_rm!` - "request system license delete"
+  - `licenses` - "show system license"
 
 ## System Controls
 
@@ -47,7 +54,7 @@ pp ndev.re.uptime
 
 # GORY DETAILS
 
-## status
+## `status`
 
 Returns a Hash structure of "show chassis routing-engine" information.  Each Hash key is the RE identifier.  For example, on a target with a single RE:
 ```ruby
@@ -66,7 +73,7 @@ pp ndev.re.status
    :load_avg=>[0.06, 0.13, 0.07]}}
 ```
 
-## uptime
+## `uptime`
 
 Returns a Hash structure of "show system uptime" information.  Each Hash key is the RE identifier.  For example, on a target with a single RE:
 ```ruby
@@ -82,7 +89,7 @@ pp ndev.re.uptime
    :last_config=>
     {:at=>"2013-04-27 15:00:55 UTC", :ago=>"5d 02:41", :by=>"root"}}}
 ```
-## system_alarms
+## `system_alarms`
 
 Returns an Array of Hash structure of "show system alarms" information.  If there are no alarms, this method returns `nil`.  For example, a target with a single alarm:
 ```ruby
@@ -94,7 +101,7 @@ pp ndev.re.system_alarms
   :type=>"Configuration"}]
 ```
 
-## chassis_alarms
+## `chassis_alarms`
 
 Returns an Array Hash structure of "show chassis alarms" information.  If there are no alarms, this method returns `nil`.  For example, a target with no chassis alarms:
 ```ruby
@@ -103,7 +110,7 @@ pp ndev.re.chassis_alarms
 nil
 ```
 
-## memory
+## `memory`
 
 Returns a Hash structure of "show system memory" information.  Each key is the RE indentifier.  A target with a single RE would look like the following.  Note that the `:procs` Array is the process array, with each element as a Hash of process specific information.
 ```ruby
@@ -143,7 +150,7 @@ pp ndev.re.memory
     ]}}
 ```
 
-## users 
+## `users` 
 
 Returns a Array structure of "show system users" information.  Each Array item is a Hash structure of user information.  A target with a single user logged in would look like:
 ```ruby
@@ -157,7 +164,7 @@ pp ndev.re.users
   :command=>"-cli (cli)"}]
 ```
 
-## software_validate?
+## `software_validate?`
 
 Performs the equivalent of "request system software validate..." and returns `true` if the software passes validation or a String indicating the error message.  The following is an example that simply checks for true:
 ```ruby
@@ -168,7 +175,7 @@ unless ndev.re.software_validate?( file_on_junos )
 end
 ```
 
-## software_install! 
+## `software_install!` 
 
 Performs the equivalent of "request system software add ..." and returns `true` if the operation was successful or a String indicating the error message.  The following example illustrates an error message:
 
@@ -203,7 +210,7 @@ WARNING: Use 'request system storage cleanup' and
 WARNING: the 'unlink' option to improve the chances of success
 ```
 
-## software_rollback!
+## `software_rollback!`
 
 Performs the equivalent of "request system software rollback".  The result of the operation is returned as a String.  For example, a successful rollback would look like this:
 ```ruby
@@ -218,7 +225,7 @@ pp ndev.re.software_rollback!
 "WARNING: Cannot rollback, /packages/junos is not valid"
 ```
 
-## reboot!( opts = {} )
+## `reboot!( opts = {} )`
 
 Performs the "request system reboot" action.  There is **NO** confirmation prompt, so once you've executed this method, the action begins.  Once this command executes the NETCONF session to the target will eventually terminate.  You can trap the `Net::SSH::Disconnect` exception to detect this event.
 
@@ -232,7 +239,7 @@ Instructs Junos to reboot after `:in` minutes from the time of calling `reboot!`
 ```
 Instructs Junos to reboot at a specific date and time.  The format of `:at` is YYYYMMDDHHMM, where HH is the 24-hour (military) time.  For example HH = 01 is 1am and HH=13 is 1pm.  If you omit the YYYY, MM, or DD options the current values apply.  For example `:at => 1730` is 1:30pm today.
 
-## shutdown!( opts = {} )
+## `shutdown!( opts = {} )`
 
 Performs the "request system power-off" action.  There is **NO** confirmation prompt, so once you've executed this method, the action begins.  Once this command executes the NETCONF session to the target will eventually terminate.  You can trap the `Net::SSH::Disconnect` exception to detect this event.
 
