@@ -12,9 +12,9 @@ following lists the methods and the equivalent Junos CLI commands
 - chassis_alarms: show chassis alarms
 - memory: show system memeory
 - users: show system users
-- validate_software?: request system software validate
-- install_software!: request system software add 
-- rollback_software!: request system software rollback
+- software_install!: request system software add 
+- software_rollback!: request system software rollback
+- software_validate?: request system software validate
 - reboot!: request system reboot (no confirm!!)
 - shutdown!: request system power-off (no confirm!!)
   
@@ -180,10 +180,10 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
   end
 
   ### ---------------------------------------------------------------
-  ### validate_software? - request system software validate ...
+  ### software_validate? - request system software validate ...
   ### ---------------------------------------------------------------
   
-  def validate_software?( package )
+  def software_validate?( package )
     got = @ndev.rpc.request_package_validate(:package_name => package).parent
     errcode = got.xpath('package-result').text.to_i
     return true if errcode == 0
@@ -193,10 +193,10 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
   end
 
   ### ---------------------------------------------------------------
-  ### install_software! - request system software add ...
+  ### software_install! - request system software add ...
   ### ---------------------------------------------------------------
   
-  def install_software!( opts = {} )
+  def software_install!( opts = {} )
     raise ArgumentError "missing :package" unless opts[:package]
     
     args = { :package_name => opts[:package] }
@@ -212,10 +212,10 @@ class Junos::Ez::RE::Provider < Junos::Ez::Provider::Parent
   end
 
   ### ---------------------------------------------------------------
-  ### rollback_software! - request system software rollback
+  ### software_rollback! - request system software rollback
   ### ---------------------------------------------------------------
   
-  def rollback_software!
+  def software_rollback!
     got = @ndev.rpc.request_package_rollback
     got.text.strip
   end

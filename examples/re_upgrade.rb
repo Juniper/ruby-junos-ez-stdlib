@@ -67,14 +67,14 @@ end
 puts "MD5 checksum matches ... proceeding ..."
 puts "Validating image ... please wait ..."
 
-unless ndev.re.validate_software?( file_on_junos )
+unless ndev.re.software_validate?( file_on_junos )
   puts "The softare does not validate!"
   ndev.close
   exit 1
 end
 
 puts "Installing image ... please wait ..."
-rc = ndev.re.install_software!( :package => file_on_junos, :no_validate => true )
+rc = ndev.re.software_install!( :package => file_on_junos, :no_validate => true )
 if rc != true
   puts rc
 end
