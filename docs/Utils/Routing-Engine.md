@@ -52,6 +52,10 @@ pp ndev.re.uptime
   - `reboot!` - "request system reboot" (!! NO CONFIRM !!)
   - `shutdown!` - "request system power-off" (!! NO CONFIRM !!)
 
+## Miscellaneous
+
+  - `ping` - Perform a "ping" command
+
 # GORY DETAILS
 
 ## `status`
