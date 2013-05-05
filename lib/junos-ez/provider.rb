@@ -8,6 +8,9 @@
 require 'set'
 
 module Junos; end
+module Junos::Ez; end
+ 
+require 'junos-ez/exceptions.rb'  
   
 module Junos::Ez
   

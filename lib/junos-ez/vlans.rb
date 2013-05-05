@@ -14,7 +14,9 @@ module Junos::Ez::Vlans
     when :VLAN, :VLAN_NG
       Junos::Ez::Vlans::Provider::VLAN.new( ndev )
     when :BRIDGE_DOMAIN
-      Junos::Ez::Vlans::Provider::BRIDGE_DOMAIN.new( ndev )      
+      Junos::Ez::Vlans::Provider::BRIDGE_DOMAIN.new( ndev )     
+    else
+      raise Junos::Ez::NoProvider, "target does not support vlan bridges"
     end      
     newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
     Junos::Ez::Provider.attach_instance_variable( ndev, varsym, newbie )
