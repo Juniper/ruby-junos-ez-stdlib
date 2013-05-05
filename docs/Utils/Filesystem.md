@@ -75,21 +75,31 @@ pp ndev.fs.ls '/var/home/jeremy', :detail => true
 # GORY DETAILS
 
 ## `cat( filename )` <a name="cat"> 
-Returns the String contents of a file.
+Returns the String contents of a file.  If the file does not exist, an `IOError` with String error message is raised.
 ```ruby
 puts ndev.fs.cat '/var/log/messages'
 ->
 May  2 18:05:32 firefly newsyslog[1845]: logfile turned over due to -F request
+
+puts ndev.fs.cat 'foober'
+exception->
+IOError: "could not resolve file: foober"
 ```
 
 ## `checksum( method, path )` <a name="checksum">
-Returns the checksum of a file (MD5, SHA1, SHA256 options) located on the Junos target.  The `method` idetifies the checksum method, and is one of `[:md5, :sha256, :sha1]`.  The `path` argument specifies the file to run the checksum over. 
+Returns the checksum of a file (MD5, SHA1, SHA256 options) located on the Junos target.  The `method` idetifies the checksum method, and is one of `[:md5, :sha256, :sha1]`.  The `path` argument specifies the file to run the checksum over.  If the `path` file does not exist, then an `IOError` exception with String error-message will be raised.
 
 The following runs an MD5 checksum over the file /var/tmp/junos-vsrx-domestic.tgz located on the Junos target:
 ```ruby
 ndev.fs.checksum :md5, "/var/tmp/junos-vsrx-domestic.tgz"
 -> 
 "91132caf6030fa88a31c2b9db60ea54d"
+
+# try to get a checksum on a non-existant file ...
+
+ndev.fs.checksum :md5, "foober"
+exception->
+IOError: "md5: /cf/var/home/jeremy/foober: No such file or directory"
 ```
   
 ## `cleanup?` <a name="cleanup_check"> 
@@ -138,8 +148,8 @@ true
 # try to copy a file that doesn't exist
 ndev.fs.cp! "/var/tmp/vsrx.conf-bleck","."
 (exception)->
-IOError: File does not exist: /var/tmp/vsrx.conf-bleck
-File fetch failed
+IOError: "File does not exist: /var/tmp/vsrx.conf-bleck
+File fetch failed"
 ```
 
 ## `cwd( directory )` <a name="cwd">
@@ -241,7 +251,7 @@ true
 ndev.fs.mv! "vsrx.conf","/var/tmp"
 exception-> 
 IOError:
-mv: /cf/var/home/jeremy/vsrx.conf: No such file or directory
+"mv: /cf/var/home/jeremy/vsrx.conf: No such file or directory"
 ```
 
 ## `rm!( path )` <a name="rm"> 
@@ -255,7 +265,7 @@ true
 ndev.fs.rm! "/var/tmp/junos-vsrx-domestic.tgz"
 exception->
 IOError:
-rm: /var/tmp/junos-vsrx-domestic.tgz: No such file or directory
+"rm: /var/tmp/junos-vsrx-domestic.tgz: No such file or directory"
 ```
 
 
