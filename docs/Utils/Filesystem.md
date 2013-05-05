@@ -127,7 +127,25 @@ ndev.fs.cleanup!
 ```
 
 ## `cp!( from_file, to_file )` <a name="cp">
-Copies a file relative on the device filesystem
+Copies a file relative on the Junos filesystem.  Returns `true` if the operations was successful, raises an `IOError` exceptions with error-message otherwise.
+
+```ruby
+# copy the vsrx.conf file from the temp directory to the current working directory
+ndev.fs.cp! "/var/tmp/vsrx.conf","."
+-> 
+true
+
+# try to copy a file that doesn't exist
+
+begin
+   ndev.fs.cp! "/var/tmp/vsrx.conf-bleck","."
+rescue => e
+   puts e
+end
+->
+IOError: File does not exist: /var/tmp/vsrx.conf-bleck
+File fetch failed
+```
 
 ## `cwd( directory )` <a name="cwd">
 Changes the current working directory (String)
