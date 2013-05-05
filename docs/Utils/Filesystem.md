@@ -139,10 +139,96 @@ Returns a String of the current working directory
 "show system storage"
 
 ## `ls( *args )` <a name="ls">
-"file list", i.e. get a file / directory listing, returns a Hash
+Returns a directory/file listing in a Hash structure.  Each primary key is the name of the directory.  If the required path is a file, then the key will be an empty string.
+The `*args` determine what information is returned.  The general format of use is:
+```
+ls <path>, <options>
+```
+Where `path` is a filesystem-path and `options` is a Hash of controls.  The following options are supported:
+```
+:format => [:text, :xml, :hash]
+```
+Determines what format this method returns.  By default this will be `:hash`.  The `:xml` option will return the Junos XML result.  The `:text` option will return the CLI text output.
+```
+:recurse => true
+```
+When this option is set, a complete recursive listing will be performed.  This is only valid if the `path` is a directory.  This option will return full informational detail on the files/directories as well.
+```
+:detail => true
+```
+When this option is set then detailed information, like file size, is provided. 
 
-## `mv!( fromt_path, to_path )` <a name="mv"> 
-"file move", i.e. move / rename files
+If no `*args` are passed, then the file listing of the current working directory is provided:
+```ruby
+ndev.fs.ls
+-> 
+{"/cf/var/home/jeremy/"=>
+  {:fileblocks=>7370,
+   :files=>
+    {"FF-no-security.conf"=>{},
+     "key1.pub"=>{},
+     "vsrx.conf"=>{}},
+   :dirs=>{".ssh"=>{}}}}
+
+```
+Or if you want the details for the current directory listing
+```ruby
+[23] pry(main)> ndev.fs.ls :detail=>true
+=> {"/cf/var/home/jeremy/"=>
+  {:fileblocks=>7370,
+   :files=>
+    {"FF-no-security.conf"=>
+      {:owner=>"jeremy",
+       :group=>"staff",
+       :links=>1,
+       :size=>366682,
+       :permissions_text=>"-rw-r--r--",
+       :permissions=>644,
+       :date=>"Apr 13 21:56",
+       :date_epoc=>1365890165},
+     "key1.pub"=>
+      {:owner=>"jeremy",
+       :group=>"staff",
+       :links=>1,
+       :size=>0,
+       :permissions_text=>"-rw-r--r--",
+       :permissions=>644,
+       :date=>"Apr 27 14:59",
+       :date_epoc=>1367074764},
+     "vsrx.conf"=>
+      {:owner=>"jeremy",
+       :group=>"staff",
+       :links=>1,
+       :size=>1559492,
+       :permissions_text=>"-rwxr-xr-x",
+       :permissions=>755,
+       :date=>"Dec 19 16:27",
+       :date_epoc=>1355934448}},
+   :dirs=>
+    {".ssh"=>
+      {:owner=>"jeremy",
+       :group=>"staff",
+       :links=>2,
+       :size=>512,
+       :permissions_text=>"drwxr-xr-x",
+       :permissions=>755,
+       :date=>"Apr 3  14:41",
+       :date_epoc=>1365000068}}}}
+```
+
+## `mv!( from_path, to_path )` <a name="mv"> 
+Move / rename file(s).  Returns `true` if the operation was successful, String error-message otherwise.
+```ruby
+# move the file "vsrx.conf" from the current working directory to the temp directory
+ndev.fs.mv! "vsrx.conf","/var/tmp"
+-> 
+true
+
+# Now do it again to generate an error message[26] pry(main)> ndev.fs.mv! "vsrx.conf","/var/tmp"
+ndev.fs.mv! "vsrx.conf","/var/tmp"
+-> 
+"\nmv: /cf/var/home/jeremy/vsrx.conf: No such file or directory\n"
+```
 
 ## `rm!( path )` <a name="rm"> 
 Removes the file(s) identified by `path`.  Returns `true` if the file(s) are removed OK, String error-message otherwise.
