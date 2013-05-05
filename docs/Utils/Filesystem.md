@@ -59,20 +59,51 @@ pp ndev.fs.ls '/var/home/jeremy', :detail => true
 
 # METHODS
 
-  - `cat` - returns the String contents of a file
-  - `checksum` - returns the checksum of a file (MD5, SHA1, SHA256 options)
-  - `cleanup?` - returns a Hash of files that *would be* removed from "request system storage cleanup"
-  - `cleanup!` - "request system storage cleanup" (!! NO CONFIRM !!)
-  - `cp!` - copies a file relative on the device filesystem
-  - `cwd` - changes the current working directory
-  - `pwd` - returns a String of the current working directory
-  - `df` - "show system storage"
-  - `ls` - "file list", i.e. get a file / directory listing, returns a Hash
-  - `mv!` - "file move", i.e. move / rename files
-  - `rm!` - "file delete", i.e. deletes files
+  - [`cat`](#cat) - returns the String contents of a file
+  - [`checksum`](#checksum) - returns the checksum of a file (MD5, SHA1, SHA256 options)
+  - [`cleanup?`](#cleanup_check) - returns a Hash of files that *would be* removed from "request system storage cleanup"
+  - [`cleanup!`](#cleanup) - "request system storage cleanup" (!! NO CONFIRM !!)
+  - [`cp!`](#cp) - copies a file relative on the device filesystem
+  - [`cwd`](#cwd) - changes the current working directory
+  - [`pwd`](#pwd) - returns a String of the current working directory
+  - [`df`](#df) - "show system storage"
+  - [`ls`](#ls) - "file list", i.e. get a file / directory listing, returns a Hash
+  - [`mv!`](#mv) - "file move", i.e. move / rename files
+  - [`rm!`](#rm) - "file delete", i.e. deletes files
 
 # GORY DETAILS
 
-... more docs comming ...
+## `cat( filename )` <a name="cat"> 
+Returns the String contents of a file
+
+## `checksum( method, path )` <a name="checksum">
+Returns the checksum of a file (MD5, SHA1, SHA256 options)
+  
+## `cleanup?` <a name="cleanup_check"> 
+Returns a Hash of files that *would be* removed from "request system storage cleanup"
+
+## `cleanup!` <a name="cleanup">
+"request system storage cleanup" (!! NO CONFIRM !!)
+
+## `cp!( from_file, to_file )` <a name="cp">
+Copies a file relative on the device filesystem
+
+## `cwd( directory )` <a name="cwd">
+Changes the current working directory (String)
+
+## `pwd` 
+Returns a String of the current working directory
+
+# `df( opts = {} )` <a name="df"> 
+"show system storage"
+
+## `ls( *args )` <a name="ls">
+"file list", i.e. get a file / directory listing, returns a Hash
+
+## `mv!( fromt_path, to_path )` <a name="mv"> 
+"file move", i.e. move / rename files
+
+## `rm!( path )` <a name="rm"> 
+"file delete", i.e. deletes files
 
 
