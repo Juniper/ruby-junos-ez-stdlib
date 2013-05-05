@@ -78,7 +78,7 @@ class Junos::Ez::FS::Provider < Junos::Ez::Provider::Parent
     
     f_chk = got.xpath('file-checksum')
     if (err = f_chk.xpath('rpc-error/error-message')[0])
-      return err.text.strip
+      raise IOError, err.text.strip
     end    
     f_chk.xpath('checksum').text.strip    
   end
@@ -180,17 +180,7 @@ class Junos::Ez::FS::Provider < Junos::Ez::Provider::Parent
     ls_hash
   end # method: ls
   
-  ### -------------------------------------------------------------
-  ### rm! - just like unix, removes files
-  ### -------------------------------------------------------------
-  
-  def rm!( path )
-    got = @ndev.rpc.file_delete( :path => path )
-    return true if got.nil?     # got no error
-    # otherwise, there was an error, check output
-    got.text
-  end
-  
+
   ### -------------------------------------------------------------
   ### cat - is used to obtain the text contents of the file
   ### -------------------------------------------------------------
@@ -203,15 +193,7 @@ class Junos::Ez::FS::Provider < Junos::Ez::Provider::Parent
     end
   end
   
-  ### -------------------------------------------------------------
-  ### 'mv' - just like unix, moves/renames a file
-  ### -------------------------------------------------------------
-  
-  def mv!( from_path, to_path )
-    got = @ndev.rpc.command( "file rename #{from_path} #{to_path}" )
-    return true if got.nil?     # got no error
-    got.text
-  end
+
   
   ### -------------------------------------------------------------
   ### df - shows the system storage information
@@ -311,6 +293,28 @@ class Junos::Ez::FS::Provider < Junos::Ez::Provider::Parent
       return true
     end
   end
+  
+  ### -------------------------------------------------------------
+  ### 'mv' - just like unix, moves/renames a file
+  ### -------------------------------------------------------------
+  
+  def mv!( from_path, to_path )
+    got = @ndev.rpc.command( "file rename #{from_path} #{to_path}" )
+    return true if got.nil?     # got no error
+    raise IOError, got.text
+  end  
+  
+  ### -------------------------------------------------------------
+  ### rm! - just like unix, removes files
+  ### -------------------------------------------------------------
+  
+  def rm!( path )
+    got = @ndev.rpc.file_delete( :path => path )
+    return true if got.nil?     # got no error
+    # otherwise, there was an error, check output
+    raise IOError, got.text
+  end
+    
   
 end # class Provider    
 
