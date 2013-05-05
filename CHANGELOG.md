@@ -21,6 +21,8 @@
   
     Completed initial documentation.  Still more work to be done with these files
     but the "enough to get started" information is now available
+    
+# 2013-May    
 
   0.0.15: 2013-05-02
   
@@ -36,5 +38,9 @@
   
     RE::Utils - added support for license-key management.  Renamed "software" methods from "xxx_software"
     to "software_xxx" to be consistent with other naming usage.  Updated docs.
+  
+  0.0.17: 2013-05-05
+  
+    FS::Utils - updated docs.  fixed methods so that all "error" scenarios raise IOError excaptions.
   
  
