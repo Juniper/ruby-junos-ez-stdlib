@@ -78,7 +78,7 @@ puts "OK!"
 Junos::Ez::Provider( ndev )
 Junos::Ez::L1ports::Provider( ndev, :l1_ports )
 Junos::Ez::IPports::Provider( ndev, :ip_ports )
-Junoz::Ez::Config::Utils( ndev, :cu )
+Junos::Ez::Config::Utils( ndev, :cu )
 
 # -----------------------------------------------------------
 # Facts ...
