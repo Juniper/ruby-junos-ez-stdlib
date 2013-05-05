@@ -1,8 +1,21 @@
-# Filesystem Utilities
+# `Junos::Ez::FS::Utils`
 
 A collection of methods to access filesystem specific functions and information. These methods return data in 
-Hash / Array structures so the information can be programmatically accessible, rather than scraping CLI or navigating
-Junos XML.
+Hash / Array structures so the information can be programmatically accessible.
+
+# METHODS
+
+  - [`cat`](#cat) - returns the String contents of a file
+  - [`checksum`](#checksum) - returns the checksum of a file (MD5, SHA1, SHA256 options)
+  - [`cleanup?`](#cleanup_check) - returns a Hash of files that *would be* removed from "request system storage cleanup"
+  - [`cleanup!`](#cleanup) - "request system storage cleanup" (!! NO CONFIRM !!)
+  - [`cp!`](#cp) - copies a file relative on the device filesystem
+  - [`cwd`](#cwd) - changes the current working directory
+  - [`pwd`](#pwd) - returns a String of the current working directory
+  - [`df`](#df) - "show system storage"
+  - [`ls`](#ls) - "file list", i.e. get a file / directory listing, returns a Hash
+  - [`mv!`](#mv) - "file move", i.e. move / rename files
+  - [`rm!`](#rm) - "file delete", i.e. deletes files
 
 # USAGE
 ```ruby
@@ -57,24 +70,17 @@ pp ndev.fs.ls '/var/home/jeremy', :detail => true
        :date_epoc=>1271441068}}}}
 ```
 
-# METHODS
 
-  - [`cat`](#cat) - returns the String contents of a file
-  - [`checksum`](#checksum) - returns the checksum of a file (MD5, SHA1, SHA256 options)
-  - [`cleanup?`](#cleanup_check) - returns a Hash of files that *would be* removed from "request system storage cleanup"
-  - [`cleanup!`](#cleanup) - "request system storage cleanup" (!! NO CONFIRM !!)
-  - [`cp!`](#cp) - copies a file relative on the device filesystem
-  - [`cwd`](#cwd) - changes the current working directory
-  - [`pwd`](#pwd) - returns a String of the current working directory
-  - [`df`](#df) - "show system storage"
-  - [`ls`](#ls) - "file list", i.e. get a file / directory listing, returns a Hash
-  - [`mv!`](#mv) - "file move", i.e. move / rename files
-  - [`rm!`](#rm) - "file delete", i.e. deletes files
 
 # GORY DETAILS
 
 ## `cat( filename )` <a name="cat"> 
-Returns the String contents of a file
+Returns the String contents of a file.
+```ruby
+puts ndev.fs.cat '/var/log/messages'
+->
+May  2 18:05:32 firefly newsyslog[1845]: logfile turned over due to -F request
+```
 
 ## `checksum( method, path )` <a name="checksum">
 Returns the checksum of a file (MD5, SHA1, SHA256 options)
