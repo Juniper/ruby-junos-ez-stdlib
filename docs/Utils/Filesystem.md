@@ -136,13 +136,8 @@ ndev.fs.cp! "/var/tmp/vsrx.conf","."
 true
 
 # try to copy a file that doesn't exist
-
-begin
-   ndev.fs.cp! "/var/tmp/vsrx.conf-bleck","."
-rescue => e
-   puts e
-end
-->
+ndev.fs.cp! "/var/tmp/vsrx.conf-bleck","."
+(exception)->
 IOError: File does not exist: /var/tmp/vsrx.conf-bleck
 File fetch failed
 ```
@@ -235,7 +230,7 @@ Or if you want the details for the current directory listing
 ```
 
 ## `mv!( from_path, to_path )` <a name="mv"> 
-Move / rename file(s).  Returns `true` if the operation was successful, String error-message otherwise.
+Move / rename file(s).  Returns `true` if the operation was successful, `IOError` exception with String error-message otherwise.
 ```ruby
 # move the file "vsrx.conf" from the current working directory to the temp directory
 ndev.fs.mv! "vsrx.conf","/var/tmp"
@@ -244,12 +239,13 @@ true
 
 # Now do it again to generate an error message[26] pry(main)> ndev.fs.mv! "vsrx.conf","/var/tmp"
 ndev.fs.mv! "vsrx.conf","/var/tmp"
--> 
-"\nmv: /cf/var/home/jeremy/vsrx.conf: No such file or directory\n"
+exception-> 
+IOError:
+mv: /cf/var/home/jeremy/vsrx.conf: No such file or directory
 ```
 
 ## `rm!( path )` <a name="rm"> 
-Removes the file(s) identified by `path`.  Returns `true` if the file(s) are removed OK, String error-message otherwise.
+Removes the file(s) identified by `path`.  Returns `true` if the file(s) are removed OK, `IOError` exception with String error-message otherwise.
 ```ruby
 ndev.fs.rm! "/var/tmp/junos-vsrx-domestic.tgz"
 -> 
@@ -257,8 +253,9 @@ true
 
 # now try to remove the file again to generate an error ..
 ndev.fs.rm! "/var/tmp/junos-vsrx-domestic.tgz"
--> 
-"\nrm: /var/tmp/junos-vsrx-domestic.tgz: No such file or directory\n"
+exception->
+IOError:
+rm: /var/tmp/junos-vsrx-domestic.tgz: No such file or directory
 ```
 
 
