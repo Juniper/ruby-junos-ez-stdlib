@@ -176,7 +176,79 @@ ndev.fs.pwd
 ```
 
 # `df( opts = {} )` <a name="df"> 
-"show system storage"
+Returns information about the filesystem storage, gathered from "show system storage".  The following options are supported:
+```
+:format => [:hash, :xml, :text]
+```
+Determines the return format, the default is `:hash`.  Format `:xml` returns the Junos XML result, and format `:text` returns the CLI text output.
+```
+:size_div => Fixnum
+```
+This option is only valid if `:format => :hash`.  When a `:size_div` is provided, this method will change the reported size by dividing it down; handy if you want to covert the size in bytes to something like MB or GB reference.  This option will change the values of the `:total_size`, `:used_size`, and `:avail_size` values.
+```ruby
+ndev.fs.df
+-> 
+{"/dev/ad0s1a"=>
+  {:mounted_on=>"/",
+   :total_blocks=>3313822,
+   :total_size=>"1.6G",
+   :used_blocks=>1431770,
+   :used_size=>"699M",
+   :used_percent=>47,
+   :avail_blocks=>1616948,
+   :avail_size=>"790M"},
+ "devfs"=>
+  {:mounted_on=>"/jail/dev",
+   :total_blocks=>2,
+   :total_size=>"1.0K",
+   :used_blocks=>2,
+   :used_size=>"1.0K",
+   :used_percent=>100,
+   :avail_blocks=>0,
+   :avail_size=>"0B"},
+# <snip>
+ "/cf/var/log"=>
+  {:mounted_on=>"/jail/var/log",
+   :total_blocks=>3313822,
+   :total_size=>"1.6G",
+   :used_blocks=>1431770,
+   :used_size=>"699M",
+   :used_percent=>47,
+   :avail_blocks=>1616948,
+   :avail_size=>"790M"}}
+```
+Same example but dividing down the size by 1024 to put into MB.
+```ruby
+[7] pry(main)> ndev.fs.df :size_div => 1024
+=> {"/dev/ad0s1a"=>
+  {:mounted_on=>"/",
+   :total_blocks=>3313822,
+   :total_size=>1618,
+   :used_blocks=>1431770,
+   :used_size=>699,
+   :used_percent=>47,
+   :avail_blocks=>1616948,
+   :avail_size=>789},
+ "devfs"=>
+  {:mounted_on=>"/jail/dev",
+   :total_blocks=>2,
+   :total_size=>0,
+   :used_blocks=>2,
+   :used_size=>0,
+   :used_percent=>100,
+   :avail_blocks=>0,
+   :avail_size=>0},
+# <snip> 
+ "/cf/var/log"=>
+  {:mounted_on=>"/jail/var/log",
+   :total_blocks=>3313822,
+   :total_size=>1618,
+   :used_blocks=>1431770,
+   :used_size=>699,
+   :used_percent=>47,
+   :avail_blocks=>1616948,
+   :avail_size=>789}}
+```
 
 ## `ls( *args )` <a name="ls">
 Returns a directory/file listing in a Hash structure.  Each primary key is the name of the directory.  If the required path is a file, then the key will be an empty string.
