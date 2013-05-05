@@ -1,8 +1,17 @@
-# Junos::Ez::Config::Utils
+# `Junos::Ez::Config::Utils`
 
-A collection of methods to perform file / template based configuration, and configuration control functions, like "commit", "show | compare", "rollback", etc.
+A collection of methods to perform file / template based configuration, and configuration control functions, like "commit", "show | compare", "rollback", etc.  These methods return data in Hash / Array structures so the information can be programmatically accessible.
 
-These methods return data in Hash / Array structures so the information can be programmatically accessible, rather than scraping CLI or navigating Junos XML.
+# METHODS
+
+  - [`lock!`](#lock) - attempt exclusive config, returns true or raises Netconf::LockError
+  - [`load!`](#load) - loads configuration snippets or templates (ERB)
+  - [`diff?`](#diff) - returns String of "show | compare" as String
+  - [`commit?`](#commit_check) - checks the candidate config for validation, returns true or Hash of errors
+  - [`commit!`](#commit) - performs commit, returns true or raises Netconf::CommitError 
+  - [`unlock!`](#unlock) - releases exclusive lock on config
+  - [`rollback!`](#rollback) - performs rollback of config
+  - [`get_config`](#get_config) - returns text-format of configuration
 
 # USAGE
 
@@ -31,16 +40,7 @@ ndev.cu.commit!
 ndev.close
 ```
 
-# METHODS
 
-  - [`lock!`](#lock) - attempt exclusive config, returns true or raises Netconf::LockError
-  - [`load!`](#load) - loads configuration snippets or templates (ERB)
-  - [`diff?`](#diff) - returns String of "show | compare" as String
-  - [`commit?`](#commit_check) - checks the candidate config for validation, returns true or Hash of errors
-  - [`commit!`](#commit) - performs commit, returns true or raises Netconf::CommitError 
-  - [`unlock!`](#unlock) - releases exclusive lock on config
-  - [`rollback!`](#rollback) - performs rollback of config
-  - [`get_config`](#get_config) - returns text-format of configuration
 
 # GORY DETAILS
 
