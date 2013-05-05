@@ -33,26 +33,25 @@ ndev.close
 
 # METHODS
 
-  - `lock!` - attempt exclusive config, returns true or raises Netconf::LockError
-  - `load!` - loads configuration snippets or templates (ERB)
-  - `diff?` - returns String of "show | compare" as String
-  - `commit?` - checks the candidate config for validation, returns true or Hash of errors
-  - `commit!` - performs commit, returns true or raises Netconf::CommitError 
-  - `unlock!` - releases exclusive lock on config
-  - `rollback!` - performs rollback of config
-  - `get_config` - returns text-format of configuration
+  - [`lock!`](#lock) - attempt exclusive config, returns true or raises Netconf::LockError
+  - [`load!`](#load) - loads configuration snippets or templates (ERB)
+  - [`diff?`](#diff) - returns String of "show | compare" as String
+  - [`commit?`](#commit_check) - checks the candidate config for validation, returns true or Hash of errors
+  - [`commit!`](#commit) - performs commit, returns true or raises Netconf::CommitError 
+  - [`unlock!`](#unlock) - releases exclusive lock on config
+  - [`rollback!`](#rollback) - performs rollback of config
+  - [`get_config`](#get_config) - returns text-format of configuration
 
 # GORY DETAILS
 
-## lock!
+## lock! <a name="lock">
 Attempt exclusive config, returns `true` if you now have the lock, or raises `Netconf::LockError` exception if the lock is not available
 
-## load!( opts = {} )
+## load!( opts = {} ) <a name="load">
 
 Loads configuration snippets or templates (ERB).  This method does **not** commit the change, only loads the contents into the candidate configuration.  If the load was successful, this method will return `true`. Otherwise it will raise a `Netconf::EditError` exception.
 
 The options Hash enables the following controls:
-
 
 ```
 :filename => String
@@ -95,10 +94,10 @@ When `true` the provided configuraiton will **COMPLETELY OVERWRITE** any existin
 ```
 When `true` enables the Junos *replace* option.  This is required if your configuration changes utilize either the `replace:` statement in text-format style or the `replace="replace"` attribute in XML-format style.  You do not need to set this option if you are using the set-format style.
 
-## diff?
+## diff? <a name="diff">
 Returns String of "show | compare" as String.  If there is no diff, then this method returns `nil`.
 
-## commit?
+## commit? <a name="commit_check">
 
 Checks the candidate config for validation, returns `true` or Array of errors.
 
@@ -113,7 +112,7 @@ ndev.cu.commit?
  {:severity=>"error", :message=>"configuration check-out failed"}]
 ```
 
-## commit!( opts = {} )
+## commit!( opts = {} ) <a name="commit">
 
 Performs commit, returns `true` or raises `Netconf::CommitError`.  Available options are:
 
@@ -123,15 +122,15 @@ A commit log comment that is available when retrieving the commit log.
     :confirm => Fixnum-Minutes
 Identifies a timeout in minutes to automatically rollback the configuration unless you explicitly issue another commit action.  This is very useful if you think your configuration changes may lock you out of the device.
 
-## unlock! 
+## unlock! <a name="unlock">
 
 Releases exclusive lock on config.  If you do not posses the lock, this method will raise an `Netconf::RpcError` exception.
 
-## rollback!( rollback_id = 0 )
+## rollback!( rollback_id = 0 ) <a name="rollback">
 
 Loads a rollback of config, does not commit.
 
-## get_config( scope = nil )
+## get_config( scope = nil ) <a name="get_config">
 
 Returns the text-style format of the request config.  If `scope` is `nil` then the entire configuration is returned.  If the `scope` is invalid (asking for the "foo" stanza for example), then a string with "ERROR!" is returned.  If the requested config is non-existant (asking for non-existant interface), then `nil` is returned.
 
