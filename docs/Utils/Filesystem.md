@@ -145,6 +145,16 @@ Returns a String of the current working directory
 "file move", i.e. move / rename files
 
 ## `rm!( path )` <a name="rm"> 
-"file delete", i.e. deletes files
+Removes the file(s) identified by `path`.  Returns `true` if the file(s) are removed OK, String error-message otherwise.
+```ruby
+ndev.fs.rm! "/var/tmp/junos-vsrx-domestic.tgz"
+-> 
+true
+
+# now try to remove the file again to generate an error ..
+ndev.fs.rm! "/var/tmp/junos-vsrx-domestic.tgz"
+-> 
+"\nrm: /var/tmp/junos-vsrx-domestic.tgz: No such file or directory\n"
+```
 
 
