@@ -110,7 +110,21 @@ ndev.fs.cleanup?
 ```
 
 ## `cleanup!` <a name="cleanup">
-"request system storage cleanup" (!! NO CONFIRM !!)
+Performs the command "request system storage cleanup" (!! NO CONFIRM !!), and returns a Hash of the files that were removed.
+```ruby
+ndev.fs.cleanup!
+-> 
+{"/cf/var/crash/flowd_vsrx.log.firefly.0"=>
+  {:size_text=>"650B", :size=>650, :date=>"May  3 13:15"},
+ "/cf/var/crash/flowd_vsrx.log.firefly.1"=>
+  {:size_text=>"650B", :size=>650, :date=>"May  3 13:22"},
+ "/cf/var/crash/flowd_vsrx.log.firefly.2"=>
+  {:size_text=>"23B", :size=>23, :date=>"May  5 19:20"},
+ "/cf/var/crash/flowd_vsrx.log.firefly.3"=>
+  {:size_text=>"650B", :size=>650, :date=>"May  5 19:20"},
+ "/cf/var/tmp/vpn_tunnel_orig.id"=>
+  {:size_text=>"0B", :size=>0, :date=>"May  5 19:20"}}
+```
 
 ## `cp!( from_file, to_file )` <a name="cp">
 Copies a file relative on the device filesystem
