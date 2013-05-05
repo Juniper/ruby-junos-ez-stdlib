@@ -83,10 +83,31 @@ May  2 18:05:32 firefly newsyslog[1845]: logfile turned over due to -F request
 ```
 
 ## `checksum( method, path )` <a name="checksum">
-Returns the checksum of a file (MD5, SHA1, SHA256 options)
+Returns the checksum of a file (MD5, SHA1, SHA256 options) located on the Junos target.  The `method` idetifies the checksum method, and is one of `[:md5, :sha256, :sha1]`.  The `path` argument specifies the file to run the checksum over. 
+
+The following runs an MD5 checksum over the file /var/tmp/junos-vsrx-domestic.tgz located on the Junos target:
+```ruby
+ndev.fs.checksum :md5, "/var/tmp/junos-vsrx-domestic.tgz"
+-> 
+"91132caf6030fa88a31c2b9db60ea54d"
+```
   
 ## `cleanup?` <a name="cleanup_check"> 
-Returns a Hash of files that *would be* removed from "request system storage cleanup"
+Returns a Hash of files that *would be* removed as a result of the command "request system storage cleanup".
+```ruby
+ndev.fs.cleanup?
+-> 
+{"/cf/var/crash/flowd_vsrx.log.firefly.0"=>
+  {:size_text=>"650B", :size=>650, :date=>"May  3 13:15"},
+ "/cf/var/crash/flowd_vsrx.log.firefly.1"=>
+  {:size_text=>"650B", :size=>650, :date=>"May  3 13:22"},
+ "/cf/var/crash/flowd_vsrx.log.firefly.2"=>
+  {:size_text=>"23B", :size=>23, :date=>"May  5 19:20"},
+ "/cf/var/crash/flowd_vsrx.log.firefly.3"=>
+  {:size_text=>"650B", :size=>650, :date=>"May  5 19:20"},
+ "/cf/var/tmp/vpn_tunnel_orig.id"=>
+  {:size_text=>"0B", :size=>0, :date=>"May  5 19:20"}}
+```
 
 ## `cleanup!` <a name="cleanup">
 "request system storage cleanup" (!! NO CONFIRM !!)
