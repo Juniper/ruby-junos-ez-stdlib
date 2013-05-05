@@ -153,10 +153,27 @@ File fetch failed"
 ```
 
 ## `cwd( directory )` <a name="cwd">
-Changes the current working directory (String)
+Changes the current working directory (String).  Returns the working directory name if the operation was succesfful.  If the requested `directory` does not exist, then an `IOError` with String error-message is raised.
+```ruby
+# change to the '/var/tmp' directory.  What we see is that this directory is really a symlink to '/cf/var/tmp'
+ndev.fs.cwd "/var/tmp"
+-> 
+"/cf/var/tmp"
+
+# now try to change to a non-existant directory:
+
+ndev.fs.cwd "/foober"
+exception->
+IOError: "invalid directory: /foober"
+```
 
 ## `pwd` 
-Returns a String of the current working directory
+Returns a String of the current working directory.
+```ruby
+ndev.fs.pwd
+-> 
+"/cf/var/home/jeremy"
+```
 
 # `df( opts = {} )` <a name="df"> 
 "show system storage"
