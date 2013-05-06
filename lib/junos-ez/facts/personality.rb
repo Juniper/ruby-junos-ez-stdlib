@@ -1,8 +1,11 @@
 Junos::Ez::Facts::Keeper.define( :personality ) do |ndev, facts|
   
   model = uses :hardwaremodel  
+  uses :routingengines
+
+  examine = ( model != "Virtual Chassis" ) ? model : facts[:RE0][:model]
       
-  facts[:personality] = case model   
+  facts[:personality] = case examine   
   when /^(EX)|(QFX)/
     :SWITCH
   when /^MX/
