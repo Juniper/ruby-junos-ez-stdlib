@@ -23,7 +23,7 @@ puts "OK!"
 ## attach our private & utils that we need ...
 
 Junos::Ez::Provider( ndev )
-Junos::Ez::RE::Utils( ndev, :re )       # routine-engine utils
+Junos::Ez::RE::Utils( ndev, :re )       # routing-engine utils
 Junos::Ez::FS::Utils( ndev, :fs )       # filesystem utils
 
 ## upload the software image to the target device
