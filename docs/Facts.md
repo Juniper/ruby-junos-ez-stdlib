@@ -127,7 +127,7 @@ ndev.facts.catalog
  :version_FPC2=>"12.2R3.5",
  :version=>"12.2R3.5"}
 ```
-Note the presense of a `:RE0` and `:RE1` fact that contains the Hash information for each routing-engine.
+Note the presense of`:RE0` and `:RE1` facts, each contains the Hash information for each routing-engine.  If a target does not support multiple routing-engnies, then there will be a `:RE` fact (no slot-id).
 ```
 :switch_style => [:VLAN, :BRIDGE_DOMAIN, :VLAN_ELS, :NONE]
 ```
