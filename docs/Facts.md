@@ -1,4 +1,4 @@
-# Fact Keeping
+# FACT KEEPING
 
 This framework is *fact based*, meaning that the provider libraries will have access to information about each
 target.  Facts enable the framework to abstract the physical differences of the underlying hardware.  
@@ -9,12 +9,11 @@ There are collection of standard facts that are always read by the framework.  Y
 
 You can also define your own facts, and then go on to building your own provider libraries (but we're getting ahead of ourselfs here ...)
 
-# Usage
+# USAGE
 
 Usage rule: you **MUST** call `Junos::Ez::Provider` on your netconf object:
 
   - **AFTER** the object has connected to the target, since it will read facts
-
   - **BEFORE** you add any other providers, since these may use the facts
   
 Here is a basic example:
@@ -59,17 +58,67 @@ pp ndev.facts.catalog
  :version=>"12.1X44-D10.4"}
 ```
 
-# Methods
+# STANDARD FACTS
+
+The following facts are provided by the `Junos::Ez::Provider` framework:
+```
+:hardwaremodel => String
+```
+Identifies the target hardware model as obtained from the chassis inventory information
+```
+:serialnumber => String
+```
+Identifies the target chassis serial-number as obtained from the chassis inventory information
+```
+:hostname => String
+```
+Identifies the target host-name as obtained from the system configuration
+```
+:domain => String
+```
+Identifies the target domain-name as obtained from the system configuration
+```
+:fqdn => String
+```
+Identifies the target Fully-Qualified-Domain-Name (FQDN), which is the composite of the `:hostname` and `:domain` facts.
+```
+:version => String
+```
+Identifies the Junos version string, e.g. "12.3R2.5" running on the master routing-engine.
+```
+:version_<RE | FPC + ID> => String
+```
+When the target is a multi-routing-engine or virtual-chassis system, the version loaded on each control processor is provided as a separate version fact.  All version facts begin with `version_`.  So and MX router with two routing-engines would have `:version_RE0` and `:version_RE1` in additon to the `:version` fact.  An EX vritual chassis with two members would have `:version_FPC0` and `:version_FPC1` facts in additon to the `:version` fact.
+```
+:master => Fixnum
+```
+If the target is a multi-routing-engine capabile, this fact will identify the master RE
+
+
+```
+:switch_style => [:VLAN, :BRIDGE_DOMAIN, :VLAN_ELS, :NONE]
+```
+Identifies the target style for handing vlan configurations.  If the target does not support vlan briding (for example the vSRX), then the style will be set to `:NONE`.  
+```
+:personality => [:SWITCH, :MX, :SRX_BRANCH, :SRX_HIGHEND]
+```
+Identifies the personality of the target.
+```
+:ifd_style => [:CLASSIC, :SWITCH]
+```
+Identifies the target style for handling interface configuration differences.
+
+# METHODS
   
   - `read!` - reloads the facts from the target
-  - `[]` - retrieve a specific fact from the keeper
+  - `facts[]` - retrieve a specific fact from the keeper
   - `fact` - alternative method to retrieve a specific fact from the keeper
   - `list`, `list!` - returns an Array of fact names (symbols)
   - `catalog`, `catalog!` - returns a Hash of fact names and values
   
 The bang (!) indicates that the method will re-read the value from the target, which the non-bang method uses the values cached in memory.  If the cache does not exist, the framework will read the values. The use of the bang-methods are handy if/when you have facts whose values change at runtime, like the `ndev.fact(:RE)[:up_time]`
 
-# Definig Custom Facts
+# CREATING CUSTOM FACTS
 
 You can define your own facts using `Junos::Ez::Facts::Keeper.define`.  You can review the stdlib facts by looking the *libs/../facts* subdirectory of this repo.  Here is the code for the `:chassis` fact.  What is interesting about this example, is this code will actually create multiple facts about the chassis.  So there is not a required one-to-one relationship between createing a custom fact and the actual number of facts it creates, yo!
 
