@@ -314,7 +314,7 @@ port.write!
 
 ### Interating Resources
 
-You can use the `each` method to interate through each managed resource.  For example:
+You can use the `each` method to iterate through each managed resource, as provided by the `list` provider instance variable.  For example:
 
 ```ruby
 ndev.l1_ports.each do |port|
@@ -323,4 +323,31 @@ ndev.l1_ports.each do |port|
     puts "Port #{port.name} should be up, and isn't!
   end
 end
+```
+
+You can use the `with` method to iterate through a given list of managed resources.  For example:
+
+```ruby
+# dump the status for just these two IP ports ...
+
+ip_list = ["ge-0/0/1.719","ge-0/0/1.335"]
+
+ndev.ip_ports.with(ip_list) do |ip|
+  pp ip.name
+  pp ip.status
+end
+
+->
+"ge-0/0/1.719"
+{:l1_oper_status=>:up,
+ :oper_status=>:down,
+ :snmp_index=>616,
+ :packets_rx=>0,
+ :packets_tx=>0}
+"ge-0/0/1.335"
+{:l1_oper_status=>:up,
+ :oper_status=>:up,
+ :snmp_index=>613,
+ :packets_rx=>0,
+ :packets_tx=>0}
 ```
