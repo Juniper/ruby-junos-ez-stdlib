@@ -1,3 +1,3 @@
 module Junos::Ez
-  class NoProvider < StandardError; end
+  class NoProviderError < StandardError; end
 end

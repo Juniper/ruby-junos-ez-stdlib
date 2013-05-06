@@ -14,7 +14,7 @@ require 'junos-ez/exceptions.rb'
   
 module Junos::Ez
   
-  VERSION = "0.0.17"
+  VERSION = "0.1.0"
   
   ### ---------------------------------------------------------------
   ### rpc_errors - decodes the XML into an array of error/Hash
@@ -361,15 +361,25 @@ class Junos::Ez::Provider::Parent
   end
   
   ### ---------------------------------------------------------------
-  ### Provider each method - this will go and create a managed 
-  ### object for each item in the list.  This could get CPU
-  ### intensive depending on the number of items under provider
-  ### management, yo!
+  ### Provider `each` - iterate through each managed resource
+  ### as obtained from the `list` instance variable.  select the
+  ### object and pass it to the provided block
   ### ---------------------------------------------------------------    
   
   def each( &block )
     raise ArgumentError, "not a provider" unless is_provider?
     list.each{ |name| yield select(name ) }
+  end
+
+  ### ---------------------------------------------------------------
+  ### Provider `with` - iterate through each managed resource
+  ### as obtained from the `given_list` instance variable.  
+  ### select the object and pass it to the provided block
+  ### ---------------------------------------------------------------    
+  
+  def with( given_list, &block )
+    raise ArgumentError, "not a provider" unless is_provider?
+    given_list.each{ |name| yield select( name ) }
   end
   
   ### ---------------------------------------------------------------
