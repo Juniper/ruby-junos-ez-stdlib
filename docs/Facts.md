@@ -90,11 +90,44 @@ Identifies the Junos version string, e.g. "12.3R2.5" running on the master routi
 ```
 When the target is a multi-routing-engine or virtual-chassis system, the version loaded on each control processor is provided as a separate version fact.  All version facts begin with `version_`.  So and MX router with two routing-engines would have `:version_RE0` and `:version_RE1` in additon to the `:version` fact.  An EX vritual chassis with two members would have `:version_FPC0` and `:version_FPC1` facts in additon to the `:version` fact.
 ```
-:master => Fixnum
+:master => String
 ```
-If the target is a multi-routing-engine capabile, this fact will identify the master RE
-
-
+If the target is a multi-routing-engine capabile, this fact will identify the master RE, for example "0".
+```
+:RE<SLOD_ID> => Hash
+```
+For each routing-engine, a Hash structure of information is obtained.  
+The following illustrates an EX virtual-chassis:
+```ruby
+ndev.facts.catalog
+-> 
+{:hardwaremodel=>"Virtual Chassis",
+ :serialnumber=>"BP0208207236",
+ :hostname=>"jex",
+ :domain=>"workflowsherpas.com",
+ :fqdn=>"jex.workflowsherpas.com",
+ :RE0=>
+  {:mastership_state=>"master",
+   :status=>"OK",
+   :model=>"EX4200-48T, 8 POE",
+   :up_time=>"14 minutes, 12 seconds",
+   :last_reboot_reason=>"0x2:watchdog "},
+ :master=>"0",
+ :RE1=>
+  {:mastership_state=>"backup",
+   :status=>"OK",
+   :model=>"EX4200-48T, 8 POE",
+   :up_time=>"14 minutes, 12 seconds",
+   :last_reboot_reason=>"0x2:watchdog "},
+ :personality=>:SWITCH,
+ :ifd_style=>:SWITCH,
+ :switch_style=>:VLAN,
+ :version_FPC0=>"12.2R3.5",
+ :version_FPC1=>"12.2R3.5",
+ :version_FPC2=>"12.2R3.5",
+ :version=>"12.2R3.5"}
+```
+Note the presense of a `:RE0` and `:RE1` fact that contains the Hash information for each routing-engine.
 ```
 :switch_style => [:VLAN, :BRIDGE_DOMAIN, :VLAN_ELS, :NONE]
 ```
@@ -107,6 +140,10 @@ Identifies the personality of the target.
 :ifd_style => [:CLASSIC, :SWITCH]
 ```
 Identifies the target style for handling interface configuration differences.
+```
+:virtual => true
+```
+Set if the target is a virtual-machine, like the vSRX
 
 # METHODS
   
