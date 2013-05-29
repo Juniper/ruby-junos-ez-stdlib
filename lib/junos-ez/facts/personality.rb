@@ -1,7 +1,7 @@
 Junos::Ez::Facts::Keeper.define( :personality ) do |ndev, facts|
   
-  model = uses :hardwaremodel  
-  uses :routingengines
+  uses :chassis, :routingengines  
+  model = facts[:hardwaremodel]
 
   examine = ( model != "Virtual Chassis" ) ? model : facts[:RE0][:model]
       

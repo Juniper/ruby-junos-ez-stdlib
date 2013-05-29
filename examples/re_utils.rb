@@ -19,6 +19,8 @@ print "Connecting to device #{login[:target]} ... "
 ndev.open
 puts "OK!"
 
+binding.pry
+
 ## attach our private & utils that we need ...
 
 Junos::Ez::Provider( ndev )
