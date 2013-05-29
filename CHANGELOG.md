@@ -48,3 +48,7 @@
     All docs and code _finished_ for the inital release of code.  Always more to do, but at this
     point, declaring the framework "good for early adopter testing".  Looking forward to bug-reports,
     please open issues against this repo.  Thank you!
+    
+  0.1.1: 2013-05-29
+  
+    Fixed a small bug in fact gathering for hardwaremodel
