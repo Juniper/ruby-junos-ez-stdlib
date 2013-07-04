@@ -1,6 +1,6 @@
 $LOAD_PATH.unshift 'lib'
 require 'rake'
-require 'junos-ez/provider'
+require 'junos-ez/version'
 
 Gem::Specification.new do |s|
   s.name = 'junos-ez-stdlib'

@@ -10,11 +10,10 @@ require 'set'
 module Junos; end
 module Junos::Ez; end
  
+require 'junos-ez/version.rb'
 require 'junos-ez/exceptions.rb'  
   
 module Junos::Ez
-  
-  VERSION = "0.1.1"
   
   ### ---------------------------------------------------------------
   ### rpc_errors - decodes the XML into an array of error/Hash
