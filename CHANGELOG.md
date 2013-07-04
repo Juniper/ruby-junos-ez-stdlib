@@ -52,3 +52,11 @@
   0.1.1: 2013-05-29
   
     Fixed a small bug in fact gathering for hardwaremodel
+  
+# 2013-July
+
+  0.1.2: 2013-07-04
+  
+    Fixed issue#3.  Previously this gem would not work with non-VC capable EX switches.  Updated
+    the `facts/version.rb` file to handle these devices.  Also added a new fact `:vc_capable` that
+    is set to `true` if the EX can support virtual-chassis, and `false` if it cannot.
