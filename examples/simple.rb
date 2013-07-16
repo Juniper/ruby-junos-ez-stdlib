@@ -2,7 +2,6 @@ require 'pry'
 require 'yaml'
 require 'net/netconf/jnpr'
 require 'junos-ez/stdlib'
-require 'junos-ez/srx'
 
 unless ARGV[0]
   puts "You must specify a target"

@@ -6,10 +6,6 @@
 ##### ---------------------------------------------------------------
 
 require 'set'
-
-module Junos; end
-module Junos::Ez; end
- 
 require 'junos-ez/version.rb'
 require 'junos-ez/exceptions.rb'  
   

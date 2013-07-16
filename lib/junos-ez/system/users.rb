@@ -66,12 +66,12 @@ class Junos::Ez::Users::Provider
   
     # READ-ONLY capture the keys
     unless (keys = as_xml.xpath('authentication/ssh-rsa')).empty?
-      @has[:ssh_keys] ||= {}
-      @has[:ssh_keys]['ssh-rsa'] = keys.collect{|key| key.text.strip}
+      as_hash[:ssh_keys] ||= {}
+      as_hash[:ssh_keys]['ssh-rsa'] = keys.collect{|key| key.text.strip}
     end
     unless (keys = as_xml.xpath('authentication/ssh-dsa')).empty?
-      @has[:ssh_keys] ||= {}      
-      @has[:ssh_keys]['ssh-dsa'] = keys.collect{|key| key.text.strip}
+      as_hash[:ssh_keys] ||= {}      
+      as_hash[:ssh_keys]['ssh-dsa'] = keys.collect{|key| key.text.strip}
     end
   end  
 
@@ -127,9 +127,7 @@ class Junos::Ez::Users::Provider
   def build_catalog
     @catalog = {}
     @ndev.rpc.get_configuration{ |x| x.system {
-      x.login {
-        x.user
-      }
+      x.login
     }}
     .xpath('//user').each do |user|
       name = user.xpath('name').text
