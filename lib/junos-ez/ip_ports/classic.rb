@@ -175,9 +175,9 @@ class Junos::Ez::IPports::Provider::CLASSIC
     
     xml_data = @ndev.rpc.get_interface_information( 
       :terse => true,
-      :interface_name => '[xgf]e-*/*/*.*' )
+      )
     
-    ifa_list = xml_data.xpath('logical-interface[normalize-space(address-family/address-family-name) = "inet"]')    
+    ifa_list = xml_data.xpath('interface-information/logical-interface[normalize-space(address-family/address-family-name) = "inet"]')    
     
   end
   
