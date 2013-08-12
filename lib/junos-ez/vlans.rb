@@ -11,8 +11,10 @@ module Junos::Ez::Vlans
 
   def self.Provider( ndev, varsym )        
     newbie = case ndev.fact :switch_style
-    when :VLAN, :VLAN_NG
+    when :VLAN
       Junos::Ez::Vlans::Provider::VLAN.new( ndev )
+    when :VLAN_L2NG
+      Junos::Ez::Vlans::Provider::VLAN_L2NG.new( ndev )      
     when :BRIDGE_DOMAIN
       Junos::Ez::Vlans::Provider::BRIDGE_DOMAIN.new( ndev )     
     else
@@ -30,6 +32,7 @@ module Junos::Ez::Vlans
 end
 
 require 'junos-ez/vlans/vlan'
+require 'junos-ez/vlans/vlan_l2ng'
 require 'junos-ez/vlans/bridge_domain'
 
 

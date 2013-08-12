@@ -20,11 +20,11 @@ Junos::Ez::Provider( ndev )
 Junos::Ez::Config::Utils( ndev, :cu )
 Junos::Ez::Vlans::Provider( ndev, :vlans )
 Junos::Ez::L1ports::Provider( ndev, :l1_ports )
-Junos::Ez::L2ports::Provider( ndev, :l2_ports )
-Junos::Ez::IPports::Provider( ndev, :ip_ports )
+#Junos::Ez::L2ports::Provider( ndev, :l2_ports )
+#Junos::Ez::IPports::Provider( ndev, :ip_ports )
 
-pp ndev.vlans.list
-pp ndev.vlans.catalog
+#pp ndev.vlans.list
+#pp ndev.vlans.catalog
 
 binding.pry
 

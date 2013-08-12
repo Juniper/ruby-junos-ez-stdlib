@@ -1,4 +1,4 @@
-class Junos::Ez::Vlans::Provider::VLAN < Junos::Ez::Vlans::Provider
+class Junos::Ez::Vlans::Provider::VLAN_L2NG < Junos::Ez::Vlans::Provider
   
   ### ---------------------------------------------------------------
   ### XML top placement
@@ -24,12 +24,15 @@ class Junos::Ez::Vlans::Provider::VLAN < Junos::Ez::Vlans::Provider
     set_has_status( as_xml, as_hash )    
     
     as_hash[:vlan_id] = as_xml.xpath('vlan-id').text.to_i
-    xml_when_item(as_xml.xpath('description')){ |i| as_hash[:description] = i.text }    
-    xml_when_item(as_xml.xpath('no-mac-learning')){ as_hash[:no_mac_learning] = :enable }
+    xml_when_item(as_xml.xpath('description')){ |i| as_hash[:description] = i.text }
+        
+    xml_when_item(as_xml.xpath('switch-options/no-mac-learning')) {
+      as_hash[:no_mac_learning] = :enable
+    }
     
     # get a brief list of the interfaces on this vlan
     got = @ndev.rpc.get_vlan_information( :vlan_name => @name || as_xml.xpath('name').text )
-    as_hash[:interfaces] = got.xpath('//vlan-member-interface').collect{|ifs| ifs.text.strip }
+    as_hash[:interfaces] = got.xpath('//l2ng-l2rtb-vlan-member-interface').collect{|ifs| ifs.text.strip }
     as_hash[:interfaces] = nil if as_hash[:interfaces][0] == "None"
     
     return true
@@ -41,8 +44,10 @@ class Junos::Ez::Vlans::Provider::VLAN < Junos::Ez::Vlans::Provider
   
   def xml_change_no_mac_learning( xml )
     no_ml = @should[:no_mac_learning]     
-    return unless exists? and no_ml
-    xml.send(:'no-mac-learning', no_ml ? nil : Netconf::JunosConfig::DELETE )
+    return unless exists? and no_ml    
+    xml.send(:'switch-options') {
+      xml.send(:'no-mac-learning', no_ml == :enable ? nil : Netconf::JunosConfig::DELETE )
+    }
   end
   
   def xml_change_vlan_id( xml )
@@ -60,7 +65,7 @@ end
 ##### Provider collection methods
 ##### ---------------------------------------------------------------
 
-class Junos::Ez::Vlans::Provider::VLAN
+class Junos::Ez::Vlans::Provider::VLAN_L2NG
   
   def build_list    
     xml_cfgs = @ndev.rpc.get_configuration{ |x| x.send :'vlans' }
@@ -86,7 +91,7 @@ end
 ##### Provider operational methods
 ##### ---------------------------------------------------------------
 
-class Junos::Ez::Vlans::Provider::VLAN
+class Junos::Ez::Vlans::Provider::VLAN_L2NG
 
   ### ---------------------------------------------------------------
   ### interfaces - returns a Hash of each interface in the VLAN
@@ -104,13 +109,15 @@ class Junos::Ez::Vlans::Provider::VLAN
     args[:extensive] = true    
     got = @ndev.rpc.get_vlan_information( args )
     
-    members = got.xpath('vlan/vlan-detail/vlan-member-list/vlan-member')
+    member_pfx = 'l2ng-l2rtb-vlan-member'
+    members = got.xpath("//#{member_pfx}-interface")
     ifs_h = {}
     members.each do |port|
-      port_name = port.xpath('vlan-member-interface').text.split('.')[0]
+      port_name = port.text.split('.')[0]
       port_h = {}
-      port_h[:mode] = port.xpath('vlan-member-port-mode').text.to_sym
-      native = (port.xpath('vlan-member-tagness').text == 'untagged')
+      port_h[:mode] = port.xpath("following-sibling::#{member_pfx}-interface-mode[1]").text.to_sym
+      tgd = port.xpath("following-sibling::#{member_pfx}-tagness[1]").text
+      native = (tgd == 'untagged')
       port_h[:native] = true if( native and port_h[:mode] == :trunk)
       ifs_h[port_name] = port_h
     end
