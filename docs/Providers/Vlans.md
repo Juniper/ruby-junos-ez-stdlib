@@ -20,7 +20,7 @@ puts "VLAN: #{vlan.name} does not exists!" unless vlan.exists?
 
   - `:vlan_id` - The VLAN tag-id, Fixnum [ 1 .. 4094]
   - `:description` - String description for this VLAN
-  - `:no_mac_learning` - If `true` this VLAN will not learn MAC addresses
+  - `:no_mac_learning` - [`:enable`, `:disable`].  If `:enable` this VLAN will not learn MAC addresses
 
 # RESOURCE METHODS
 
