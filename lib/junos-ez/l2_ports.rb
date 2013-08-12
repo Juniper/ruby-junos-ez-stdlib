@@ -15,12 +15,11 @@ module Junos::Ez::L2ports
     newbie = case ndev.fact( :switch_style )
     when :VLAN
       Junos::Ez::L2ports::Provider::VLAN.new( ndev )      
-    when :VLAN_NG
-      raise ArgumentError, "under development"
-      Junos::Ez::L2ports::Provider::VLAN_NG.new( ndev )            
+    when :VLAN_L2NG
+      Junos::Ez::L2ports::Provider::VLAN_L2NG.new( ndev )            
     when :BRIDGE_DOMAIN
       raise ArgumentError, "under development"
-      Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN.new( ndev )      
+#      Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN.new( ndev )      
     end      
     
     newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
@@ -49,9 +48,8 @@ module Junos::Ez::L2ports
 end
 
 require 'junos-ez/l2_ports/vlan'
-=begin
-require 'junos-ez/l2ports/vlan_l2ng' ... under development
-require 'junos-ez/l2ports/bridge_domain' ... under development
-=end
+require 'junos-ez/l2_ports/vlan_l2ng'
+
+# require 'junos-ez/l2ports/bridge_domain' ... under development
 
 

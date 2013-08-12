@@ -26,7 +26,7 @@ class Junos::Ez::Vlans::Provider::BRIDGE_DOMAIN < Junos::Ez::Vlans::Provider
     status_from_junos( as_xml, as_hash )        
     as_hash[:vlan_id] = as_xml.xpath('vlan-id').text.to_i
     as_hash[:description] = as_xml.xpath('description').text
-    as_hash[:no_mac_learning] = as_xml.xpath('bridge-options/no-mac-learning').empty? ? false : true    
+    as_hash[:no_mac_learning] = as_xml.xpath('bridge-options/no-mac-learning').empty? ? :disable : :enable    
     return true    
   end
   
@@ -42,7 +42,7 @@ class Junos::Ez::Vlans::Provider::BRIDGE_DOMAIN < Junos::Ez::Vlans::Provider
     no_ml = @should[:no_mac_learning]     
     return unless ( exists? and no_ml )    
     xml.send(:'bridge-options') {
-      xml.send(:'no-mac-learning', no_ml ? nil : Netconf::JunosConfig::DELETE )
+      xml.send(:'no-mac-learning', (no_ml == :enable) ? nil : Netconf::JunosConfig::DELETE )
     }    
   end
   
