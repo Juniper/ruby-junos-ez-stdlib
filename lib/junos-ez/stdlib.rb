@@ -6,6 +6,7 @@ require 'junos-ez/l1_ports'             # physical ports
 require 'junos-ez/vlans'                # vlans
 require 'junos-ez/l2_ports'             # switch ports
 require 'junos-ez/ip_ports'             # ip ports (v4)
+require 'junos-ez/lag_ports'            # Link Aggregation Groups
 
 # -------------------------------------------------------------------
 # utility libraries, not providers
