@@ -65,4 +65,5 @@
 
   0.2.0: *in progres*
   
-    Fixed issue #6.  Added support for EX4300 platform.
+    Fixed issue #6.  Added support for EX4300 platform.  Added new provider for Link Aggregation Group
+    resources (LAGports)
