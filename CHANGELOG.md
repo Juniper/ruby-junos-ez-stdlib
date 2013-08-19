@@ -60,3 +60,9 @@
     Fixed issue#3.  Previously this gem would not work with non-VC capable EX switches.  Updated
     the `facts/version.rb` file to handle these devices.  Also added a new fact `:vc_capable` that
     is set to `true` if the EX can support virtual-chassis, and `false` if it cannot.
+
+# 2013-Aug
+
+  0.2.0: *in progres*
+  
+    Fixed issue #6.  Added support for EX4300 platform.
