@@ -43,6 +43,17 @@ module Junos::Ez::L2ports
       @should[:vlan_tagging] != @has[:vlan_tagging]      
     end    
     
+    ### ---------------------------------------------------------------
+    ### XML overload 'activate/deactivate' since we need to modify
+    ### this at the 'unit' level and not at the 'family' level
+    ### ---------------------------------------------------------------   
+    
+    def xml_change__active( xml )
+      par = xml.instance_variable_get(:@parent).at_xpath('ancestor::unit')
+      value = @should[:_active]  ? 'active' : 'inactive'
+      par[value] = value # attribute name is same as value
+    end       
+    
   end
   
 end

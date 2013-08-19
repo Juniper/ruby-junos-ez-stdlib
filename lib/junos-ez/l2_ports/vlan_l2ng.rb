@@ -100,12 +100,15 @@ class Junos::Ez::L2ports::Provider::VLAN_L2NG < Junos::Ez::L2ports::Provider
   ## to do some cleanup work in the [edit vlans] stanza
   
   def xml_on_delete( xml )
+    @ifd = xml.instance_variable_get(:@parent).at_xpath('ancestor::interface')
+    @ifd.xpath('//native-vlan-id').remove      ## remove the element from the get-config    
+    
     return unless @under_vlans
     return if @under_vlans.empty?
-    
+
     _xml_rm_under_vlans( xml, @under_vlans )
   end   
-  
+
   ### ---------------------------------------------------------------
   ### XML property writers
   ### ---------------------------------------------------------------    
