@@ -175,6 +175,7 @@ documentation on Providers/Resources, see the *docs* directory.
 # CONTRIBUTORS
 
   * Jeremy Schulman, @nwkautomaniac
+  * Ganesh Nalawade, @ganesh634
 
 # LICENSES
 
