@@ -3,7 +3,7 @@ Junos::Ez::Facts::Keeper.define( :personality ) do |ndev, facts|
   uses :chassis, :routingengines  
   model = facts[:hardwaremodel]
 
-  examine = ( model != "Virtual Chassis" ) ? model : facts.select {|k,v| k.match(/RE/) }.values[0][:model]
+  examine = ( model != "Virtual Chassis" ) ? model : facts.select {|k,v| k.match(/^RE[0..9]+/) }.values[0][:model]
       
   facts[:personality] = case examine   
   when /^(EX)|(QFX)/
