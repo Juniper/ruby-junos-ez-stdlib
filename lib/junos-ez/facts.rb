@@ -75,11 +75,9 @@ end
 ### Load all of the fact files
 ### -----------------------------------------------------------------
 
-Dir[File.dirname(__FILE__) + "/facts/*.rb"].each do |file|
-  require file
-end    
-
-
-
-
+require 'junos-ez/facts/chassis'
+require 'junos-ez/facts/personality'
+require 'junos-ez/facts/version'
+require 'junos-ez/facts/switch_style'
+require 'junos-ez/facts/ifd_style'
 
