@@ -408,15 +408,17 @@ class Junos::Ez::L2ports::Provider::VLAN_L2NG
   end
   
   def _xml_rm_under_vlans( xml, vlans )
-    at_vlans = _xml_edit_under_vlans( xml )
-    vlans.each do |vlan_name|
-      Nokogiri::XML::Builder.with( at_vlans.parent ) do |this|
-        this.vlan {
-          this.name vlan_name
-          this.interface( Netconf::JunosConfig::DELETE ) { this.name @name }
-        }
+    if vlans.any?
+      at_vlans = _xml_edit_under_vlans( xml )
+      vlans.each do |vlan_name|
+        Nokogiri::XML::Builder.with( at_vlans.parent ) do |this|
+          this.vlan {
+            this.name vlan_name
+            this.interface( Netconf::JunosConfig::DELETE ) { this.name @name }
+          }
+        end
       end
-    end
+    end    
   end
   
   def _xml_rm_ac_untagged_vlan( xml )
