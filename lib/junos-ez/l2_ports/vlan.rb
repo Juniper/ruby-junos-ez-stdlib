@@ -51,7 +51,7 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
     xml_when_item(as_xml.xpath('description')){|i| as_hash[:description] = i.text}
 
     f_eth = as_xml.xpath('family/ethernet-switching')        
-    as_hash[:vlan_tagging] = f_eth.xpath('port-mode').text.chomp == 'trunk' 
+    as_hash[:vlan_tagging] = f_eth.xpath('interface-mode').text.chomp == 'trunk' 
     
     # obtain a copy of the running state, this is needed in case the config
     # is located under the [edit vlans] stanza vs. [edit interfaces]
@@ -138,8 +138,8 @@ class Junos::Ez::L2ports::Provider::VLAN < Junos::Ez::L2ports::Provider
   ## ----------------------------------------------------------------
   
   def xml_change_vlan_tagging( xml )    
-    port_mode = should_trunk? ? 'trunk' : 'access'
-    xml.send(:'port-mode', port_mode )
+    interface_mode = should_trunk? ? 'trunk' : 'access'
+    xml.send(:'interface-mode', interface_mode )
     
     # when the vlan_tagging value changes then this method
     # will trigger updates to the untagged_vlan and tagged_vlans
