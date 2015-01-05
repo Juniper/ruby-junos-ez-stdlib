@@ -31,9 +31,11 @@ Junos::Ez::Facts::Keeper.define( :version ) do |ndev, facts|
       facts[ver_key] = $1                  
     end
     master_id = f_master
-    facts[:version] = 
-      facts[("version_" + "RE" + master_id).to_sym] || 
-      facts[('version_' + "FPC" + master_id).to_sym]
+    unless master_id.nil?
+      facts[:version] = 
+        facts[("version_" + "RE" + master_id).to_sym] || 
+        facts[('version_' + "FPC" + master_id).to_sym]
+    end
   else
     junos = swver.xpath('//package-information[name = "junos"]/comment').text
     junos =~ /\[(.*)\]/
