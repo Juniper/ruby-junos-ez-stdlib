@@ -204,7 +204,7 @@ class Junos::Ez::Provider::Parent
   ## can use 'create!' which does write to the device.
   ## ----------------------------------------------------------------
   
-  def create( name = nil, prop_hash = {}, &block )
+  def create( name = nil, prop_hash = {} )
         
     ## if this is an existing object, then we shouldn't 
     ## allow the caller to create something.
@@ -244,8 +244,8 @@ class Junos::Ez::Provider::Parent
   ## the config assuming create returns ok.
   ## ----------------------------------------------------------------
   
-  def create!( name = nil, prop_hash = {}, &block )
-    newbie = create( name, prop_hash, block )
+  def create!( *args )
+    newbie = create( *args )
     return nil unless newbie
     newbie.write!
     newbie
