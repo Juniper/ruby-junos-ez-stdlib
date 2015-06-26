@@ -18,8 +18,7 @@ module Junos::Ez::L2ports
     when :VLAN_L2NG
       Junos::Ez::L2ports::Provider::VLAN_L2NG.new( ndev )            
     when :BRIDGE_DOMAIN
-      raise ArgumentError, "under development"
-#      Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN.new( ndev )      
+      Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN.new( ndev )      
     end      
     
     newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
