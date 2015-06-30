@@ -18,7 +18,9 @@ module Junos::Ez::L2ports
     when :VLAN_L2NG
       Junos::Ez::L2ports::Provider::VLAN_L2NG.new( ndev )            
     when :BRIDGE_DOMAIN
-      Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN.new( ndev )      
+      Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN.new(ndev)
+      #raise ArgumentError, "under development"
+#      Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN.new( ndev )      
     end      
     
     newbie.properties = Junos::Ez::Provider::PROPERTIES + PROPERTIES
@@ -48,7 +50,7 @@ module Junos::Ez::L2ports
     ### ---------------------------------------------------------------   
     
     def xml_change__active( xml )
-      par = xml.instance_variable_get(:@parent).at_xpath('ancestor::unit')
+      par = xml.instance_variable_get(:@parent).at_xpath('ancestor::interface')
       value = @should[:_active]  ? 'active' : 'inactive'
       par[value] = value # attribute name is same as value
     end       
@@ -59,7 +61,6 @@ end
 
 require 'junos-ez/l2_ports/vlan'
 require 'junos-ez/l2_ports/vlan_l2ng'
-
-# require 'junos-ez/l2ports/bridge_domain' ... under development
+require 'junos-ez/l2_ports/bridge_domain'
 
 
