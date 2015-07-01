@@ -537,8 +537,3 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   
  
 end
-  
-  
-  
-  
-  
