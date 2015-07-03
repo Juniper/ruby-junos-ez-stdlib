@@ -43,8 +43,11 @@ class Junos::Ez::LAGports::Provider
   ### ---------------------------------------------------------------  
  
   def xml_get_has_xml( xml )
-    @ifd_ether_options = 'ether-options'      # @@@ hack for now
-    
+    if ndev.facts[:ifd_style].to_s == 'CLASSIC'
+      @ifd_ether_options = 'gigether-options'
+    else
+      @ifd_ether_options = 'ether-options' 
+    end
     xml.xpath('//interface')[0]    
   end
   
