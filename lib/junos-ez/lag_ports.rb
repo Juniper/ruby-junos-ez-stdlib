@@ -48,15 +48,6 @@ class Junos::Ez::LAGports::Provider
     xml.xpath('//interface')[0]    
   end
  
-  def xml_get_has_xml( xml )
-    if ndev.facts[:ifd_style].to_s == 'CLASSIC'
-      @ifd_ether_options = 'gigether-options'
-    else
-      @ifd_ether_options = 'ether-options' 
-    end
-    xml.xpath('//interface')[0]    
-  end
-  
   def xml_read_parser( as_xml, as_hash )    
     set_has_status( as_xml, as_hash )          
         
