@@ -41,13 +41,13 @@ class Junos::Ez::LAGports::Provider
   ### ---------------------------------------------------------------
   ### XML property readers
   ### ---------------------------------------------------------------  
-  
+ 
   def xml_get_has_xml( xml )
     @ifd_ether_options = 'ether-options'      # @@@ hack for now
-
+    
     xml.xpath('//interface')[0]    
   end
- 
+  
   def xml_read_parser( as_xml, as_hash )    
     set_has_status( as_xml, as_hash )          
         
@@ -219,4 +219,3 @@ class Junos::Ez::LAGports::Provider
     }
   end
 end
-
