@@ -12,7 +12,7 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
     }}
   end
   
-  # set the edit anchor inside the ethernet-switching stanza
+  # set the edit anchor inside bridge-domains stanza
   # we will need to 'up-out' when making changes to the 
   # unit information, like description
   
@@ -32,7 +32,7 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   ### ---------------------------------------------------------------  
 
   def xml_get_has_xml( xml ) 
-    # second unit contains the family/ethernet-switching stanza
+    # second unit contains the family/bridge-domains stanza
     got = xml.xpath('//unit')[0]
     
     # if this resource doesn't exist we need to default some 
@@ -140,7 +140,6 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   ## ----------------------------------------------------------------
   
   ## overload default method since we need to "up-out" of the
-  ## ethernet-switching stanza
   
   def xml_change_description( xml )
     unit = xml.parent.xpath('ancestor::unit')[0]
@@ -156,15 +155,7 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   def xml_change_vlan_tagging( xml )
     port_mode = should_trunk? ? 'trunk' : 'access'
     xml.send(:'interface-mode', port_mode )
-    
-   # if is_trunk? and not should_trunk?
-   #   # trunk --> access
-   #   set_ifd_trunking( xml, false )
-   # elsif should_trunk? and not is_trunk?
-      # access --> trunk
-   #   set_ifd_trunking( xml, true )
-   # end    
-    
+  
     # when the vlan_tagging value changes then this method
     # will trigger updates to the untagged_vlan and tagged_vlans
     # resource values as well.
@@ -220,10 +211,6 @@ end
     end
     
     if add or del
-      #xml.send(:'vlan-id') {
-      #  del.each { |v| xml.members v, Netconf::JunosConfig::DELETE }
-      #  add.each { |v| xml.members v }
-      add.each {|v| print "\n %%%%%%%%%%%%%%%%%% _vlan_name_to_tag_id( v ) \n", _vlan_name_to_tag_id( v )}
       del.each{|v| xml.send(:'vlan-id-list', _vlan_name_to_tag_id( v ), Netconf::JunosConfig::DELETE)}
       add.each{|v| xml.send( :'vlan-id-list', _vlan_name_to_tag_id(v) )}
     end
@@ -303,28 +290,20 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   ### -------------------------------------------------------------
   
   def self.ac_ac_nountg( this, xml )
-   #^^^^^^^ create log 
      #NetdevJunos::Log.debug "ac_ac_nountg"
      # @@@ a port *MUST* be assigned to a vlan in access mode on MX.
      # @@@ generate an error!
      raise Junos::Ez::NoProviderError, "a port *MUST* be assigned to a vlan in access mode on MX."
-     #raise "ERROR!!! a port *MUST* be assigned to a vlan in access mode on MX."     
   end
-  
-  ########## need to see#################
+
   def self.ac_tr_nountg( this, xml ) 
-    #unless (untg_vlan = this.has[:untagged_vlan]).nil?
-    #  this._xml_rm_ac_untagged_vlan( xml )
-    #end
     #no action needed handled already
   end
-  #########################################
   
   def self.tr_ac_nountg( this, xml )
-    #this._delete_native_vlan_id( xml )
-    #this._xml_rm_these_vlans( xml, this.has[:tagged_vlans ] ) if this.has[:tagged_vlans] 
-    raise Junos::Ez::NoProviderError, "port must be assigned to vlan in access mode on MX"
-    #raise "ERROR!! untagged_vlan missing, port must be assigned to a VLAN"   
+     # @@@ a port *MUST* be assigned to a vlan in access mode on MX.
+     # @@@ generate an error!
+     raise Junos::Ez::NoProviderError, "a port *MUST* be assigned to vlan in access mode on MX"
   end
   
   def self.tr_tr_nountg( this, xml )
@@ -336,7 +315,6 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   ## ----------------------------------------------------------------
   
   def self.ac_ac_untg( this, xml )
-    #this._xml_rm_ac_untagged_vlan( xml )
     vlan_id = this._vlan_name_to_tag_id( this.should[:untagged_vlan] )
     xml.send :'vlan-id', vlan_id 
   end
@@ -349,10 +327,8 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
    
   def self.tr_ac_untg( this, xml ) 
     this._delete_native_vlan_id( xml )
-    #this._xml_rm_these_vlans( xml, this.has[:tagged_vlans ] ) if this.has[:tagged_vlans]         
     vlan_id = this._vlan_name_to_tag_id( this.should[:untagged_vlan] )
     xml.send( :'vlan-id', vlan_id )
-    print "xml: ", xml.to_xml
   end
   
   def self.tr_tr_untg( this, xml )
