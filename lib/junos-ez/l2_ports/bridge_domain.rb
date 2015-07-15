@@ -7,31 +7,24 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   def xml_at_top
     Nokogiri::XML::Builder.new {|xml| xml.configuration {
       xml.interfaces {
-        print "\n **** inside xml_at_top********\n"
-        print "@name:", @name
         return xml_at_element_top( xml, @name )
       }
     }}
   end
   
-  # set the edit anchor inside the ethernet-switching stanza
+  # set the edit anchor inside bridge-domains stanza
   # we will need to 'up-out' when making changes to the 
   # unit information, like description
   
   def xml_at_element_top( xml, name )
-    print "\n************ inside xml_at_element_top ****************\n"
-    print "xml and name:"
-    print xml.to_xml
-    print name
     xml.interface {
       xml.name name
       xml.send(:'native-vlan-id')
       xml.unit { 
         xml.name '0'
-        print "-----xml: ", xml.to_xml
         return xml
       }
-    }    
+    }  
   end
      
   ### ---------------------------------------------------------------
@@ -39,14 +32,11 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   ### ---------------------------------------------------------------  
 
   def xml_get_has_xml( xml ) 
-    print "\n ************** inside xml_get_has_xml **************\n\n xml is:" 
-    print xml.to_xml          
-    # second unit contains the family/ethernet-switching stanza
+    # second unit contains the family/bridge-domains stanza
     got = xml.xpath('//unit')[0]
     
     # if this resource doesn't exist we need to default some 
     # values into has/should variables
-    print "\n got----: ",got
     unless got
       @has[:vlan_tagging] = false
       @should = @has.clone
@@ -55,10 +45,6 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   end
   
   def xml_read_parser( as_xml, as_hash )  
-    print "\n\n ************** inside xml_read_parser *************** \n\n"
-    print "as_xml: "
-    print as_xml
-    print "as_hash: ",as_hash 
     ## reading is anchored at the [... unit 0 ...] level
     set_has_status( as_xml, as_hash )  
     
@@ -77,7 +63,6 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
     # --- access port        
     
     if as_hash[:vlan_tagging] == false
-      print "\n\n &&&&&&&&&&& vlan tagging flase &&&&&&&&&&&&&& \n\n"
       xml_when_item(f_eth.xpath('domain/vlan-id')){ |i| as_hash[:untagged_vlan] = i.text.chomp }
       unless as_hash[:untagged_vlan]
         as_hash[:untagged_vlan] = eth_port_vlans[:untagged]
@@ -113,28 +98,17 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   ## to do some cleanup work in the [edit vlans] stanza
   
   def xml_on_delete( xml )
-    print "\n************ inside xml_on_delete **************\n xml:"
-    print xml
     @ifd = xml.instance_variable_get(:@parent).at_xpath('ancestor::interface')
-    print " &&&&&&&&&&&& 1 &&&&&&&&&&&&"
     @ifd.xpath('//native-vlan-id').remove      ## remove the element from the get-config    
-    print " &&&&&&&&&&&& 2 &&&&&&&&&&&&"
-    if @ifd.xpath('//native-vlan-id')
-      print "vlan -id exists"
-    end  
     ## need to add check if any native-vlan-id is present or not (untagged vlan)#####
-   #if is_trunk? and @ifd.xpath('//native-vlan-id')
-   #   _delete_native_vlan_id( xml )
-   #end
+   if is_trunk? and @ifd.xpath('//native-vlan-id')
+      _delete_native_vlan_id( xml )
+   end
       
     return unless @under_vlans
-    print " &&&&&&&&&&&& 3 &&&&&&&&&&&&"
-    print @under_vlans
     return if @under_vlans.empty?
-    print " &&&&&&&&&&&& 4 &&&&&&&&&&&&"
 
     _xml_rm_under_vlans( xml, @under_vlans )
-    print "\n ^^^^^^^^^^^ exiting xml_on_delete ^^^^^^^^^^^\n"
   end   
 
   ### ---------------------------------------------------------------
@@ -142,15 +116,10 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   ### ---------------------------------------------------------------    
   
   def xml_at_here( xml )
-    print "\n ************** inside xml_at_here *************\n"
-    print xml.to_xml
     @ifd = xml.instance_variable_get(:@parent).at_xpath('ancestor::interface')
     @ifd.xpath('//native-vlan-id').remove      ## remove the element from the get-config
-    print "@ifd:"
-    print @ifd
     xml.family {
       xml.send(:'bridge') {
-        print "xml after removing ifd is: ",xml
         return xml
       }
     }
@@ -171,7 +140,6 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   ## ----------------------------------------------------------------
   
   ## overload default method since we need to "up-out" of the
-  ## ethernet-switching stanza
   
   def xml_change_description( xml )
     unit = xml.parent.xpath('ancestor::unit')[0]
@@ -185,11 +153,9 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   ## ----------------------------------------------------------------
   
   def xml_change_vlan_tagging( xml )
-    print "\n\n ******************* xml_change_vlan_tagging *******************\n\n xml" 
-    print xml.to_xml  
     port_mode = should_trunk? ? 'trunk' : 'access'
     xml.send(:'interface-mode', port_mode )
-    
+  
     # when the vlan_tagging value changes then this method
     # will trigger updates to the untagged_vlan and tagged_vlans
     # resource values as well.
@@ -197,28 +163,35 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
     
     upd_untagged_vlan( xml )
     upd_tagged_vlans( xml ) 
-    
+        
     return true
   end  
+  
+  def set_ifd_trunking( xml, should_trunk )
+   par = xml.instance_variable_get(:@parent)     
+   Nokogiri::XML::Builder.with( par.at_xpath( 'ancestor::interface' )) do |dot|
+     if should_trunk
+       dot.send( :'flexible-vlan-tagging' )
+       dot.send( :'encapsulation', 'flexible-ethernet-services' )
+     else
+       dot.send( :'flexible-vlan-tagging', Netconf::JunosConfig::DELETE )
+       dot.send( :'encapsulation', Netconf::JunosConfig::DELETE )
+     end
+   end       
+end 
   
   ## ----------------------------------------------------------------
   ## :tagged_vlans
   ## ----------------------------------------------------------------
   
   def xml_change_tagged_vlans( xml )  
-    print "\n ************** inside xml_change_tagged_vlans *************\n\nxml:"
-    print xml.to_xml
     return false if mode_changed?  
     upd_tagged_vlans( xml )
   end
   
   def upd_tagged_vlans( xml ) 
-    print "\n ************** inside upd_tagged_vlans *************\n\n xml:"
-    print xml           
     return false unless should_trunk?
     
-    print @should[:tagged_vlans] 
-    print @has[:tagged_vlans]  
     
     @should[:tagged_vlans] = @should[:tagged_vlans].to_set if @should[:tagged_vlans].kind_of? Array
     @has[:tagged_vlans] = @has[:tagged_vlans].to_set if @has[:tagged_vlans].kind_of? Array    
@@ -226,40 +199,21 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
     v_should = @should[:tagged_vlans] || Set.new    
     v_has = @has[:tagged_vlans] || Set.new  
       
-    print "hiiiiii" 
-    print v_should
-    print v_has
     del = v_has - v_should
     add = v_should - v_has 
     
-    print "add and del is: ", add, del
-    
-    add.each do |n|
-    # Display the element.
-    puts "add value is:", n
-    end
     
     del_under_vlans = del & @under_vlans    
-    print "hello========="
     unless del_under_vlans.empty?
       del = del ^ @under_vlans
       _xml_rm_under_vlans( xml, del_under_vlans )
       @under_vlans = []
     end
-    puts "adds size is",add.size()
-    
     
     if add or del
-      print "\n inside add or del \n"
-      #xml.send(:'vlan-id') {
-      #  del.each { |v| xml.members v, Netconf::JunosConfig::DELETE }
-      #  add.each { |v| xml.members v }
-      add.each {|v| print "\n %%%%%%%%%%%%%%%%%% _vlan_name_to_tag_id( v ) \n", _vlan_name_to_tag_id( v )}
       del.each{|v| xml.send(:'vlan-id-list', _vlan_name_to_tag_id( v ), Netconf::JunosConfig::DELETE)}
       add.each{|v| xml.send( :'vlan-id-list', _vlan_name_to_tag_id(v) )}
-      print "\n %%%%%%% xml: \n", xml.to_xml
     end
-    print "\n\n *************** exiting **************** \n\n"
     return true    
   end    
   
@@ -268,15 +222,11 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   ## ----------------------------------------------------------------  
   
   def xml_change_untagged_vlan( xml ) 
-    print "\n ************** inside xml_change_untagged_vlan *************\n\n xml:----"
-    print xml.to_xml 
     return false if mode_changed?         
     upd_untagged_vlan( xml )
   end  
   
   def upd_untagged_vlan( xml )
-    print "\n ************** inside upd_untagged_vlan *************\n\n xml:"
-    print xml.to_xml
     self.class.change_untagged_vlan( self, xml )
   end    
   
@@ -329,11 +279,8 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   ### based on the three criteria to select the action
   
   def self.change_untagged_vlan( this, xml )
-    print "\n\n ********** inside change_untagged_vlan *************\n\n"
     @@ez_l2_jmptbl ||= init_jump_table 
-    print "\n @@ez_l2_jmptbl:     ",@@ez_l2_jmptbl   
     proc = @@ez_l2_jmptbl[this.is_trunk?][this.should_trunk?][this.should[:untagged_vlan].nil?]
-    print "\n proc:",proc
     proc.call( this, xml )
   end
 
@@ -343,85 +290,49 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   ### -------------------------------------------------------------
   
   def self.ac_ac_nountg( this, xml )
-    print "\n !!!!!!!!!!! inside ac_ac_nountg !!!!!!!!!!!!!!!\n\n\n"
-   #^^^^^^^ create log 
      #NetdevJunos::Log.debug "ac_ac_nountg"
      # @@@ a port *MUST* be assigned to a vlan in access mode on MX.
      # @@@ generate an error!
      raise Junos::Ez::NoProviderError, "a port *MUST* be assigned to a vlan in access mode on MX."
-     #raise "ERROR!!! a port *MUST* be assigned to a vlan in access mode on MX."     
   end
-  
-  ########## need to see#################
+
   def self.ac_tr_nountg( this, xml ) 
-    print "\n ******** inside ac_tr_nountg ********\n"     
-    #unless (untg_vlan = this.has[:untagged_vlan]).nil?
-    #  this._xml_rm_ac_untagged_vlan( xml )
-    #end
     #no action needed handled already
-    print "xml is:", xml.to_xml
   end
-  #########################################
   
   def self.tr_ac_nountg( this, xml )
-    print "\n ******** inside tr_ac_nountg ********\n"
-    #this._delete_native_vlan_id( xml )
-    #this._xml_rm_these_vlans( xml, this.has[:tagged_vlans ] ) if this.has[:tagged_vlans] 
-    print "port must be assigned to vlan in access mode on MX"
-    raise Junos::Ez::NoProviderError, "port must be assigned to vlan in access mode on MX"
-    #raise "ERROR!! untagged_vlan missing, port must be assigned to a VLAN"   
+     # @@@ a port *MUST* be assigned to a vlan in access mode on MX.
+     # @@@ generate an error!
+     raise Junos::Ez::NoProviderError, "a port *MUST* be assigned to vlan in access mode on MX"
   end
   
   def self.tr_tr_nountg( this, xml )
-    print "\n ******** inside tr_tr_nountg ********\n"
     this._delete_native_vlan_id( xml )  
-    print "xml is: ", xml.to_xml        
   end
   
   ## ----------------------------------------------------------------
   ## transition where port WILL-HAVE untagged-vlan
   ## ----------------------------------------------------------------
   
-  ## setting untagged vlan id #########
-  #######working#########
   def self.ac_ac_untg( this, xml )
-    print "\n ******** inside ac_ac_untg ********\n"
-    #this._xml_rm_ac_untagged_vlan( xml )
-    print "\n xml is: ",xml.to_xml
-    print this.should[:untagged_vlan]
     vlan_id = this._vlan_name_to_tag_id( this.should[:untagged_vlan] )
     xml.send :'vlan-id', vlan_id 
-    #xml.send :'vlan-id', (this._vlan_name_to_tag_id(this.should[:untagged_vlan]))
-      #xml.members this.should[:untagged_vlan]
-      #this._vlan_name_to_tag_id(this.should[:untagged_vlan])
-     # print "hello:  ",this._vlan_name_to_tag_id(this.should[:untagged_vlan])     
-    print "\n xml after vlan is: ",xml.to_xml          
   end
-  ###########working#################
       
   def self.ac_tr_untg( this, xml )    
-    print "\n     inside ac_tr_untg           \n"  
-    # move untagged vlan to native-vlan-id ...    
     was_untg_vlan = this.has[:untagged_vlan]
     this._set_native_vlan_id( xml, this.should[:untagged_vlan] )
     this._xml_rm_ac_untagged_vlan( xml ) if was_untg_vlan   
   end   
    
   def self.tr_ac_untg( this, xml ) 
-    print "\n ******** inside tr_ac_untg ********\n"   
     this._delete_native_vlan_id( xml )
-    #this._xml_rm_these_vlans( xml, this.has[:tagged_vlans ] ) if this.has[:tagged_vlans]         
-    #this._set_vlan_id(xml)
     vlan_id = this._vlan_name_to_tag_id( this.should[:untagged_vlan] )
     xml.send( :'vlan-id', vlan_id )
-    print "xml: ", xml.to_xml
   end
   
   def self.tr_tr_untg( this, xml )
-    print "\n\n *********inside tr_tr_untg************\n\n"
-    print "xml: ", xml.to_xml
     this._set_native_vlan_id(xml, this.should[:untagged_vlan])
-    print "\n @@@@@@@@ xml is : ", xml
   end
  
 end
@@ -433,7 +344,6 @@ end
 class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   
   def build_list
-    print "\n\n ********** inside build_list ****************\n\n"
     begin
       got = @ndev.rpc.get_bridge_instance_information( :brief => true)
     rescue => e
@@ -444,10 +354,8 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   end
   
   def build_catalog
-    print "\n\n************ inside build_catalog *************\n\n"
     @catalog = {}    
     return @catalog if list!.empty?
-    
     list.each do |ifs_name|
       @ndev.rpc.get_configuration{ |xml|
         xml.interfaces {
@@ -473,7 +381,6 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   private
   
   def _get_eth_port_vlans_h( ifs_name )
-    print "\n********* inside _get_eth_port_vlans_h ****************\n"
     got = @ndev.rpc.get_bridge_instance_information(:interface => ifs_name)
     ret_h = {:untagged => nil, :tagged => Set.new }
     got.xpath('//l2ng-l2ald-iff-interface-entry').each do |vlan|
@@ -512,14 +419,8 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   end
   
   def _xml_rm_under_vlans( xml, vlans )
-    print "\n\n ************** inside _xml_rm_under_vlans ***********\n\n"
-    print "xml:     ",xml.to_xml
-    print "vlans:    ",vlans.to_s
     if vlans.any?
-      print "\n inside if \n"
       at_vlans = _xml_edit_under_vlans( xml )
-      print "\n at_vlans:",at_vlans
-      print "\n\n *********** under _xml_rm_under_vlans *************\n\n"
       vlans.each do |vlan_id|
         Nokogiri::XML::Builder.with( at_vlans.parent ) do |this|
           this.domain {
@@ -532,20 +433,15 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   end
   
   def _xml_rm_ac_untagged_vlan( xml )
-    print "\n\n ********* inside _xml_rm_ac_untagged_vlan **************\n\n"
-    print "@under_vlans",@under_vlans
     if @under_vlans.empty?
-      print "\n\n inside if _xml_rm_ac_untagged_vlan ********** \n"
       xml.send :'vlan-id', Netconf::JunosConfig::DELETE    
     else
-      print "\n****** inside else*****\n"
       _xml_rm_under_vlans( xml, [ @has[:untagged_vlan ] ] )
       @under_vlans = []    
     end
   end
   
   def _xml_rm_these_vlans( xml, vlans )
-    print "\n\n************** inside _xml_rm_these_vlans *************\n\n"
     if @under_vlans.empty?
       xml.send :'vlan-id', ( Netconf::JunosConfig::DELETE ) 
     else
@@ -554,7 +450,6 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
       del_under_vlans = v_has & @under_vlans
       _xml_rm_under_vlans( xml, del_under_vlans )
       if v_has ^ @under_vlans
-        print "\n****** inside if *****\n"
         xml.send :'vlan-id', ( Netconf::JunosConfig::DELETE ) 
       end
       @under_vlans = []        
@@ -567,12 +462,9 @@ end
 class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
     
   def _vlan_name_to_tag_id( vlan_name )
-    print "\n\n ************ inside _vlan_name_to_tag_id ***************\n\n"
-    print "vlan_name:", vlan_name
     tag_id = @ndev.rpc.get_configuration { |xml|
       xml.send(:'bridge-domains') { xml.domain { xml.name vlan_name }}
     }.xpath('//vlan-id').text.chomp
-    print "tag_id is:", tag_id
     
     raise ArgumentError, "VLAN '#{vlan_name}' not found" if tag_id.empty?
     return tag_id
@@ -582,9 +474,6 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
     # get the candidate configuration for each VLAN named in tagged_vlans and
     # then map it to the corresponding vlan-id.  this is not very effecient, but
     # at present there is no other way without getting into a cache mech.   
-    print "\n\n ************ inside _vlan_tag_id_to_name ***************\n\n"
-    print "tag_id: ", tag_id
-    print "my_hash: ", my_hash
     vlan_name = @ndev.rpc.get_configuration { |xml|
       xml.send(:'bridge-domains') {
         my_hash[:tagged_vlans].each do |v_name|
@@ -597,7 +486,6 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
     }.xpath("//domain[vlan-id = '#{tag_id}']/name").text.chomp    
     
     raise ArgumentError, "VLAN-ID '#{tag_id}' not found" if vlan_name.empty?
-    print "vlan_name is: ",vlan_name
     return vlan_name
   end
   
@@ -605,12 +493,10 @@ end
 
 class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
   def _at_native_vlan_id( xml )
-    print "\n*********** inside _at_native_vlan_id( xml ) ************\n"
     ifd
   end
   
   def _delete_native_vlan_id( xml )
-    print "\n************* inside _delete_native_vlan_id ********************\n"
     Nokogiri::XML::Builder.with( @ifd ) do |dot|
       dot.send :'native-vlan-id', Netconf::JunosConfig::DELETE
     end
@@ -625,8 +511,5 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
     return true
   end
   
-  def _set_vlan_id( xml)
-    vlan_id = _vlan_name_to_tag_id( this.should[:untagged_vlan] )
-    xml.send( :'vlan-id', vlan_id )
-  end
+ 
 end
