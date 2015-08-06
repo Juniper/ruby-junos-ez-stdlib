@@ -43,8 +43,11 @@ class Junos::Ez::LAGports::Provider
   ### ---------------------------------------------------------------  
  
   def xml_get_has_xml( xml )
-    @ifd_ether_options = 'ether-options'      # @@@ hack for now
-    
+    if ndev.facts[:ifd_style] == "CLASSIC"
+      @ifd_ether_options = 'gigether-options'
+    else
+      @ifd_ether_options = 'ether-options' 
+    end 
     xml.xpath('//interface')[0]    
   end
   
@@ -70,9 +73,27 @@ class Junos::Ez::LAGports::Provider
   ### ---------------------------------------------------------------
   ### XML property writers
   ### ---------------------------------------------------------------    
-  
+  def update_ifd_should()
+    if @should[:links].empty?
+      raise Junos::Ez::NoProviderError, "\n *links* are compulsory for creating lag interface!!! \n"
+    else
+      ether_option = @should[:links][0].to_s
+      @ifd_ether_options = (ether_option.start_with? 'fe-') ? 'fastether-options' : 'gigether-options'
+    end
+  end
+ 
+  def update_ifd_has()
+    @has[:links] = @has[:links].to_a
+    if @has[:links].empty?
+     raise Junos::Ez::NoProviderError, "\n Either lag interface is not created or links associated with given lag interface is not supported \n"
+    else
+     ether_option = @has[:links][0].to_s
+     @ifd_ether_options = (ether_option.start_with? 'fe-') ? 'fastether-options' : 'gigether-options'
+    end  
+  end
+ 
   def xml_change_links( xml )
-    
+    update_ifd_should()  
     @should[:links] = @should[:links].to_set if @should[:links].kind_of? Array
     
     has = @has[:links] || Set.new
@@ -144,7 +165,7 @@ class Junos::Ez::LAGports::Provider
   ### ---------------------------------------------------------------      
   
   def xml_on_delete( xml )
-    
+    update_ifd_has()
     par = xml.instance_variable_get(:@parent)
     dot_ifd = par.at_xpath('ancestor::interfaces')
    
