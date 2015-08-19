@@ -92,7 +92,6 @@ class Junos::Ez::Group::Provider
         result
       end
     else
-      #Junos::Ez::Provider::Parent.instance_method(:write_xml_config!(xml)).bind(self).call
       super(xml) 
     end
     _apply_group
@@ -203,6 +202,5 @@ class Junos::Ez::Group::Provider
       result
     end
   end
-
 end
 
