@@ -41,6 +41,11 @@ class Junos::Ez::LAGports::Provider
   ### ---------------------------------------------------------------
   ### XML property readers
   ### ---------------------------------------------------------------  
+  
+  def xml_config_read!
+    database = {'database' => 'committed'}
+    @ndev.rpc.get_configuration(xml_at_top, database)
+  end
  
   def xml_get_has_xml( xml )
     if ndev.facts[:ifd_style] == "CLASSIC"
