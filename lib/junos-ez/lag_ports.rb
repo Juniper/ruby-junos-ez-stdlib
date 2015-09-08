@@ -37,6 +37,24 @@ class Junos::Ez::LAGports::Provider
       }}
     }}
   end
+  
+  ###-----------------------------------------------------------
+  ###-----------------------------------------------------------
+  ### utilities
+  ###-----------------------------------------------------------
+
+  def get_cookie_links( cfg )
+    cfg.xpath( "apply-macro[name = 'netdev_lag[:links]']/data/name" ).collect { |n| n.text }
+  end 
+
+  def set_cookie_links( cfg )
+    cfg.send(:'apply-macro', Netconf::JunosConfig::REPLACE ) {
+      cfg.name 'netdev_lag[:links]'
+      should[:links].each{ |ifd|
+        cfg.data { cfg.name ifd }
+      }
+    }
+  end  
        
   ### ---------------------------------------------------------------
   ### XML property readers
@@ -61,7 +79,7 @@ class Junos::Ez::LAGports::Provider
         
     # property :links
     ae_name = as_xml.xpath('name').text
-    as_hash[:links] = Set.new(_get_port_list( ae_name ))
+    as_hash[:links] = Set.new(get_cookie_links(as_xml))
     
     # property :lacp
     ae_opts = as_xml.xpath('aggregated-ether-options')
@@ -104,6 +122,8 @@ class Junos::Ez::LAGports::Provider
     has = @has[:links] || Set.new
     should = @should[:links] || Set.new
             
+    set_cookie_links( xml )
+
     del = has - should
     add = should - has
     
