@@ -34,7 +34,6 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   def xml_get_has_xml( xml ) 
     # second unit contains the family/bridge-domains stanza
     got = xml.xpath('//unit')[0]
-    
     # if this resource doesn't exist we need to default some 
     # values into has/should variables
     unless got
@@ -44,7 +43,7 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
     got
   end
   
-  def xml_read_parser( as_xml, as_hash )  
+  def xml_read_parser( as_xml, as_hash )
     ## reading is anchored at the [... unit 0 ...] level
     set_has_status( as_xml, as_hash )  
     
@@ -72,22 +71,21 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
     end
     
     # --- trunk port    
-    
-    as_hash[:untagged_vlan] ||= eth_port_vlans[:untagged]    
-    as_hash[:tagged_vlans] = f_eth.xpath('domain/vlan-id-list').collect { |v| v.text.chomp }.to_set   
+    as_hash[:untagged_vlan] ||= eth_port_vlans[:untagged]
+    as_hash[:tagged_vlans] = f_eth.xpath('//bridge/vlan-id-list').collect { |v| v.text.chomp }.to_set
     (eth_port_vlans[:tagged] - as_hash[:tagged_vlans]).each do |vlan|
       as_hash[:tagged_vlans] << vlan
-      @under_vlans << vlan
+     @under_vlans << vlan
     end
-    
     # native-vlan-id is set at the interface level, and is the VLAN-ID, not the vlan
     # name.  So we need to do a bit of translating here.  The *ASSUMPTION* is that the
     # native-vlan-id value is a given VLAN in the tagged_vlan list.  So we will use 
     # that list to do the reverse lookup on the tag-id => name
-    
-    xml_when_item(f_eth.xpath('ancestor::interface/native-vlan-id')){ |i| 
-      as_hash[:untagged_vlan] = _vlan_tag_id_to_name( i.text.chomp, as_hash ) 
+    as_hash[:tagged_vlans]= as_hash[:tagged_vlans].collect {|x| _vlan_tag_id_to_name(x)} 
+    xml_when_item(f_eth.xpath('ancestor::interface/native-vlan-id')){ |i|
+      as_hash[:untagged_vlan] = _vlan_tag_id_to_name( i.text.chomp) 
     }
+    as_hash[:tagged_vlans].delete(as_hash[:untagged_vlan])
   end
     
   ### ---------------------------------------------------------------
@@ -127,11 +125,9 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN< Junos::Ez::L2ports::Provider
   
   def xml_build_change( nop = nil )
     @under_vlans ||= []       # handles case for create'd port
-    
     if mode_changed?
       @should[:untagged_vlan] ||= @has[:untagged_vlan]    
     end
-    
     super xml_at_here( xml_at_top )
   end  
 
@@ -189,9 +185,8 @@ end
     upd_tagged_vlans( xml )
   end
   
-  def upd_tagged_vlans( xml ) 
+  def upd_tagged_vlans( xml )
     return false unless should_trunk?
-    
     
     @should[:tagged_vlans] = @should[:tagged_vlans].to_set if @should[:tagged_vlans].kind_of? Array
     @has[:tagged_vlans] = @has[:tagged_vlans].to_set if @has[:tagged_vlans].kind_of? Array    
@@ -201,7 +196,6 @@ end
       
     del = v_has - v_should
     add = v_should - v_has 
-    
     
     del_under_vlans = del & @under_vlans    
     unless del_under_vlans.empty?
@@ -465,30 +459,20 @@ class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
     tag_id = @ndev.rpc.get_configuration { |xml|
       xml.send(:'bridge-domains') { xml.domain { xml.name vlan_name }}
     }.xpath('//vlan-id').text.chomp
-    
     raise ArgumentError, "VLAN '#{vlan_name}' not found" if tag_id.empty?
     return tag_id
   end
   
-  def _vlan_tag_id_to_name( tag_id, my_hash )
-    # get the candidate configuration for each VLAN named in tagged_vlans and
-    # then map it to the corresponding vlan-id.  this is not very effecient, but
-    # at present there is no other way without getting into a cache mech.   
-    vlan_name = @ndev.rpc.get_configuration { |xml|
-      xml.send(:'bridge-domains') {
-        my_hash[:tagged_vlans].each do |v_name|
-          xml.domain { 
-            xml.name v_name 
-            xml.send(:'vlan-id')
-          }
-        end
-      }
-    }.xpath("//domain[vlan-id = '#{tag_id}']/name").text.chomp    
-    
-    raise ArgumentError, "VLAN-ID '#{tag_id}' not found" if vlan_name.empty?
-    return vlan_name
+
+  def _vlan_tag_id_to_name( vlan_id )
+    tag_name = @ndev.rpc.get_configuration { |xml|
+      xml.send(:'bridge-domains') { xml.domain { xml.send(:'vlan-id', vlan_id)}}
+    }.xpath('//name').text.chomp
+    raise ArgumentError, "VLAN '#{vlan_id}' not found" if tag_name.empty?
+    return tag_name
   end
-  
+ 
+
 end
 
 class Junos::Ez::L2ports::Provider::BRIDGE_DOMAIN
