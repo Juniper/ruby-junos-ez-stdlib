@@ -3,7 +3,7 @@ Junos::Ez::Facts::Keeper.define( :chassis ) do |ndev, facts|
   inv_info = ndev.rpc.get_chassis_inventory
   errs = inv_info.xpath('//output')[0]
 
-  if errs.text.include? "This command can only be used on the master routing engine"
+  if errs and errs.text.include? "This command can only be used on the master routing engine"
      raise Junos::Ez::NoProviderError, "Chef can only be used on master routing engine !!"
   end
 
