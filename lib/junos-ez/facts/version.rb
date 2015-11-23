@@ -4,7 +4,11 @@ Junos::Ez::Facts::Keeper.define( :version ) do |ndev, facts|
       
   case f_persona
   when :MX
-    swver = ndev.rpc.command "show version invoke-on all-routing-engines"
+    begin
+      swver = ndev.rpc.command "show version invoke-on all-routing-engines"
+    rescue Netconf::RpcError
+      swver = ndev.rpc.command "show version"
+    end
   when :SWITCH
     ## most EX switches support the virtual-chassis feature, so the 'all-members' option would be valid
     ## in some products, this options is not valid (i.e. not vc-capable.  so we're going to try for vc, and if that
