@@ -9,9 +9,9 @@ Junos::Ez::Facts::Keeper.define( :switch_style ) do |ndev, facts|
     case examine
     when /junosv-firefly/i
       :NONE
-    when /^(ex9)|(ex43)|(ocx)/i
+    when /^(ex)|(ocx)/i
       :VLAN_L2NG
-    when /^(qfx5)|(qfx3)/i
+    when /^(qfx)/i
       if facts[:version][0..3].to_f >= 13.2
         :VLAN_L2NG
       else
