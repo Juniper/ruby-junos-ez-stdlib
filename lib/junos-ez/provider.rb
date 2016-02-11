@@ -544,7 +544,7 @@ class Junos::Ez::Provider::Parent
       action = {'action' => 'replace' }
       result = @ndev.rpc.load_configuration( xml, action )
     rescue Netconf::RpcError => e      
-      errs = e.rsp.xpath('//rpc-error[error-severity = "error"]')
+      errs = e.rsp.xpath('//rpc-error')
       raise e unless errs.empty?
       e.rsp
     else
