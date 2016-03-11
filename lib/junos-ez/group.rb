@@ -137,7 +137,7 @@ class Junos::Ez::Group::Provider
     return @catalog if list!.empty?
     list.each do |grp_name|
       @ndev.rpc.get_configuration{ |xml|
-        xml.gropus {
+        xml.groups {
             xml.name grp_name
           }
       }.xpath('groups').each do |as_xml|
