@@ -138,6 +138,7 @@ documentation on Providers/Resources, see the *docs* directory.
   - IPports: IP v4 port management
   - StaticHosts: Static Hosts [system static-host-mapping ...]  
   - StaticRoutes: Static Routes [routing-options static ...] 
+  - Group: JUNOS groups management 
 
 # UTILITIES
 
@@ -173,9 +174,15 @@ documentation on Providers/Resources, see the *docs* directory.
   * gem install junos-ez-stdlib
 
 # CONTRIBUTORS
-
-  * Jeremy Schulman, @nwkautomaniac
-  * Ganesh Nalawade, @ganesh634
+  Juniper Networks is actively contributing to and maintaining this repo. Please contact jnpr-community-netdev@juniper.net 
+  for any queries.
+  
+  Contributors:
+  [John Deatherage](https://github.com/routelastresort), [Nitin Kumar](https://github.com/vnitinv)
+  [Priyal Jain](https://github.com/jainpriyal), [Ganesh Nalawade](https://github.com/ganeshnalawade)
+  
+  Former Contributors:  
+  [Jeremy Schulman](https://github.com/jeremyschulman)
 
 # LICENSES
 
