@@ -178,7 +178,7 @@ documentation on Providers/Resources, see the *docs* directory.
   for any queries.
   
   Contributors:
-  [John Deatherage](https://github.com/routelastresort), [Nitin Kumar](https://github.com/vnitinv)
+  [John Deatherage](https://github.com/routelastresort), [Nitin Kumar](https://github.com/vnitinv),
   [Priyal Jain](https://github.com/jainpriyal), [Ganesh Nalawade](https://github.com/ganeshnalawade)
   
   Former Contributors:  
