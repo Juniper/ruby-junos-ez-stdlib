@@ -69,22 +69,23 @@
     resources (LAGports)
 
 # 2016-March
-  
-  1.0.0 
-    - Fixed issues 
-      Issue #17: Add support for OCX device 
-      Issue #20: "under development" error is thrown while importing the interface_create recipe from the Chef-Server.
-      Issue #22: "netdev_vlan" resource action delete is not working fine while invoking from the JUNOS Chef-Client.
-      Issue #23: RPC command error: commit-configuration is getting thrown on Invoking the "netdev_lag" resource from 
-                 JUNOS Chef Client.
-      Issue #27: Duplicate declaration of lag configuration in a recipe is giving NoMethodError: undefined method 
-                 `properties' for nil:NilClass.
-      Issue #30: Error in rerunning netdev_lag interface.
-      Issue #33: undefined method `properties' for nil:NilClass error is thrown if the backup RE is unreachable.
-      Issue #35: Error in running chef client from Backup RE.
-      Issue #39: Getting 'Junos::Ez::NoProviderError' error on qfx device.
-      Issue #42: Raise exception to handle warnings in <error-severity>.
 
-   -Enhancement
+  1.0.0:
+
+    Fixed issues
+      Issue #17 Add support for OCX device.
+      Issue #20 "under development" error is thrown while importing the interface_create recipe from the Chef-Server.
+      Issue #22 "netdev_vlan" resource action delete is not working fine while invoking from the JUNOS Chef-Client.
+      Issue #23 RPC command error: commit-configuration is getting thrown on Invoking the "netdev_lag" resource from
+                 JUNOS Chef Client.
+      Issue #27 Duplicate declaration of lag configuration in a recipe is giving NoMethodError: undefined method
+                 `properties' for nil:NilClass.
+      Issue #30 Error in rerunning netdev_lag interface.
+      Issue #33 undefined method `properties' for nil:NilClass error is thrown if the backup RE is unreachable.
+      Issue #35 Error in running chef client from Backup RE.
+      Issue #39 Getting 'Junos::Ez::NoProviderError' error on qfx device.
+      Issue #42 Raise exception to handle warnings in <error-severity>.
+
+    Enhancement
       * Add support for configuring l2_interface on MX device.
-      * Add support for provider 'group' for configuring JUNOS groups. 
+      * Add support for provider 'group' for configuring JUNOS groups.
