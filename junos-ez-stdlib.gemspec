@@ -1,5 +1,4 @@
 $LOAD_PATH.unshift 'lib'
-require 'rake'
 require 'junos-ez/version'
 
 Gem::Specification.new do |s|
@@ -10,6 +9,6 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/Juniper/ruby-junos-ez-stdlib'
   s.authors = ["Jeremy Schulman"]
   s.email = 'jschulman@juniper.net'
-  s.files = FileList[ '*', 'lib/**/*.rb', 'examples/**/*.rb', 'docs/**/*.md' ]
+  s.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   s.add_dependency('netconf', ">= 0.2.5")
 end
