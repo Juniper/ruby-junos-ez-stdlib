@@ -89,6 +89,7 @@ class Junos::Ez::Provider::Parent
     
     @list = []                # array list of item names
     @catalog = {}             # hash catalog of named items
+    @port_mac = {}            # hash of ports and its mac address
         
     return unless @name           
     # resources only from here ...
@@ -191,6 +192,15 @@ class Junos::Ez::Provider::Parent
   def catalog!
     @catalog.clear
     @catalog = build_catalog
+  end
+
+  def port_mac
+    @port_mac.empty? ? port_mac! : @port_mac
+  end
+
+  def port_mac!
+    @port_mac.clear
+    @port_mac = build_port_mac
   end
   
   ### ---------------------------------------------------------------
