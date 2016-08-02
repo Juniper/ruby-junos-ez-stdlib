@@ -92,7 +92,7 @@
 
 # 2016-August
 
-  1.0.2
+  1.0.3
      Fixed issues
      Issue #46 Removing references to rake from gemspec
      Issue #47 cannot get the git source code
@@ -100,3 +100,4 @@
      Enhancement
      * Valid project metadata and rake for cleanly building/releasing
      * Test hooks and badges
+     * netconf gem pessimistic version constraint to 0.3.1
