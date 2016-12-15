@@ -31,8 +31,9 @@ Junos::Ez::Facts::Keeper.define( :version ) do |ndev, facts|
       re_name = re_sw.xpath('preceding-sibling::re-name').text.upcase
       ver_key = ('version_' + re_name).to_sym
 
-      if re_sw.at_xpath('//junos-version')
-        facts[ver_key] = re_sw.xpath('//junos-version').text
+      jun_ver = re_sw.at_xpath('//junos-version')
+      if jun_ver
+        facts[ver_key] = jun_ver.text
       else
         re_sw.xpath('package-information[1]/comment').text =~ /\[(.*)\]/
         facts[ver_key] = $1
@@ -44,8 +45,9 @@ Junos::Ez::Facts::Keeper.define( :version ) do |ndev, facts|
         facts[('version_' + "FPC" + master_id).to_sym]
     end
   else
-    if swver.at_xpath('//junos-version')
-      facts[:version] = swver.xpath('//junos-version').text
+    jun_ver = swver.at_xpath('//junos-version')
+    if jun_ver
+      facts[:version] = jun_ver.text
     else
       junos = swver.xpath('//package-information[name = "junos"]/comment').text
       junos =~ /\[(.*)\]/
