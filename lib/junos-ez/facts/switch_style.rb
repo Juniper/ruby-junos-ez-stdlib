@@ -1,9 +1,9 @@
 Junos::Ez::Facts::Keeper.define( :switch_style ) do |ndev, facts|
   f_persona = uses :personality
-  
+
   model = facts[:hardwaremodel]
-  examine = ( model != "Virtual Chassis" ) ? model : facts.select {|k,v| k.match(/^RE[0-9]+/) }.values[0][:model]   
-    
+  examine = ( model != "Virtual Chassis" ) ? model : facts.select {|k,v| k.match(/^RE[0-9]+/) }.values[0][:model]
+
   facts[:switch_style] = case f_persona
   when :SWITCH, :SRX_BRANCH
     case examine
@@ -19,13 +19,10 @@ Junos::Ez::Facts::Keeper.define( :switch_style ) do |ndev, facts|
       end
     else
       :VLAN
-    end        
+    end
   when :MX, :SRX_HIGHEND
     :BRIDGE_DOMAIN
   else
     :NONE
   end
-
 end
-    
-

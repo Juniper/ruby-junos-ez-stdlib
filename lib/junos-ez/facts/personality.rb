@@ -1,11 +1,10 @@
 Junos::Ez::Facts::Keeper.define( :personality ) do |ndev, facts|
-  
-  uses :chassis, :routingengines  
+  uses :chassis, :routingengines
   model = facts[:hardwaremodel]
 
   examine = ( model != "Virtual Chassis" ) ? model : facts.select {|k,v| k.match(/^RE[0..9]+/) }.values[0][:model]
-      
-  facts[:personality] = case examine   
+
+  facts[:personality] = case examine
   when /^(EX)|(QFX)|(OCX)/i
     :SWITCH
   when /^MX/i
@@ -21,5 +20,4 @@ Junos::Ez::Facts::Keeper.define( :personality ) do |ndev, facts|
   when /SRX(\d){4}/i
     :SRX_HIGHEND
   end
-  
 end
