@@ -73,7 +73,9 @@ class Junos::Ez::L2ports::Provider::VLAN_L2NG < Junos::Ez::L2ports::Provider
     # --- trunk port
 
     as_hash[:untagged_vlan] ||= eth_port_vlans[:untagged]
-    as_hash[:tagged_vlans] = f_eth.xpath('vlan/members').collect { |v| v.text.chomp }.to_set
+    tagged_vlans_a = f_eth.xpath('vlan/members').collect {|v| str_int_range_to_a(v.text.chomp)}
+    tagged_vlans_a.flatten!
+    as_hash[:tagged_vlans] = tagged_vlans_a.to_set
     (eth_port_vlans[:tagged] - as_hash[:tagged_vlans]).each do |vlan|
       as_hash[:tagged_vlans] << vlan
       @under_vlans << vlan

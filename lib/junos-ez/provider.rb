@@ -520,6 +520,15 @@ class Junos::Ez::Provider::Parent
 
   private
 
+  # decompose a range to idividual values
+  #   str_int_range_to_a('1')    # => ["1"]
+  #   str_int_range_to_a('1-4')  # => ["1", "2", "3", "4"]
+  def str_int_range_to_a(str)
+    return [str] unless str.include?('-')
+    first, last = str.split('-', 2)
+    (first.to_i..last.to_i).map(&:to_s)
+  end
+
   def set_has_status( xml, has )
     has[:_active] = xml['inactive'] ? false : true
     has[:_exist] = true
