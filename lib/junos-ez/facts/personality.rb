@@ -1,19 +1,7 @@
 Junos::Ez::Facts::Keeper.define( :personality ) do |ndev, facts|
   uses :chassis, :routingengines
-  model = facts[:hardwaremodel]
 
-  examine = nil
-  if model == 'Virtual Chassis'
-    re = facts.detect {|k,v| k.match(/^RE\d+/)}
-    if re
-      re_model = re[1][:model]
-      if re_model
-        examine = re_model.start_with?('RE-') ? re_model[3, re_model.length] : re_model
-      end
-    end
-  else
-    examine = model
-  end
+  examine = examine_model(facts[:hardwaremodel])
 
   facts[:personality] = case examine
   when /^(?:EX)|(?:QFX)|(?:OCX)/i
