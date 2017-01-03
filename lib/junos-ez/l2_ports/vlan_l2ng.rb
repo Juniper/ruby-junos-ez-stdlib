@@ -447,22 +447,13 @@ class Junos::Ez::L2ports::Provider::VLAN_L2NG
   end
 
   def _vlan_tag_id_to_name( tag_id, my_hash )
-    # get the candidate configuration for each VLAN named in tagged_vlans and
-    # then map it to the corresponding vlan-id.  this is not very effecient, but
-    # at present there is no other way without getting into a cache mech.
-    vlan_name = @ndev.rpc.get_configuration { |xml|
-      xml.vlans {
-        my_hash[:tagged_vlans].each do |v_name|
-          xml.vlan {
-            xml.name v_name
-            xml.send(:'vlan-id')
-          }
-        end
-      }
-    }.xpath("//vlan[vlan-id = '#{tag_id}']/name").text.chomp
-
+    vlan_name = if my_hash[:tagged_vlans].include?(tag_id)
+      @ndev.rpc.get_configuration.xpath("//vlans/vlan[vlan-id = '#{tag_id}']/name").text.chomp
+    else
+      ''
+    end
     raise ArgumentError, "VLAN-ID '#{tag_id}' not found" if vlan_name.empty?
-    return vlan_name
+    vlan_name
   end
 end
 
