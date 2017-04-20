@@ -182,7 +182,7 @@ documentation on Providers/Resources, see the *docs* directory.
 
   Contributors:
   [John Deatherage](https://github.com/routelastresort), [Nitin Kumar](https://github.com/vnitinv),
-  [Priyal Jain](https://github.com/jainpriyal), [Ganesh Nalawade](https://github.com/ganeshnalawade)
+  [Priyal Jain](https://github.com/jainpriyal), [Ganesh Nalawade](https://github.com/ganeshrn)
 
   Former Contributors:  
   [Jeremy Schulman](https://github.com/jeremyschulman)
