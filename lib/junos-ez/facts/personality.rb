@@ -6,7 +6,7 @@ Junos::Ez::Facts::Keeper.define( :personality ) do |ndev, facts|
   examine = ( model != "Virtual Chassis" ) ? model : facts.select {|k,v| k.match(/^RE[0..9]+/) }.values[0][:model]
       
   facts[:personality] = case examine   
-  when /^(EX)|(QFX)|(OCX)/i
+  when /^(EX)|(QFX)|(PTX)|(OCX)/i
     :SWITCH
   when /^MX/i
     :MX
