@@ -54,6 +54,22 @@ class Junos::Ez::L1ports::Provider < Junos::Ez::Provider::Parent
       ifs.text.strip
     end
   end
+
+  def build_port_mac
+    @port_mac = {}
+    interfaces = @ndev.rpc.get_interface_information({
+        :media => true,
+        :terse => true,
+        :interface_name => Junos::Ez::L1ports::IFS_NAME_FILTER
+    })
+
+    interfaces.xpath('physical-interface').each do |interface|
+      name= interface.xpath("name").text.strip
+      mac_addr = interface.xpath("current-physical-address").text.strip
+      @port_mac[name] = mac_addr
+    end
+    return @port_mac
+  end
   
   def build_catalog
     @catalog = {}

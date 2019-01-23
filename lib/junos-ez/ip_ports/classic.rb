@@ -51,8 +51,12 @@ class Junos::Ez::IPports::Provider::CLASSIC < Junos::Ez::IPports::Provider
     xml_when_item(as_xml.xpath('description')){ |i| as_hash[:description] = i.text }
     xml_when_item(ifa_inet.xpath('mtu')){ |i| as_hash[:mtu] = i.text.to_i }   
     
-    # @@@ assuming a single IP address; prolly need to be more specific ...
-    as_hash[:address] = ifa_inet.xpath('address/name').text || nil
+    # The address could be a list.
+    address = []
+    ifa_inet.xpath('address').each do |addr|
+      address << addr.xpath('name').text
+    end
+    as_hash[:address] = address || nil
     
     # check for firewall-filters (aka ACLs)
     if (fw_acl = ifa_inet.xpath('filter')[0])
