@@ -34,6 +34,7 @@ Junos::Ez::Facts::Keeper.define( :version ) do |ndev, facts|
     unless master_id.nil?
       facts[:version] = 
         facts[("version_" + "RE" + master_id).to_sym] || 
+        facts[("version_" + "LOCALRE").to_sym] ||
         facts[('version_' + "FPC" + master_id).to_sym]
     end
   else
