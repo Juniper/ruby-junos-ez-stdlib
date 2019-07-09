@@ -1,0 +1,24 @@
+commit 3b7d371bcfbc62e9a120097a49469ca42f141f10
+Author: Jake Bell <jake@theunraveler.com>
+Date:   Thu Mar 17 12:09:37 2016 -0500
+
+    Removing references to rake from gemspec
+
+diff --git a/junos-ez-stdlib.gemspec b/junos-ez-stdlib.gemspec
+index b808f10..3c1a5a0 100644
+--- a/junos-ez-stdlib.gemspec
++++ b/junos-ez-stdlib.gemspec
+@@ -1,5 +1,4 @@
+ $LOAD_PATH.unshift 'lib'
+-require 'rake'
+ require 'junos-ez/version'
+ 
+ Gem::Specification.new do |s|
+@@ -10,6 +9,6 @@ Gem::Specification.new do |s|
+   s.homepage = 'https://github.com/Juniper/ruby-junos-ez-stdlib'
+   s.authors = ["Jeremy Schulman"]
+   s.email = 'jschulman@juniper.net'
+-  s.files = FileList[ '*', 'lib/**/*.rb', 'examples/**/*.rb', 'docs/**/*.md' ]
++  s.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+   s.add_dependency('netconf', ">= 0.2.5")
+ end
