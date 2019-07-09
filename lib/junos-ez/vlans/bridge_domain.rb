@@ -21,9 +21,13 @@ class Junos::Ez::Vlans::Provider::BRIDGE_DOMAIN < Junos::Ez::Vlans::Provider
     return nil unless (@has_xml = cfg_xml.xpath('//domain')[0])      
     xml_read_parser( @has_xml, @has )    
   end
+
+  def xml_get_has_xml( xml )
+    xml.xpath('//domain')[0]    
+  end
   
   def xml_read_parser( as_xml, as_hash )
-    status_from_junos( as_xml, as_hash )        
+    set_has_status( as_xml, as_hash )        
     as_hash[:vlan_id] = as_xml.xpath('vlan-id').text.to_i
     as_hash[:description] = as_xml.xpath('description').text
     as_hash[:no_mac_learning] = as_xml.xpath('bridge-options/no-mac-learning').empty? ? :disable : :enable    

@@ -37,14 +37,40 @@ class Junos::Ez::LAGports::Provider
       }}
     }}
   end
+  
+  ###-----------------------------------------------------------
+  ###-----------------------------------------------------------
+  ### utilities
+  ###-----------------------------------------------------------
+
+  def get_cookie_links( cfg )
+    cfg.xpath( "apply-macro[name = 'netdev_lag[:links]']/data/name" ).collect { |n| n.text }
+  end 
+
+  def set_cookie_links( cfg )
+    cfg.send(:'apply-macro', Netconf::JunosConfig::REPLACE ) {
+      cfg.name 'netdev_lag[:links]'
+      should[:links].each{ |ifd|
+        cfg.data { cfg.name ifd }
+      }
+    }
+  end  
        
   ### ---------------------------------------------------------------
   ### XML property readers
   ### ---------------------------------------------------------------  
+  
+  def xml_config_read!
+    database = {'database' => 'committed'}
+    @ndev.rpc.get_configuration(xml_at_top, database)
+  end
  
   def xml_get_has_xml( xml )
-    @ifd_ether_options = 'ether-options'      # @@@ hack for now
-    
+    if ndev.facts[:ifd_style] == "CLASSIC"
+      @ifd_ether_options = 'gigether-options'
+    else
+      @ifd_ether_options = 'ether-options' 
+    end 
     xml.xpath('//interface')[0]    
   end
   
@@ -53,7 +79,7 @@ class Junos::Ez::LAGports::Provider
         
     # property :links
     ae_name = as_xml.xpath('name').text
-    as_hash[:links] = Set.new(_get_port_list( ae_name ))
+    as_hash[:links] = Set.new(get_cookie_links(as_xml))
     
     # property :lacp
     ae_opts = as_xml.xpath('aggregated-ether-options')
@@ -70,14 +96,34 @@ class Junos::Ez::LAGports::Provider
   ### ---------------------------------------------------------------
   ### XML property writers
   ### ---------------------------------------------------------------    
-  
+  def update_ifd_should()
+    if @should[:links].empty?
+      raise Junos::Ez::NoProviderError, "\n *links* are compulsory for creating lag interface!!! \n"
+    else
+      ether_option = @should[:links][0].to_s
+      @ifd_ether_options = (ether_option.start_with? 'fe-') ? 'fastether-options' : 'gigether-options'
+    end
+  end
+ 
+  def update_ifd_has()
+    @has[:links] = @has[:links].to_a
+    if @has[:links].empty?
+     raise Junos::Ez::NoProviderError, "\n Either lag interface is not created or links associated with given lag interface is not supported \n"
+    else
+     ether_option = @has[:links][0].to_s
+     @ifd_ether_options = (ether_option.start_with? 'fe-') ? 'fastether-options' : 'gigether-options'
+    end  
+  end
+ 
   def xml_change_links( xml )
-    
+    update_ifd_should()  
     @should[:links] = @should[:links].to_set if @should[:links].kind_of? Array
     
     has = @has[:links] || Set.new
     should = @should[:links] || Set.new
             
+    set_cookie_links( xml )
+
     del = has - should
     add = should - has
     
@@ -144,7 +190,7 @@ class Junos::Ez::LAGports::Provider
   ### ---------------------------------------------------------------      
   
   def xml_on_delete( xml )
-    
+    update_ifd_has()
     par = xml.instance_variable_get(:@parent)
     dot_ifd = par.at_xpath('ancestor::interfaces')
    

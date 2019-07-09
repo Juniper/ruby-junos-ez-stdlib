@@ -1,0 +1,8 @@
+LineLength:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Documentation:
+  Enabled: false

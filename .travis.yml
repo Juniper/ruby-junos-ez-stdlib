@@ -1,0 +1,18 @@
+sudo: false
+language: ruby
+rvm:
+  - 1.9.3-p551
+  - 2.0.0-p648
+  - 2.1.9
+  - 2.2.5
+  - 2.3.1
+matrix:
+  allow_failures:
+    - rvm: 1.9.3-p551
+    - rvm: 2.0.0-p648
+  fast_finish: true
+before_install: gem update --remote bundler
+install:
+  - bundle install --retry=3
+script:
+  - bundle exec rake build

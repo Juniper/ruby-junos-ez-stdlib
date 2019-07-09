@@ -4,7 +4,11 @@ Junos::Ez::Facts::Keeper.define( :version ) do |ndev, facts|
       
   case f_persona
   when :MX
-    swver = ndev.rpc.command "show version invoke-on all-routing-engines"
+    begin
+      swver = ndev.rpc.command "show version invoke-on all-routing-engines"
+    rescue Netconf::RpcError
+      swver = ndev.rpc.command "show version"
+    end
   when :SWITCH
     ## most EX switches support the virtual-chassis feature, so the 'all-members' option would be valid
     ## in some products, this options is not valid (i.e. not vc-capable.  so we're going to try for vc, and if that
@@ -26,21 +30,34 @@ Junos::Ez::Facts::Keeper.define( :version ) do |ndev, facts|
     swver_infos = swver.xpath('//software-information')
     swver_infos.each do |re_sw|
       re_name = re_sw.xpath('preceding-sibling::re-name').text.upcase
-      re_sw.xpath('package-information[1]/comment').text =~ /\[(.*)\]/
       ver_key = ('version_' + re_name).to_sym
-      facts[ver_key] = $1                  
+      
+      if re_sw.at_xpath('//junos-version')
+        facts[ver_key] = re_sw.xpath('//junos-version').text
+      else
+        re_sw.xpath('package-information[1]/comment').text =~ /\[(.*)\]/
+        facts[ver_key] = $1
+      end	
     end
     master_id = f_master
     unless master_id.nil?
       facts[:version] = 
         facts[("version_" + "RE" + master_id).to_sym] || 
+<<<<<<< HEAD
         facts[("version_" + "LOCALRE").to_sym] ||
+=======
+        facts[("version_" + "LOCALRE").to_sym] ||
+>>>>>>> master
         facts[('version_' + "FPC" + master_id).to_sym]
     end
   else
-    junos = swver.xpath('//package-information[name = "junos"]/comment').text
-    junos =~ /\[(.*)\]/
-    facts[:version] = $1        
+    if swver.at_xpath('//junos-version')
+      facts[:version] = swver.xpath('//junos-version').text
+    else
+      junos = swver.xpath('//package-information[name = "junos"]/comment').text
+      junos =~ /\[(.*)\]/
+      facts[:version] = $1
+    end  
   end    
   
 end
